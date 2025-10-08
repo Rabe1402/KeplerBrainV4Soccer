@@ -8,9 +8,6 @@ void setup()
   WRITE_I2C_BNO055_INIT();
   Serial.begin(115200);
   WRITE_LCD_CLEAR();
-  
-  drive_base=10;
-  yaw_direction=20;
 }
  
 int selection_cursor = 0;
