@@ -1,12 +1,15 @@
 #include <INA.h>
 #include "../shared/KeplerBRAIN_V4.h"
 #include "Variables.h" //alle variablen usw. sind in dieser datei, um diese ein wenig aufzuräumen 
+#include "powersense.h"
+
 
 void setup()
 {
   // Initialisierung der Hardwarekomponenten des Controllers
   KEPLERBRAIN_INIT();
   WRITE_I2C_BNO055_INIT();
+  WRITE_I2C_INA231_INIT();
   Serial.begin(115200);
   WRITE_LCD_CLEAR();
 }
