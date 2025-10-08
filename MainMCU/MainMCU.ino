@@ -1,3 +1,4 @@
+#include <INA.h>
 #include "../shared/KeplerBRAIN_V4.h"
 #include "Variables.h" //alle variablen usw. sind in dieser datei, um diese ein wenig aufzuräumen 
 
