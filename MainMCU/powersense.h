@@ -1,53 +1,117 @@
-#include <INA.h>
+// *** I2C INA231 ***
+// Verfügbare Funktionen:
+// void WRITE_I2C_INA231_INIT(void) - Initialisiert den INA231-Sensor (Konfiguration und Kalibrierung)
+// int16_t READ_I2C_INA231_SHUNT_VOLTAGE(void) - Liest die Shunt-Spannung (Rohwert, LSB = 2.5 µV)
+// uint16_t READ_I2C_INA231_BUS_VOLTAGE(void) - Liest die Bus-Spannung (Rohwert, LSB = 1.25 mV)
+// int16_t READ_I2C_INA231_CURRENT(void) - Liest den Strom (Rohwert, LSB = Current_LSB)
+// uint16_t READ_I2C_INA231_POWER(void) - Liest die Leistung (Rohwert, LSB = 25 * Current_LSB)
 
-/**************************************************************************************************
-** Declare program constants, global variables and instantiate INA class                         **
-**************************************************************************************************/
-const uint32_t SERIAL_SPEED{115200};     ///< Use fast serial speed
-const uint32_t SHUNT_MICRO_OHM{100000};  ///< Shunt resistance in Micro-Ohm, e.g. 100000 is 0.1 Ohm
-const uint16_t MAXIMUM_AMPS{2};          ///< Max expected amps, clamped from 1A to a max of 1022A
-uint8_t        devicesFound{0};          ///< Number of INAs found
-INA_Class      INA;                      ///< INA class instantiation to use EEPROM
-// INA_Class      INA(0);                ///< INA class instantiation to use EEPROM
-// INA_Class      INA(5);                ///< INA class instantiation to use dynamic memory rather
-//                                            than EEPROM. Allocate storage for up to (n) devices
+#ifndef INA231_H
+#define INA231_H
 
-void WRITE_I2C_INA231_INIT() {
- 
-  /************************************************************************************************
-  ** The INA.begin call initializes the device(s) found with an expected ±1 Amps maximum current **
-  ** and for a 0.1Ohm resistor, and since no specific device is given as the 3rd parameter all   **
-  ** devices are initially set to these values.                                                  **
-  ************************************************************************************************/
-  devicesFound = INA.begin(MAXIMUM_AMPS, SHUNT_MICRO_OHM);  // Expected max Amp & shunt resistance
-  while (devicesFound == 0) {
-    Serial.println(F("No INA device found, retrying in 10 seconds..."));
-    delay(10000);                                             // Wait 10 seconds before retrying
-    devicesFound = INA.begin(MAXIMUM_AMPS, SHUNT_MICRO_OHM);  // Expected max Amp & shunt resistance
-  }                                                           // while no devices detected
-  Serial.print(F(" - Detected "));
-  Serial.print(devicesFound);
-  Serial.println(F(" INA devices on the I2C bus"));
-  INA.setBusConversion(8500);             // Maximum conversion time 8.244ms
-  INA.setShuntConversion(8500);           // Maximum conversion time 8.244ms
-  INA.setAveraging(128);                  // Average each reading n-times
-  INA.setMode(INA_MODE_CONTINUOUS_BOTH);  // Bus/shunt measured continuously
-}  // method setup()
+#include <Wire.h>
 
-uint16_t READ_I2C_INA231_VOLTAGE() 
+#define INA231_ADDR          0x40 //i2c adresse des boards
+
+#define REG_CONFIG           0x00 //i2c register für die werte 
+#define REG_SHUNT_VOLTAGE    0x01 //i2c register für die werte 
+#define REG_BUS_VOLTAGE      0x02 //i2c register für die werte 
+#define REG_POWER            0x03 //i2c register für die werte 
+#define REG_CURRENT          0x04 //i2c register für die werte  
+#define REG_CALIBRATION      0x05 //i2c register für die werte 
+
+#define R_SHUNT              0.1f   // Shunt-Widerstand in Ohm
+#define MAX_CURRENT          1.0f   // Maximal erwarteter Strom in A
+
+extern TwoWire i2c; 
+
+// Initialisierung des INA231
+void WRITE_I2C_INA231_INIT(void)
 {
-  for (uint8_t i = 0; i < devicesFound; i++)
-  return INA.getBusMilliVolts(i);
+  uint16_t config_read = 0;
+  do
+  {
+    delay(10);
+    i2c.beginTransmission(INA231_ADDR);
+    i2c.write(REG_CONFIG);
+    i2c.endTransmission(false);
+    i2c.requestFrom(INA231_ADDR, 2, true);
+    if (i2c.available() >= 2) {
+      config_read = (i2c.read() << 8) | i2c.read();
+    }
+  } while (config_read != 0x4127);  // Default-Wert nach Reset
+
+  // Configuration: Continuous Shunt + Bus, 1.1 ms Conv, 1 Average
+  i2c.beginTransmission(INA231_ADDR);
+  i2c.write(REG_CONFIG);
+  i2c.write(0x41);  // MSB
+  i2c.write(0x27);  // LSB
+  i2c.endTransmission();
+
+  // Calibration setzen
+  float current_lsb = MAX_CURRENT / 32768.0f;  // LSB für Current
+  uint16_t calibration = (uint16_t)(0.00512f / (current_lsb * R_SHUNT));  // Formel aus Datasheet
+  i2c.beginTransmission(INA231_ADDR);
+  i2c.write(REG_CALIBRATION);
+  i2c.write((calibration >> 8) & 0xFF);  // MSB
+  i2c.write(calibration & 0xFF);         // LSB
+  i2c.endTransmission();
 }
 
-int32_t READ_I2C_INA231_AMPS()
+// Shunt-Spannung auslesen (Rohwert, LSB = 2.5 µV)
+int16_t READ_I2C_INA231_SHUNT_VOLTAGE(void)
 {
-  for (uint8_t i = 0; i < devicesFound; i++)
-  return INA.getBusMicroAmps(i);
+  int16_t value = 0;
+  i2c.beginTransmission(INA231_ADDR);
+  i2c.write(REG_SHUNT_VOLTAGE);
+  i2c.endTransmission(false);
+  i2c.requestFrom(INA231_ADDR, 2, true);
+  if (i2c.available() >= 2) {
+    value = (int16_t)((i2c.read() << 8) | i2c.read());
+  }
+  return value;  // Signed
 }
 
-int16_t READ_I2C_INA231_WATT()
+// Bus-Spannung auslesen (Rohwert, LSB = 1.25 mV)
+uint16_t READ_I2C_INA231_BUS_VOLTAGE(void)
 {
-  for (uint8_t i = 0; i < devicesFound; i++)
-  return INA.getBusMicroWatts(i);
+  uint16_t value = 0;
+  i2c.beginTransmission(INA231_ADDR);
+  i2c.write(REG_BUS_VOLTAGE);
+  i2c.endTransmission(false);
+  i2c.requestFrom(INA231_ADDR, 2, true);
+  if (i2c.available() >= 2) {
+    value = (i2c.read() << 8) | i2c.read();
+  }
+  return value;  // Unsigned
 }
+
+// Strom auslesen (Rohwert, LSB = Current_LSB)
+int16_t READ_I2C_INA231_CURRENT(void)
+{
+  int16_t value = 0;
+  i2c.beginTransmission(INA231_ADDR);
+  i2c.write(REG_CURRENT);
+  i2c.endTransmission(false);
+  i2c.requestFrom(INA231_ADDR, 2, true);
+  if (i2c.available() >= 2) {
+    value = (int16_t)((i2c.read() << 8) | i2c.read());
+  }
+  return value;  // Signed
+}
+
+// Leistung auslesen (Rohwert, LSB = 25 * Current_LSB)
+uint16_t READ_I2C_INA231_POWER(void)
+{
+  uint16_t value = 0;
+  i2c.beginTransmission(INA231_ADDR);
+  i2c.write(REG_POWER);
+  i2c.endTransmission(false);
+  i2c.requestFrom(INA231_ADDR, 2, true);
+  if (i2c.available() >= 2) {
+    value = (i2c.read() << 8) | i2c.read();
+  }
+  return value;  // Unsigned
+}
+
+#endif // INA231_H

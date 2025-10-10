@@ -1,6 +1,6 @@
 
 //sonstige 
-int serial_baud = 9600;
+int serial_baud = 115200;
 
 
 bool debug = true;

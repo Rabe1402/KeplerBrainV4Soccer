@@ -1,21 +1,9 @@
-//#include <INA.h>
 #include "../shared/KeplerBRAIN_V4.h"
 #include "Variables.h" //alle variablen usw. sind in dieser datei, um diese ein wenig aufzuräumen 
-//#include "powersense.h"
+#include "powersense.h" //powersensor read 
 #include <vector>
 #include <iostream>
-
-void _imu_read()
-{
-  yaw = READ_I2C_BNO055_YAW();
-  pitch = READ_I2C_BNO055_PITCH();
-  roll = READ_I2C_BNO055_ROLL();
-  _log("imu_read", "Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll));
-}
-// / \
-//  |
-// muss dort bleiben ansonsten hat Tests.h keinen zugriff auf imu_read 
-#include "Tests.h"
+#include "Tests.h" // alle test codes 
 
 
 void setup()
@@ -101,7 +89,7 @@ void loop()
 
 
       case 5:
-        WRITE_LCD_TEXT(1, 2, "Prog 5"); //warum gibts default 2 mal?
+        WRITE_LCD_TEXT(1, 2, "Prog 5"); 
         last_time = millis();  // Initialize time for PID
         drive_base=20;
         yaw_direction=20;
@@ -110,7 +98,7 @@ void loop()
         Kd = 0.1;   // Derivative gain - tune this (higher for more damping, reduces overshoot)
         while ( selection = 5) 
         {
-       // _SPIs(); //auscommentiert weil ich die INA.h file ned hab
+        _SPIs(); 
         _imu_read();
         _default();
         }
@@ -124,14 +112,6 @@ void loop()
   if (selection_cursor <= 0){WRITE_LCD_TEXT(1, 2, "   ()   +");}  
   else if (selection_cursor >= 5){WRITE_LCD_TEXT(1, 2, "-  ()    ");}  
   else{WRITE_LCD_TEXT(1, 2, "-  ()   +");}  
-  
-  /*WRITE_LCD_CLEAR();
-  WRITE_MOTOR(M1, 0);
-  WRITE_MOTOR(M2, 0);
-  Serial.println("no program selected");
-  Serial.println("press button B1 for normal startup");
-  WRITE_LCD_TEXT(1, 1, "Select Program");
-  WRITE_LCD_TEXT(1, 2, "B1 for normal startup");*/
 }
 
 void _default()
@@ -170,22 +150,29 @@ void _default()
   WRITE_MOTOR(M4, -drive_m4);
 }
 
-
+// alle spi übertragungen der anderen stm32 (e.g. boden; abstand; infrarot)  
 void _SPIs()
-{
+{      // spi übertageung von den boden sensoren 8 bytes. jeweil der sensor an der boden platte. wie die werte aussehen kann man auf der lbotics website sehen. 
 	digitalWrite(SPI1, LOW);
-	 
 	  if(spi.transfer(0XFF) == 250)
 	  { 
-	    ff = spi.transfer(0XFF); // was sind die??? pls schreib bei random nummern hin was di machn :3
-	    fl = spi.transfer(0XFF); // was sind die??? pls schreib bei random nummern hin was di machn :3
-	    fr = spi.transfer(0XFF); // was sind die??? pls schreib bei random nummern hin was di machn :3
-	    ll = spi.transfer(0XFF); // was sind die??? pls schreib bei random nummern hin was di machn :3
-	    rr = spi.transfer(0XFF); // was sind die??? pls schreib bei random nummern hin was di machn :3
-	    bl = spi.transfer(0XFF); // was sind die??? pls schreib bei random nummern hin was di machn :3
-	    br = spi.transfer(0XFF); // was sind die??? pls schreib bei random nummern hin was di machn :3
-	    bb = spi.transfer(0XFF); // was sind die??? pls schreib bei random nummern hin was di machn :3
+	    ff = spi.transfer(0XFF); // front 
+	    fl = spi.transfer(0XFF); // front left 
+	    fr = spi.transfer(0XFF); // front right 
+	    ll = spi.transfer(0XFF); // left
+	    rr = spi.transfer(0XFF); // right 
+	    bl = spi.transfer(0XFF); // back left
+	    br = spi.transfer(0XFF); // back right
+	    bb = spi.transfer(0XFF); // back back 
 	  }
 	 
 	  digitalWrite(SPI1, HIGH);
+}
+
+void _imu_read()
+{
+  yaw = READ_I2C_BNO055_YAW();
+  pitch = READ_I2C_BNO055_PITCH();
+  roll = READ_I2C_BNO055_ROLL();
+  _log("imu_read", "Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll));
 }
