@@ -1,6 +1,12 @@
 
 //sonstige 
+int serial_baud = 9600;
 
+
+bool debug = true;
+bool debug_over_serial = true;
+std::vector<String> debug_log = {"Log initialized!"};
+String log_message = "";
 
 //IMU Sensor 
 uint16_t yaw;
