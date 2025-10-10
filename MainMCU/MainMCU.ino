@@ -8,12 +8,20 @@
 
 void setup()
 {
+  Serial.begin(serial_baud); // Hier lassen um debug im setup zuzulassen 
+
   // Initialisierung der Hardwarekomponenten des Controllers
   KEPLERBRAIN_INIT();
+  Serial.println("KeplerBrainINIT succses -> Moving Forward in Setup");
+  SLEEP(100); //um jegliche blockierungen zu vermeiden 
   WRITE_I2C_BNO055_INIT();
+  Serial.println("BNO055_INIT succses -> Moving Forward in Setup");
+  SLEEP(100); // --"--
   WRITE_I2C_INA231_INIT();
-  Serial.begin(serial_baud);
+  Serial.println("INA231_INIT succses -> Moving Forward in Setup");
+  SLEEP(100); // --"--
   WRITE_LCD_CLEAR();
+  Serial.println("Setup finished now jumping in loop(). HAVE FUN!!!");
 }
  
 int selection_cursor = 0;
@@ -21,7 +29,8 @@ int selection = 0;
 
 void loop()
 {
-  
+  _powerread();
+
   if (READ_BUTTON_CLOSED(B1) == 1 && selection_cursor > 0){selection_cursor--;WRITE_LCD_TEXT(1, 2, "o");}
   if (READ_BUTTON_CLOSED(B3) == 1 && selection_cursor < 10){selection_cursor++;WRITE_LCD_TEXT(9, 2, "o");}
   delay(200);
@@ -46,17 +55,20 @@ void loop()
       case 0:
         WRITE_LCD_TEXT(1, 2, "Default");
         delay(700);                             //damit man cancel kann falls man falsch selected hat
-        if (READ_BUTTON_CLOSED(B2) == 1){exit;} //
+        //if (READ_BUTTON_CLOSED(B2) == 1){exit;} //
 
-
+        //setup
         last_time = millis();  // Initialize time for PID
         drive_base=10;
         yaw_direction=20;
         Kp = 1.0;   // Proportional gain - tune this (start higher for faster response)
         Ki = 0.01;  // Integral gain - tune this (small to avoid windup)
         Kd = 0.5;   // Derivative gain - tune this (higher for more damping, reduces overshoot)
+
+        //loop
         while ( selection = 0) 
         {
+          _powerread();
           _SPIs(); 
           _imu_read();
           _default();
@@ -65,29 +77,42 @@ void loop()
       case 1:
         WRITE_LCD_TEXT(1, 2, "Motor Test");
         delay(700);
-        if (READ_BUTTON_CLOSED(B2) == 1){exit;}
+       // if (READ_BUTTON_CLOSED(B2) == 1){exit;}
 
         _motor_test();
-
+        while ( selection = 1) //hier lassen um powerread nicht zu skippen 
+        {
+          _powerread();
+        }
       case 2:
         WRITE_LCD_TEXT(1, 2, "IMU Test");
         delay(700);
-        if (READ_BUTTON_CLOSED(B2) == 1){exit;}
+        //if (READ_BUTTON_CLOSED(B2) == 1){exit;}
 
         _imu_test();
 
+        while ( selection = 2) //hier lassen um powerread nicht zu skippen 
+        {
+          _powerread();
+        }
       case 3:
         WRITE_LCD_TEXT(1, 2, "Input Test");
         delay(700);
-        if (READ_BUTTON_CLOSED(B2) == 1){exit;}
+        //if (READ_BUTTON_CLOSED(B2) == 1){exit;}
 
-
+        while ( selection = 3)  //hier lassen um powerread nicht zu skippen 
+        {
+          _powerread(); 
+        }
       case 4:
         WRITE_LCD_TEXT(1, 2, "Show BATT info");
         delay(700);
-        if (READ_BUTTON_CLOSED(B2) == 1){exit;}
+        //if (READ_BUTTON_CLOSED(B2) == 1){exit;}
 
-
+        while ( selection = 4) //hier lassen um powerread nicht zu skippen 
+        {
+          _powerread();
+        }
       case 5:
         WRITE_LCD_TEXT(1, 2, "Prog 5"); 
         last_time = millis();  // Initialize time for PID
@@ -101,6 +126,7 @@ void loop()
         _SPIs(); 
         _imu_read();
         _default();
+        _powerread();
         }
 
     }
@@ -175,4 +201,49 @@ void _imu_read()
   pitch = READ_I2C_BNO055_PITCH();
   roll = READ_I2C_BNO055_ROLL();
   _log("imu_read", "Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll));
+}
+
+// power read code für spannungs üerwachung und ggeb. stromzählung
+void _powerread()
+{
+  //werte leseung 
+  BatV = READ_I2C_INA231_BUS_VOLTAGE();
+  BatA = READ_I2C_INA231_CURRENT();
+
+  //seriel schreiben der werte 
+  Serial.print("BatVolatge: ");
+  Serial.print(BatV);
+  Serial.print("    "); //bissi platz das net alles so aufeinander bickt 
+  Serial.print("BatAmp: ");
+  Serial.print(BatA); 
+  Serial.print("    "); //bissi platz das net alles so aufeinander bickt 
+  Serial.print(ina231_error_count);
+  Serial.println(); //nur für neue zeile so , dass der code gut ausschaut
+  SLEEP(100);
+
+  //led steuerung
+  if (BatV > 12000)
+  {
+  WRITE_LED(L1,0);
+  WRITE_LED(L2,0);
+  WRITE_LED(L3,1);
+  }
+  if (BatV > 9000 && BatV < 11000)
+  {
+    WRITE_LED(L1,1); //Wenn batterie über 9V und unter 11V dann Rote led 1 
+    WRITE_LED(L2,0);
+  }
+  if (BatV > 11000 && BatV < 12000)
+  { 
+    WRITE_LED(L1, 0);
+    WRITE_LED(L2, 1);
+    WRITE_LED(L3, 0);
+  }
+  while (BatV < 9000)
+  {
+    WRITE_LED(L1,1);
+    SLEEP(300);      //Fick alles wenn die baterie zu leer ist
+    WRITE_LED(L1,0);
+    SLEEP(399);
+  }
 }
