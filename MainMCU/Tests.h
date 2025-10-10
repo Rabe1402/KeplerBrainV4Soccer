@@ -61,7 +61,12 @@ void _imu_test()
   while(READ_BUTTON_CLOSED(B1) != 1)
   {
     old_time = millis();
-    _imu_read();
+    
+    yaw = READ_I2C_BNO055_YAW();
+    pitch = READ_I2C_BNO055_PITCH();
+    roll = READ_I2C_BNO055_ROLL();
+    _log("imu_read", "Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll));
+
     WRITE_LCD_TEXT(1, 2, "Y"   + String(yaw)   );
     WRITE_LCD_TEXT(5, 2, " |P" + String(pitch) );
     WRITE_LCD_TEXT(11,2, " |R" + String(roll)  );

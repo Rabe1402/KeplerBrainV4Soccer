@@ -3,7 +3,6 @@
 #include "Variables.h" //alle variablen usw. sind in dieser datei, um diese ein wenig aufzuräumen 
 //#include "powersense.h"
 #include <vector>
-//#include <sting>
 #include <iostream>
 
 void _imu_read()
@@ -11,9 +10,7 @@ void _imu_read()
   yaw = READ_I2C_BNO055_YAW();
   pitch = READ_I2C_BNO055_PITCH();
   roll = READ_I2C_BNO055_ROLL();
-  //Serial.println("IMU_Sensor");
-  //Serial.println( String(yaw)+" "+String(pitch)+" "+String(roll)+" ");
-  
+  _log("imu_read", "Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll));
 }
 // / \
 //  |
@@ -25,8 +22,8 @@ void setup()
 {
   // Initialisierung der Hardwarekomponenten des Controllers
   KEPLERBRAIN_INIT();
-  //WRITE_I2C_BNO055_INIT();
-  //WRITE_I2C_INA231_INIT();
+  WRITE_I2C_BNO055_INIT();
+  WRITE_I2C_INA231_INIT();
   Serial.begin(serial_baud);
   WRITE_LCD_CLEAR();
 }
