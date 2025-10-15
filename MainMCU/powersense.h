@@ -2,16 +2,16 @@
 // Verfügbare Funktionen:
 // void WRITE_I2C_INA231_INIT(void) - Initialisiert den INA231-Sensor (Konfiguration und Kalibrierung)
 // int16_t READ_I2C_INA231_SHUNT_VOLTAGE(void) - Liest die Shunt-Spannung (Rohwert, LSB = 2.5 µV)
-// uint16_t READ_I2C_INA231_BUS_VOLTAGE(void) - Liest die Bus-Spannung (Rohwert, LSB = 1.25 mV)
-// int16_t READ_I2C_INA231_CURRENT(void) - Liest den Strom (Rohwert, LSB = Current_LSB)
+// uint16_t READ_I2C_INA231_BUS_VOLTAGE(void) - Liest die Bus-Spannung (in mV)
+// int16_t READ_I2C_INA231_CURRENT(void) - Liest den Strom (in mA)
 // uint16_t READ_I2C_INA231_POWER(void) - Liest die Leistung (Rohwert, LSB = 25 * Current_LSB)
 
 #ifndef INA231_H
 #define INA231_H
 
-#include <Wire.h>
-#include <HardwareTimer.h>  // Für Timer-Konfiguration
+//#define INA231_DEBUG  
 
+#include <Wire.h>
 //ausnahmsweise variablen hier lassen, um dem brandel den code einfach geben zu können// 
 
 #define INA231_ADDR          0x40 //i2c adresse des boards
@@ -22,6 +22,7 @@
 #define REG_POWER            0x03 //i2c register für die werte 
 #define REG_CURRENT          0x04 //i2c register für die werte  
 #define REG_CALIBRATION      0x05 //i2c register für die werte 
+#define REG_ALERT            
 
 #define R_SHUNT              0.1f   // Shunt-Widerstand in Ohm
 #define MAX_CURRENT          5.0f   // Maximal erwarteter Strom in A
@@ -41,109 +42,10 @@ static volatile float ina231_power = 0.0f;          // W
 static volatile uint32_t ina231_error_count = 0;
 
 extern TwoWire i2c; 
-static HardwareTimer timer(TIM9);  // HardwareTimer für TIM9
 
-// Hintergrund-Update der Messwerte (aufgerufen vom Timer-Callback)
-static void UPDATE_I2C_INA231(void)
-{
-  #ifdef INA231_DEBUG
-  Serial.println("Updating INA231 measurements...");
-  #endif
+int counter; //globaler counter 
 
-  // Shunt-Spannung
-  i2c.beginTransmission(INA231_ADDR);
-  i2c.write(REG_SHUNT_VOLTAGE);
-  if (i2c.endTransmission(false) == 0) {
-    i2c.requestFrom(INA231_ADDR, 2, true);
-    if (i2c.available() >= 2) {
-      int16_t raw = (int16_t)((i2c.read() << 8) | i2c.read());
-      ina231_shunt_voltage = raw * SHUNT_VOLTAGE_LSB;  // in mV
-      #ifdef INA231_DEBUG
-      Serial.print("Shunt Voltage raw: ");
-      Serial.print(raw);
-      Serial.print(", mV: ");
-      Serial.println(ina231_shunt_voltage, 3);
-      #endif
-    } else {
-      ina231_error_count++;
-    }
-  } else {
-    ina231_error_count++;
-  }
-
-  // Bus-Spannung
-  i2c.beginTransmission(INA231_ADDR);
-  i2c.write(REG_BUS_VOLTAGE);
-  if (i2c.endTransmission(false) == 0) {
-    i2c.requestFrom(INA231_ADDR, 2, true);
-    if (i2c.available() >= 2) {
-      uint8_t msb = i2c.read();
-      uint8_t lsb = i2c.read();
-      uint16_t raw = (msb << 8) | lsb;  // Big-Endian
-      ina231_bus_voltage = raw * BUS_VOLTAGE_LSB;  // in V
-      #ifdef INA231_DEBUG
-      Serial.print("Bus Voltage raw: ");
-      Serial.print(raw);
-      Serial.print(", V: ");
-      Serial.println(ina231_bus_voltage, 3);
-      #endif
-    } else {
-      ina231_error_count++;
-    }
-  } else {
-    ina231_error_count++;
-  }
-
-  // Strom
-  i2c.beginTransmission(INA231_ADDR);
-  i2c.write(REG_CURRENT);
-  if (i2c.endTransmission(false) == 0) {
-    i2c.requestFrom(INA231_ADDR, 2, true);
-    if (i2c.available() >= 2) {
-      int16_t raw = (int16_t)((i2c.read() << 8) | i2c.read());
-      ina231_current = raw * CURRENT_LSB;  // in A
-      #ifdef INA231_DEBUG
-      Serial.print("Current raw: ");
-      Serial.print(raw);
-      Serial.print(", A: ");
-      Serial.println(ina231_current, 3);
-      #endif
-    } else {
-      ina231_error_count++;
-    }
-  } else {
-    ina231_error_count++;
-  }
-
-  // Leistung
-  i2c.beginTransmission(INA231_ADDR);
-  i2c.write(REG_POWER);
-  if (i2c.endTransmission(false) == 0) {
-    i2c.requestFrom(INA231_ADDR, 2, true);
-    if (i2c.available() >= 2) {
-      uint16_t raw = (i2c.read() << 8) | i2c.read();
-      ina231_power = raw * POWER_LSB;  // in W
-      #ifdef INA231_DEBUG
-      Serial.print("Power raw: ");
-      Serial.print(raw);
-      Serial.print(", W: ");
-      Serial.println(ina231_power, 3);
-      #endif
-    } else {
-      ina231_error_count++;
-    }
-  } else {
-    ina231_error_count++;
-  }
-
-  #ifdef INA231_DEBUG
-  Serial.print("Error count: ");
-  Serial.println(ina231_error_count);
-  Serial.println("INA231 measurements updated");
-  #endif
-}
-
-// Initialisierung des INA231 und HardwareTimer
+// Initialisierung des INA231 
 void WRITE_I2C_INA231_INIT(void)
 {
   uint16_t config_read = 0;
@@ -217,17 +119,6 @@ void WRITE_I2C_INA231_INIT(void)
     #endif
   }
 
-  #ifdef INA231_DEBUG
-  Serial.println("Starting TIM9 initialization...");
-  #endif
-  timer.setPrescaleFactor(8400);
-  timer.setOverflow(1000, TICK_FORMAT);
-  timer.attachInterrupt(UPDATE_I2C_INA231);
-//timer.setInterruptPriority(5); //weg wegen gibts net oder so 
-  timer.resume();
-  #ifdef INA231_DEBUG
-  Serial.println("TIM9 initialization complete");
-  #endif
 }
 
 // Shunt-Spannung auslesen (mV)

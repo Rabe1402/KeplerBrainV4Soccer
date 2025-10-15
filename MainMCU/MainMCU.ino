@@ -29,8 +29,6 @@ int selection = 0;
 
 void loop()
 {
-  _powerread();
-
   if (READ_BUTTON_CLOSED(B1) == 1 && selection_cursor > 0){selection_cursor--;WRITE_LCD_TEXT(1, 2, "o");}
   if (READ_BUTTON_CLOSED(B3) == 1 && selection_cursor < 10){selection_cursor++;WRITE_LCD_TEXT(9, 2, "o");}
   delay(200);
@@ -68,7 +66,7 @@ void loop()
         //loop
         while ( selection = 0) 
         {
-          _powerread();
+           
           _SPIs(); 
           _imu_read();
           _default();
@@ -82,7 +80,7 @@ void loop()
         _motor_test();
         while ( selection = 1) //hier lassen um powerread nicht zu skippen 
         {
-          _powerread();
+           
         }
       case 2:
         WRITE_LCD_TEXT(1, 2, "IMU Test");
@@ -93,7 +91,7 @@ void loop()
 
         while ( selection = 2) //hier lassen um powerread nicht zu skippen 
         {
-          _powerread();
+           
         }
       case 3:
         WRITE_LCD_TEXT(1, 2, "Input Test");
@@ -102,7 +100,7 @@ void loop()
 
         while ( selection = 3)  //hier lassen um powerread nicht zu skippen 
         {
-          _powerread(); 
+            
         }
       case 4:
         WRITE_LCD_TEXT(1, 2, "Show BATT info");
@@ -111,7 +109,7 @@ void loop()
 
         while ( selection = 4) //hier lassen um powerread nicht zu skippen 
         {
-          _powerread();
+           
         }
       case 5:
         WRITE_LCD_TEXT(1, 2, "Prog 5"); 
@@ -126,7 +124,7 @@ void loop()
         _SPIs(); 
         _imu_read();
         _default();
-        _powerread();
+         
         }
 
     }
@@ -203,47 +201,3 @@ void _imu_read()
   _log("imu_read", "Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll));
 }
 
-// power read code für spannungs üerwachung und ggeb. stromzählung
-void _powerread()
-{
-  //werte leseung 
-  BatV = READ_I2C_INA231_BUS_VOLTAGE();
-  BatA = READ_I2C_INA231_CURRENT();
-
-  //seriel schreiben der werte 
-  Serial.print("BatVolatge: ");
-  Serial.print(BatV);
-  Serial.print("    "); //bissi platz das net alles so aufeinander bickt 
-  Serial.print("BatAmp: ");
-  Serial.print(BatA); 
-  Serial.print("    "); //bissi platz das net alles so aufeinander bickt 
-  Serial.print(ina231_error_count);
-  Serial.println(); //nur für neue zeile so , dass der code gut ausschaut
-  SLEEP(100);
-
-  //led steuerung
-  if (BatV > 12000)
-  {
-  WRITE_LED(L1,0);
-  WRITE_LED(L2,0);
-  WRITE_LED(L3,1);
-  }
-  if (BatV > 9000 && BatV < 11000)
-  {
-    WRITE_LED(L1,1); //Wenn batterie über 9V und unter 11V dann Rote led 1 
-    WRITE_LED(L2,0);
-  }
-  if (BatV > 11000 && BatV < 12000)
-  { 
-    WRITE_LED(L1, 0);
-    WRITE_LED(L2, 1);
-    WRITE_LED(L3, 0);
-  }
-  while (BatV < 9000)
-  {
-    WRITE_LED(L1,1);
-    SLEEP(300);      //Fick alles wenn die baterie zu leer ist
-    WRITE_LED(L1,0);
-    SLEEP(399);
-  }
-}

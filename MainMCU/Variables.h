@@ -45,7 +45,4 @@ int drive_m2;
 int drive_m3;
 int drive_m4;
 
-//PowerRead
-uint16_t BatV;
-int16_t BatA;
 
