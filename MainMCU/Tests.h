@@ -2,7 +2,7 @@ void _log(String name, String message)
 {
   if (debug)
   {
-    log_message = "## Got log from" + String(name) + "at" + String(millis() + ":\n" + String(message));
+    log_message = "\n## Got log from " + String(name) + " at " + String(millis()) + "ms:\n " + String(message);
     if (debug_over_serial)
     {
       Serial.println(log_message);
@@ -87,6 +87,112 @@ void _imu_test()
 
       WRITE_LCD_TEXT(3, 2, "DT: " + String(millis() - old_time));
     }
+
+  }
+
+  WRITE_LCD_TEXT(1, 2, "o");
+  while(READ_BUTTON_CLOSED(B2) == 1){}
+  WRITE_LCD_CLEAR();
+}
+
+void _input_test()
+{
+  WRITE_LCD_TEXT(1, 2, "x       ");
+
+  int old_time;
+  bool full_speed = false;
+
+  while(READ_BUTTON_CLOSED(B1) != 1)
+  {
+    old_time = millis();
+    
+    if (!full_speed){delay(100);}
+    if (READ_BUTTON_CLOSED(B3) == 1)
+    {
+      full_speed = !full_speed;
+      if (full_speed)
+      {
+        WRITE_LCD_TEXT(11, 2, "fs:on ");
+      }
+      else
+      {
+        WRITE_LCD_TEXT(11, 2, "fs:off");
+      }
+      delay(1000);
+
+      WRITE_LCD_TEXT(3, 2, "DT: " + String(millis() - old_time));
+    }
+
+  }
+
+  WRITE_LCD_TEXT(1, 2, "o");
+  while(READ_BUTTON_CLOSED(B2) == 1){}
+  WRITE_LCD_CLEAR();
+}
+
+void _batt_test()
+{
+  WRITE_LCD_TEXT(1, 2, "x       ");
+
+  int  old_time;
+  bool full_speed = false;
+  int mode = 0;
+
+  while(READ_BUTTON_CLOSED(B1) != 1)
+  {
+    old_time = millis();
+    
+    switch (mode)
+    {
+      case 0:
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_BUS_VOLTAGE) + "mV");
+      break;
+
+      case 1:
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_SHUNT_VOLTAGE) + "idk 1µV");
+      break;
+
+      case 2:
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_CURRENT) + "mA");
+      break;
+
+      case 3:
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_POWER) + "idk");
+      break;
+    }
+    
+
+    if (!full_speed){delay(100);}
+    if (READ_BUTTON_CLOSED(B3) == 1)
+    {
+      full_speed = !full_speed;
+      if (full_speed)
+      {
+        WRITE_LCD_TEXT(11, 2, "fs:on ");
+      }
+      else
+      {
+        WRITE_LCD_TEXT(11, 2, "fs:off");
+      }
+      delay(1000);
+
+      WRITE_LCD_TEXT(3, 2, "DT: " + String(millis() - old_time));
+    }
+    if (READ_BUTTON_CLOSED(B2) == 1)
+    {
+      mode++;
+      if (mode < 3)
+      {
+        mode = 0;
+      }
+
+      WRITE_LCD_TEXT(11, 2, String(mode));
+
+      delay(1000);
+
+    }
+
+    WRITE_LCD_TEXT(3, 2, "DT: " + String(millis() - old_time));
 
   }
 

@@ -26,91 +26,71 @@ void setup()
  
 int selection_cursor = 0;
 int selection = 0;
+bool run = false;
 
 void loop()
 {
-  if (READ_BUTTON_CLOSED(B1) == 1 && selection_cursor > 0){selection_cursor--;WRITE_LCD_TEXT(1, 2, "o");}
-  if (READ_BUTTON_CLOSED(B3) == 1 && selection_cursor < 10){selection_cursor++;WRITE_LCD_TEXT(9, 2, "o");}
-  delay(200);
+  if (!run)
+  {
+    if (READ_BUTTON_CLOSED(B1) == 1 && selection_cursor > 0){selection_cursor--;WRITE_LCD_TEXT(1, 2, "o");}
+    if (READ_BUTTON_CLOSED(B3) == 1 && selection_cursor < 10){selection_cursor++;WRITE_LCD_TEXT(9, 2, "o");}
+    delay(200);
 
-  //Display
-  WRITE_LCD_TEXT(1, 1, String(selection_cursor));
+    //Display
+    WRITE_LCD_TEXT(1, 1, String(selection_cursor));
 
-  if (READ_BUTTON_CLOSED(B2) == 1){
+    if (READ_BUTTON_CLOSED(B2) == 1){
 
-    WRITE_LCD_TEXT(4, 2, "<>");
-    while(READ_BUTTON_CLOSED(B2) == 1){}
-    WRITE_LCD_TEXT(4, 2, "()");
+      WRITE_LCD_TEXT(4, 2, "<>");
+      while(READ_BUTTON_CLOSED(B2) == 1){}
+      WRITE_LCD_TEXT(4, 2, "()");
 
-    delay(500);
+      delay(500);
 
-    selection = selection_cursor;
+      selection = selection_cursor;
 
-    _log("main loop", "Selected Program" + String(selection));
+      _log("main loop", "Selected Program" + String(selection));
 
+      run = true;
+    }
+  }else
+  {
     switch ( selection )
     {
       case 0:
         WRITE_LCD_TEXT(1, 2, "Default");
         delay(700);                             //damit man cancel kann falls man falsch selected hat
-        //if (READ_BUTTON_CLOSED(B2) == 1){exit;} //
+        if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
-        //setup
-        last_time = millis();  // Initialize time for PID
-        drive_base=10;
-        yaw_direction=20;
-        Kp = 1.0;   // Proportional gain - tune this (start higher for faster response)
-        Ki = 0.01;  // Integral gain - tune this (small to avoid windup)
-        Kd = 0.5;   // Derivative gain - tune this (higher for more damping, reduces overshoot)
-
-        //loop
-        while ( selection = 0) 
-        {
-           
-          _SPIs(); 
-          _imu_read();
-          _default();
-        }
+        _default();
 
       case 1:
         WRITE_LCD_TEXT(1, 2, "Motor Test");
         delay(700);
-       // if (READ_BUTTON_CLOSED(B2) == 1){exit;}
+        if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
         _motor_test();
-        while ( selection = 1) //hier lassen um powerread nicht zu skippen 
-        {
-           
-        }
+
       case 2:
         WRITE_LCD_TEXT(1, 2, "IMU Test");
         delay(700);
-        //if (READ_BUTTON_CLOSED(B2) == 1){exit;}
+        if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
         _imu_test();
 
-        while ( selection = 2) //hier lassen um powerread nicht zu skippen 
-        {
-           
-        }
       case 3:
         WRITE_LCD_TEXT(1, 2, "Input Test");
         delay(700);
-        //if (READ_BUTTON_CLOSED(B2) == 1){exit;}
+        if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
-        while ( selection = 3)  //hier lassen um powerread nicht zu skippen 
-        {
-            
-        }
+        _input_test();
+
       case 4:
         WRITE_LCD_TEXT(1, 2, "Show BATT info");
         delay(700);
-        //if (READ_BUTTON_CLOSED(B2) == 1){exit;}
+        if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
-        while ( selection = 4) //hier lassen um powerread nicht zu skippen 
-        {
-           
-        }
+
       case 5:
         WRITE_LCD_TEXT(1, 2, "Prog 5"); 
         last_time = millis();  // Initialize time for PID
@@ -119,13 +99,11 @@ void loop()
         Kp = 1.5;   // Proportional gain - tune this (start higher for faster response)
         Ki = 0.01;  // Integral gain - tune this (small to avoid windup)
         Kd = 0.1;   // Derivative gain - tune this (higher for more damping, reduces overshoot)
-        while ( selection = 5) 
-        {
+        
         _SPIs(); 
         _imu_read();
         _default();
          
-        }
 
     }
 
@@ -140,6 +118,13 @@ void loop()
 
 void _default()
 {
+  //setup
+  last_time = millis();  // Initialize time for PID
+  drive_base=10;
+  yaw_direction=20;
+  Kp = 1.0;   // Proportional gain - tune this (start higher for faster response)
+  Ki = 0.01;  // Integral gain - tune this (small to avoid windup)
+  Kd = 0.5;   // Derivative gain - tune this (higher for more damping, reduces overshoot)
 	unsigned long now = millis();
   dt = (now - last_time) / 1000.0;  // Time delta in seconds
   if (dt <= 0) dt = 0.001;  // Prevent division by zero or negative
