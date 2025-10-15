@@ -145,19 +145,19 @@ void _batt_test()
     switch (mode)
     {
       case 0:
-        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_BUS_VOLTAGE) + "mV");
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_BUS_VOLTAGE()) + "mV");
       break;
 
       case 1:
-        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_SHUNT_VOLTAGE) + "idk 1µV");
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_SHUNT_VOLTAGE()) + "idk 1µV");
       break;
 
       case 2:
-        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_CURRENT) + "mA");
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_CURRENT()) + "mA");
       break;
 
       case 3:
-        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_POWER) + "idk");
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_POWER()) + "idk");
       break;
     }
     
