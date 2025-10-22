@@ -26,7 +26,7 @@ bool history_filled = false; // Flag, ob das Array vollständig gefüllt ist
 unsigned long last_time = millis(); // Zeitstempel für die Berechnung
 int drive_base = 10; // Basisgeschwindigkeit
 float yaw_direction = 20; // Ziel-Yaw-Wert
-
+float yaw_difference = 0; // yaw difference zum anfahren an einen bestimmten imu wert 
 
 //spi1 (bodensens)
 uint8_t ff;

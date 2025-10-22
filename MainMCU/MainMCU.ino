@@ -135,10 +135,7 @@ void _default()
 
   // Berechne den Fehler (mit Wrap-around für Winkel, 0-359 Grad)
   float error = yaw_direction - yaw_average;
-  error = fmod(error + 180, 360) - 180; // Normalisiere auf -180 bis 180 für kürzeste Drehung
-
-  // Einfache proportionale Steuerung basierend auf dem Fehler
-  float yaw_difference = error; // Direkt den Fehler verwenden (ohne PID)
+  yaw_difference = fmod(error + 180, 360) - 180; // Normalisiere auf -180 bis 180 für kürzeste Drehung
 
   // Motorsteuerung
   drive_m1 = drive_base - yaw_difference;
