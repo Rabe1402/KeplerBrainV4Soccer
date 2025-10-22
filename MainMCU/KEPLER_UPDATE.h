@@ -151,7 +151,6 @@ void KEPLER_UPDATE()
 
     counter_now_power = counter;  //counter schaltung 
   }
-}
-// gethub test 
+} 
 
 
