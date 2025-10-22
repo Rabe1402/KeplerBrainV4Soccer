@@ -69,7 +69,7 @@ void KEPLER_UPDATE()
       i2c.requestFrom(0x40, 2, true);
       if (i2c.available() >= 2) {
         int16_t raw = (int16_t)((i2c.read() << 8) | i2c.read());
-        ina231_current = raw * (5.0f / 32768.0f * 10000);  // in A
+        ina231_current = raw * (5.0f / 32768.0f * 1000);  // in A
         #ifdef INA231_DEBUG
         Serial.print("Current raw: ");
         Serial.print(raw);
