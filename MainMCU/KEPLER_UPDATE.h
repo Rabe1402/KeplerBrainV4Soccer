@@ -113,9 +113,11 @@ void KEPLER_UPDATE()
     //seriel schreiben der werte 
     Serial.print("BatVolatge: ");
     Serial.print(ina231_bus_voltage);
+    Serial.print(" mV");
     Serial.print("    "); //bissi platz das net alles so aufeinander bickt 
     Serial.print("BatAmp: ");
     Serial.print(ina231_current); 
+    Serial.print(" mA");
     Serial.print("    "); //bissi platz das net alles so aufeinander bickt 
     Serial.print(ina231_error_count);
     Serial.println(); //nur für neue zeile so , dass der code gut ausschaut
@@ -148,6 +150,6 @@ void KEPLER_UPDATE()
     }
 
     counter_now_power = counter;  //counter schaltung 
-
   }
 }
+

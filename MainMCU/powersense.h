@@ -13,13 +13,6 @@
 
 #include <Wire.h>
 
-// Umrechnungskonstanten (aus INA231-Datenblatt)
-//#define SHUNT_VOLTAGE_LSB    0.0025f  // 2.5 µV pro Bit, in mV
-//#define BUS_VOLTAGE_LSB      1.25f // 1.25 mV pro Bit, in mV
-//#define CURRENT_LSB          (MAX_CURRENT / 32768.0f * 10000)  // mA pro Bit
-//#define POWER_LSB            (25.0f * CURRENT_LSB)     // W pro Bit
-
-
 extern TwoWire i2c; 
 
 // Initialisierung des INA231 

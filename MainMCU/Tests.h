@@ -133,7 +133,6 @@ void _input_test()
 void _batt_test()
 {
   WRITE_LCD_TEXT(1, 2, "x       ");
-
   int  old_time;
   bool full_speed = false;
   int mode = 0;

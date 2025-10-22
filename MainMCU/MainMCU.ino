@@ -24,14 +24,14 @@ void setup()
   SLEEP(100); // --"--
   WRITE_LCD_CLEAR();
   Serial.println("Setup finished now jumping in loop(). HAVE FUN!!!");
+  KEPLER_UPDATE(); //einmal update
 }
  
-int selection_cursor = 0;
-int selection = 0;
-bool run = false;
+
 
 void loop()
 {
+  KEPLER_UPDATE(); //um hintergrund aktionen automatisch auszuführen 
   if (!run)
   {
     if (READ_BUTTON_CLOSED(B1) == 1 && selection_cursor > 0){selection_cursor--;WRITE_LCD_TEXT(1, 2, "o");}
@@ -95,13 +95,6 @@ void loop()
 
       case 5:
         WRITE_LCD_TEXT(1, 2, "Prog 5"); 
-        last_time = millis();  // Initialize time for PID
-        drive_base=20;
-        yaw_direction=20;
-        Kp = 1.5;   // Proportional gain - tune this (start higher for faster response)
-        Ki = 0.01;  // Integral gain - tune this (small to avoid windup)
-        Kd = 0.1;   // Derivative gain - tune this (higher for more damping, reduces overshoot)
-        
         _SPIs(); 
         _imu_read();
         _default();
@@ -120,65 +113,74 @@ void loop()
 
 void _default()
 {
-  //setup
-  last_time = millis();  // Initialize time for PID
-  drive_base=10;
-  yaw_direction=20;
-  Kp = 1.0;   // Proportional gain - tune this (start higher for faster response)
-  Ki = 0.01;  // Integral gain - tune this (small to avoid windup)
-  Kd = 0.5;   // Derivative gain - tune this (higher for more damping, reduces overshoot)
-	unsigned long now = millis();
-  dt = (now - last_time) / 1000.0;  // Time delta in seconds
-  if (dt <= 0) dt = 0.001;  // Prevent division by zero or negative
+  unsigned long now = millis();
+  float dt = (now - last_time) / 1000.0; // Zeitdelta in Sekunden
+  if (dt <= 0) dt = 0.001; // Verhindern von Division durch Null
   last_time = now;
-  WRITE_LCD_TEXT(1, 1, String(yaw) + "   ");
-  WRITE_LCD_TEXT(1, 2, String(yaw_direction));
 
-  // Calculate error (with wrap-around handling for angles assuming 0-359 degrees)
-  error = yaw_direction - (int)yaw;
-  error = fmod(error + 180, 360) - 180;  // Normalize to -180 to 180 for shortest turn
+  // Yaw-Wert ins History-Array einfügen
+  yaw_history[history_index] = yaw;
+  history_index = (history_index + 1) % 5; // Zyklisch durch das Array
+  if (history_index == 0) history_filled = true; // Array ist voll nach 5 Werten
 
-  // PID calculations
-  integral += error * dt;  // Accumulate integral
-  // Optional: Add anti-windup by clamping integral if needed, e.g., integral = constrain(integral, -100, 100);
-  derivative = (error - previous_error) / dt;
-  yaw_difference = Kp * error + Ki * integral + Kd * derivative;
-  previous_error = error;
+  // Berechne den gleitenden Durchschnitt
+  float yaw_average = 0;
+  int count = history_filled ? 5 : history_index; // Anzahl der gültigen Werte
+  if (count > 0) { // Vermeide Division durch Null
+    for (int i = 0; i < count; i++) {
+      yaw_average += yaw_history[i];
+    }
+    yaw_average /= count;
+  }
 
+  // Berechne den Fehler (mit Wrap-around für Winkel, 0-359 Grad)
+  float error = yaw_direction - yaw_average;
+  error = fmod(error + 180, 360) - 180; // Normalisiere auf -180 bis 180 für kürzeste Drehung
+
+  // Einfache proportionale Steuerung basierend auf dem Fehler
+  float yaw_difference = error; // Direkt den Fehler verwenden (ohne PID)
+
+  // Motorsteuerung
   drive_m1 = drive_base - yaw_difference;
   drive_m2 = drive_base + yaw_difference;
   drive_m3 = drive_base + yaw_difference;
   drive_m4 = drive_base - yaw_difference;
 
+  // Begrenze die Motorwerte
   drive_m1 = constrain(drive_m1, -20, 20);
   drive_m2 = constrain(drive_m2, -20, 20);
   drive_m3 = constrain(drive_m3, -20, 20);
   drive_m4 = constrain(drive_m4, -20, 20);
 
-  WRITE_MOTOR(M1,  drive_m1);
-  WRITE_MOTOR(M2,  drive_m2);
+  // Schreibe die Motorwerte
+  WRITE_MOTOR(M1, drive_m1);
+  WRITE_MOTOR(M2, drive_m2);
   WRITE_MOTOR(M3, -drive_m3);
   WRITE_MOTOR(M4, -drive_m4);
+
+  // LCD-Ausgabe
+  WRITE_LCD_TEXT(1, 1, String(yaw) + "   ");
+  WRITE_LCD_TEXT(1, 2, String(yaw_direction));
 }
 
-// alle spi übertragungen der anderen stm32 (e.g. boden; abstand; infrarot)  
+  // alle spi übertragungen der anderen stm32 (e.g. boden; abstand; infrarot)  
 void _SPIs()
 {      // spi übertageung von den boden sensoren 8 bytes. jeweil der sensor an der boden platte. wie die werte aussehen kann man auf der lbotics website sehen. 
 	digitalWrite(SPI1, LOW);
-	  if(spi.transfer(0XFF) == 250)
-	  { 
-	    ff = spi.transfer(0XFF); // front 
-	    fl = spi.transfer(0XFF); // front left 
-	    fr = spi.transfer(0XFF); // front right 
-	    ll = spi.transfer(0XFF); // left
-	    rr = spi.transfer(0XFF); // right 
-	    bl = spi.transfer(0XFF); // back left
-	    br = spi.transfer(0XFF); // back right
-	    bb = spi.transfer(0XFF); // back back 
-	  }
-	 
-	  digitalWrite(SPI1, HIGH);
-}
+  if(spi.transfer(0XFF) == 250)
+  { 
+    ff = spi.transfer(0XFF); // front 
+    fl = spi.transfer(0XFF); // front left 
+    fr = spi.transfer(0XFF); // front right 
+    ll = spi.transfer(0XFF); // left
+    rr = spi.transfer(0XFF); // right 
+    bl = spi.transfer(0XFF); // back left
+    br = spi.transfer(0XFF); // back right
+    bb = spi.transfer(0XFF); // back back 
+  }
+ 
+  digitalWrite(SPI1, HIGH);
+}  
 
 void _imu_read()
 {
