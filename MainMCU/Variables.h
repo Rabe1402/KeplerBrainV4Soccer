@@ -6,6 +6,9 @@ int selection_cursor = 0;
 int selection = 0;
 bool run = false;
 
+int i = 0;
+int error =0;
+
 //Debug
 bool debug = true;
 bool debug_over_serial = true;
@@ -21,6 +24,7 @@ int16_t roll;
 float yaw_history[5] = {0, 0, 0, 0, 0}; // Array für die letzten 5 Yaw-Werte
 int history_index = 0; // Index für das Array
 bool history_filled = false; // Flag, ob das Array vollständig gefüllt ist
+int radtodeg = (M_PI / 180.0);
 
 // Setup-Variablen
 unsigned long last_time = millis(); // Zeitstempel für die Berechnung
