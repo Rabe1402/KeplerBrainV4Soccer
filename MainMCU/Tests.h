@@ -1,17 +1,4 @@
-void _log(String name, String message)
-{
-  if (debug)
-  {
-    log_message = "\n## Got log from " + String(name) + " at " + String(millis()) + "ms:\n " + String(message);
-    if (debug_over_serial)
-    {
-      Serial.println(log_message);
-    }else
-    {
-      debug_log.push_back(log_message);
-    }
-  }
-}
+
 
 void _motor_test()
 {

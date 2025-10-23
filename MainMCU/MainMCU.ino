@@ -1,10 +1,37 @@
 #include "../shared/KeplerBRAIN_V4.h"
 #include "KEPLER_UPDATE.h" // wird in echte header migrirt wenn randl gut findet 
-#include "Variables.h" //alle variablen usw. sind in dieser datei, um diese ein wenig aufzuräumen 
 #include "powersense.h" //powersensor read 
+
 #include <vector>
 #include <iostream>
+#include <math.h>
+
+#include "Variables.h" //alle variablen usw. sind in dieser datei, um diese ein wenig aufzuräumen 
+
+void _imu_read()
+{
+  yaw = READ_I2C_BNO055_YAW();
+  pitch = READ_I2C_BNO055_PITCH();
+  roll = READ_I2C_BNO055_ROLL();
+  _log("imu_read", "Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll));
+}
+void _log(String name, String message)
+{
+  if (debug)
+  {
+    log_message = "\n## Got log from " + String(name) + " at " + String(millis()) + "ms:\n " + String(message);
+    if (debug_over_serial)
+    {
+      Serial.println(log_message);
+    }else
+    {
+      debug_log.push_back(log_message);
+    }
+  }
+}
+
 #include "Tests.h" // alle test codes 
+#include "Move.h"
 
 
 
@@ -31,7 +58,7 @@ void setup()
 
 void loop()
 {
-  KEPLER_UPDATE(); //um hintergrund aktionen automatisch auszuführen 
+  //.KEPLER_UPDATE(); //um hintergrund aktionen automatisch auszuführen 
   if (!run)
   {
     if (READ_BUTTON_CLOSED(B1) == 1 && selection_cursor > 0){selection_cursor--;WRITE_LCD_TEXT(1, 2, "o");}
@@ -61,10 +88,10 @@ void loop()
     {
       case 0:
         WRITE_LCD_TEXT(1, 2, "Default");
-        delay(700);                             //damit man cancel kann falls man falsch selected hat
-        if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
         _default();
+
+      break;;
 
       case 1:
         WRITE_LCD_TEXT(1, 2, "Motor Test");
@@ -72,6 +99,7 @@ void loop()
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
         _motor_test();
+      break;;
 
       case 2:
         WRITE_LCD_TEXT(1, 2, "IMU Test");
@@ -80,6 +108,8 @@ void loop()
 
         _imu_test();
 
+      break;;
+
       case 3:
         WRITE_LCD_TEXT(1, 2, "Input Test");
         delay(700);
@@ -87,10 +117,14 @@ void loop()
 
         _input_test();
 
+      break;;
+
       case 4:
         WRITE_LCD_TEXT(1, 2, "Show BATT info");
         delay(700);
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
+
+      break;;
 
 
       case 5:
@@ -102,8 +136,6 @@ void loop()
 
     }
 
-    delay(5000);
-
   }
 
   if (selection_cursor <= 0){WRITE_LCD_TEXT(1, 2, "   ()   +");}  
@@ -111,7 +143,14 @@ void loop()
   else{WRITE_LCD_TEXT(1, 2, "-  ()   +");}  
 }
 
-void _default()
+void _default(){
+  i++;
+  //move_angle(i, 20);
+  rotate_to(0, 1, 0);
+  motors(drive_m1, drive_m2, drive_m3, drive_m4);
+}
+
+void _default_old()
 {
   unsigned long now = millis();
   float dt = (now - last_time) / 1000.0; // Zeitdelta in Sekunden
@@ -179,11 +218,4 @@ void _SPIs()
   digitalWrite(SPI1, HIGH);
 }  
 
-void _imu_read()
-{
-  yaw = READ_I2C_BNO055_YAW();
-  pitch = READ_I2C_BNO055_PITCH();
-  roll = READ_I2C_BNO055_ROLL();
-  _log("imu_read", "Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll));
-}
 
