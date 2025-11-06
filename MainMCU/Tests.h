@@ -131,20 +131,20 @@ void _batt_test()
     switch (mode)
     {
       case 0:
-        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_BUS_VOLTAGE()) + "mV");
-      break;
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_BUS_VOLTAGE()) + "mV         ");
+      break;;
 
       case 1:
-        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_SHUNT_VOLTAGE()) + "idk 1µV");
-      break;
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_SHUNT_VOLTAGE()) + "idk 1µV              ");
+      break;;
 
       case 2:
-        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_CURRENT()) + "mA");
-      break;
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_CURRENT()) + "mA                 ");
+      break;;
 
       case 3:
-        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_POWER()) + "idk");
-      break;
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_POWER()) + "idk                  ");
+      break;;
     }
     
 
@@ -167,7 +167,7 @@ void _batt_test()
     if (READ_BUTTON_CLOSED(B2) == 1)
     {
       mode++;
-      if (mode < 3)
+      if (mode > 3)
       {
         mode = 0;
       }
@@ -178,7 +178,7 @@ void _batt_test()
 
     }
 
-    WRITE_LCD_TEXT(3, 2, "DT: " + String(millis() - old_time));
+    WRITE_LCD_TEXT(3, 2, "DT: " + String(millis() - old_time) + "                  ");
 
   }
 

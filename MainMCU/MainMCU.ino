@@ -58,7 +58,7 @@ void setup()
 
 void loop()
 {
-  //.KEPLER_UPDATE(); //um hintergrund aktionen automatisch auszuführen 
+  KEPLER_UPDATE(); //um hintergrund aktionen automatisch auszuführen 
   if (!run)
   {
     if (READ_BUTTON_CLOSED(B1) == 1 && selection_cursor > 0){selection_cursor--;WRITE_LCD_TEXT(1, 2, "o");}
@@ -66,7 +66,7 @@ void loop()
     delay(200);
 
     //Display
-    WRITE_LCD_TEXT(1, 1, String(selection_cursor));
+    WRITE_LCD_TEXT(1, 1, String(selection_cursor) + "              ");
 
     if (READ_BUTTON_CLOSED(B2) == 1){
 
@@ -99,6 +99,9 @@ void loop()
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
         _motor_test();
+
+        run = false;
+
       break;;
 
       case 2:
@@ -108,6 +111,8 @@ void loop()
 
         _imu_test();
 
+        run = false;
+
       break;;
 
       case 3:
@@ -116,6 +121,8 @@ void loop()
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
         _input_test();
+        
+        run = false;
 
       break;;
 
@@ -123,6 +130,9 @@ void loop()
         WRITE_LCD_TEXT(1, 2, "Show BATT info");
         delay(700);
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
+
+        _batt_test();
+        run = false;
 
       break;;
 
@@ -132,7 +142,7 @@ void loop()
         _SPIs(); 
         _imu_read();
         _default();
-         
+      break;;         
 
     }
 
@@ -145,12 +155,14 @@ void loop()
 
 void _default(){
   i++;
-  //move_angle(i, 20);
-  rotate_to(0, 1, 0);
+  _imu_read();
+  move_angle_correction(45, 20, 1);
+  rotate_to(0, 5, 40, 0.000004, 0.00000006, 7);
+  //rotate_to(0, 5, 0.00005, 7);
   motors(drive_m1, drive_m2, drive_m3, drive_m4);
 }
 
-void _default_old()
+void _default_old()//  _imu_read();
 {
   unsigned long now = millis();
   float dt = (now - last_time) / 1000.0; // Zeitdelta in Sekunden
