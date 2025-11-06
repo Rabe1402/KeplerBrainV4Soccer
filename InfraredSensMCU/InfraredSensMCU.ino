@@ -9,7 +9,11 @@ volatile uint8_t arr_sensor[16] = {0};
 // SPI Data
 volatile uint8_t spi_data[9] = {250,1,2,3,4,5,6,7,8};
 volatile uint8_t tx_index = 0;
- 
+
+#define Debug 
+//#define Debug1TO8
+//#define Debug8TO16
+
 void setup()
 {
   // Initialize SPI1 as Slave with interrupt
@@ -35,7 +39,7 @@ void setup()
   pinMode(PB9, INPUT);
  
   // User Code
-  //Serial.begin(115200);
+  Serial.begin(115200);
  
 }
  
@@ -61,28 +65,60 @@ void loop()
   if (digitalRead(PC13)) arr_sensor[14] = 0; else arr_sensor[14] = 1; 
   if (digitalRead(PB9)) arr_sensor[15] = 0; else arr_sensor[15] = 1; 
  
- 
+  #ifndef Debug1TO8
+  #ifndef Debug1TO16
   // Ausgabe Sensorwerte und Übertragung
   for (int i = 0; i < 16; i++)
   {
     if (arr_sensor[i] == 1) 
     {
-      //Serial.print("1 ");
- 
+      #ifdef Debug
+      Serial.print("1 ");
+      #endif
       // Die Nummer des Sensors mit der höchsten Zahl der 
       // ein Signal "sieht" wird  übertragen
       // !!! Dies ist zu verbessern und hier ist eine Logik
       // zu entwickeln, was übertragen wird, wenn mehr als ein
       // Sensor das Signal dedektiert
+      
       spi_data[1] = i+1;
     } 
     else 
     {
-      //Serial.print("0 ");
+      #ifdef Debug
+      Serial.print("0 ");
+      #endif 
     }
   }
- 
-  //Serial.println("");
+  #ifdef Debug
+  Serial.println("");
+  #endif 
+  #endif
+  #endif
+  
+  #ifdef Debug1TO8
+  spi_data[1] = arr_sensor[0];
+  spi_data[2] = arr_sensor[1];
+  spi_data[3] = arr_sensor[2];
+  spi_data[4] = arr_sensor[3];
+  spi_data[5] = arr_sensor[4];
+  spi_data[6] = arr_sensor[5];
+  spi_data[7] = arr_sensor[6];
+  spi_data[8] = arr_sensor[7];
+  #endif
+
+  #ifdef Debug9TO16
+  spi_data[1] = arr_sensor[8];
+  spi_data[2] = arr_sensor[9];
+  spi_data[3] = arr_sensor[10];
+  spi_data[4] = arr_sensor[11];
+  spi_data[5] = arr_sensor[12];
+  spi_data[6] = arr_sensor[13];
+  spi_data[7] = arr_sensor[14];
+  spi_data[8] = arr_sensor[15];
+  #endif
+
+
 }
  
 // Initialize SPI1 in slave mode with interrupt
