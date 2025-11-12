@@ -88,14 +88,32 @@ void _input_test()
 
   int old_time;
   bool full_speed = false;
+  int mode = 0;
 
   while(READ_BUTTON_CLOSED(B1) != 1)
   {
     old_time = millis();
     
+    switch (mode)
+    {
+      case 0:
+      break;;
+
+      case 1:
+      break;;
+
+      case 2:
+      break;;
+
+      case 3:
+      break;;
+    }
+    
     if (!full_speed){delay(100);}
     if (READ_BUTTON_CLOSED(B3) == 1)
     {
+          
+
       full_speed = !full_speed;
       if (full_speed)
       {
@@ -107,8 +125,36 @@ void _input_test()
       }
       delay(1000);
 
-      WRITE_LCD_TEXT(3, 2, "DT: " + String(millis() - old_time));
     }
+    if (READ_BUTTON_CLOSED(B2) == 1)
+    {
+      mode++;
+      if (mode > 3)
+      {
+        mode = 0;
+      }
+
+      switch (mode)
+      {
+        case 0:
+        break;;
+  
+        case 1:
+        break;;
+  
+        case 2:
+        break;;
+  
+        case 3:
+        break;;
+      }
+
+      WRITE_LCD_TEXT(11, 2, String(mode));
+
+      delay(1000);
+
+    }
+    WRITE_LCD_TEXT(3, 2, "DT: " + String(millis() - old_time));
 
   }
 
