@@ -116,11 +116,11 @@ void loop()
       break;;
 
       case 3:
-        WRITE_LCD_TEXT(1, 2, "Input Test");
+        WRITE_LCD_TEXT(1, 2, "Ground Test");
         delay(700);
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
-        _input_test();
+        _ground_test();
         
         run = false;
 
@@ -234,10 +234,10 @@ void _default_old()//  _imu_read();
   // alle spi übertragungen der anderen stm32 (e.g. boden; abstand; infrarot)  
 void _SPIs()
 {      // spi übertageung von den boden sensoren 8 bytes. jeweil der sensor an der boden platte. wie die werte aussehen kann man auf der lbotics website sehen. 
-	digitalWrite(SPI1, LOW);
+	digitalWrite(SPI2, LOW);
   if(spi.transfer(0XFF) == 250)
   { 
-    ff = spi.transfer(0XFF); // front 
+    fc = spi.transfer(0XFF); // front 
     fl = spi.transfer(0XFF); // front left 
     fr = spi.transfer(0XFF); // front right 
     ll = spi.transfer(0XFF); // left
@@ -247,7 +247,7 @@ void _SPIs()
     bc = spi.transfer(0XFF); // back back 
   }
  
-  digitalWrite(SPI1, HIGH);
+  digitalWrite(SPI2, HIGH);
 }  
 
 

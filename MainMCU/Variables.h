@@ -34,7 +34,7 @@ float yaw_direction = 20; // Ziel-Yaw-Wert
 float yaw_difference = 0; // yaw difference zum anfahren an einen bestimmten imu wert 
 
 //spi1 (bodensens)
-uint8_t ff;
+uint8_t fc;
 uint8_t fl;
 uint8_t fr;
 uint8_t ll;

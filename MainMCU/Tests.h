@@ -82,7 +82,7 @@ void _imu_test()
   WRITE_LCD_CLEAR();
 }
 
-void _input_test()
+void _ground_test()
 {
   WRITE_LCD_TEXT(1, 2, "x       ");
 
@@ -90,22 +90,29 @@ void _input_test()
   bool full_speed = false;
   int mode = 0;
 
+  WRITE_LCD_TEXT(1, 2, "fc fl fr ll rr");
+
   while(READ_BUTTON_CLOSED(B1) != 1)
   {
     old_time = millis();
+
+    _SPIs();
     
     switch (mode)
     {
       case 0:
+        WRITE_LCD_TEXT(1,  1, String(fc) + " ");
+        WRITE_LCD_TEXT(4,  1, String(fl) + " ");
+        WRITE_LCD_TEXT(7,  1, String(fr) + " ");
+        WRITE_LCD_TEXT(10,  1, String(ll) + " ");
+        WRITE_LCD_TEXT(13, 1, String(rr) + " ");
+
       break;;
 
       case 1:
-      break;;
-
-      case 2:
-      break;;
-
-      case 3:
+        WRITE_LCD_TEXT(1, 1, String(bl) + " ");
+        WRITE_LCD_TEXT(4, 1, String(br) + " ");
+        WRITE_LCD_TEXT(7, 1, String(bc) + "    ");
       break;;
     }
     
@@ -129,32 +136,30 @@ void _input_test()
     if (READ_BUTTON_CLOSED(B2) == 1)
     {
       mode++;
-      if (mode > 3)
+      if (mode > 1)
       {
         mode = 0;
       }
 
+      WRITE_LCD_TEXT(1, 1, "              ");
+
       switch (mode)
       {
         case 0:
+          WRITE_LCD_TEXT(1, 2, "fc fl fr ll rr ");
         break;;
   
         case 1:
-        break;;
-  
-        case 2:
-        break;;
-  
-        case 3:
+          WRITE_LCD_TEXT(1, 2, "bl br bc       ");
         break;;
       }
 
-      WRITE_LCD_TEXT(11, 2, String(mode));
+      WRITE_LCD_TEXT(16, 2, String(mode));
 
       delay(1000);
 
+
     }
-    WRITE_LCD_TEXT(3, 2, "DT: " + String(millis() - old_time));
 
   }
 
