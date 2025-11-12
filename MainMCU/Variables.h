@@ -7,8 +7,16 @@ int selection_cursor = 0;
 int selection = 0;
 bool run = false;
 
-int i = 0;
-int error =0;
+int error = 0;
+
+//Default
+
+int target_angle = 45;
+int target_speed = 20;
+int correction_speed = 70;
+
+int line_timers[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+int line_threshold = 24;
 
 //Debug
 bool debug = true;
