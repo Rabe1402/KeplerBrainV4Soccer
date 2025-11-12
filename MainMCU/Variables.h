@@ -7,8 +7,16 @@ int selection_cursor = 0;
 int selection = 0;
 bool run = false;
 
-int i = 0;
-int error =0;
+int error = 0;
+
+//Default
+
+int target_angle = 45;
+int target_speed = 20;
+int correction_speed = 70;
+
+int line_timers[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+int line_threshold = 24;
 
 //Debug
 bool debug = true;
@@ -34,14 +42,14 @@ float yaw_direction = 20; // Ziel-Yaw-Wert
 float yaw_difference = 0; // yaw difference zum anfahren an einen bestimmten imu wert 
 
 //spi1 (bodensens)
-uint8_t ff;
+uint8_t fc;
 uint8_t fl;
 uint8_t fr;
 uint8_t ll;
 uint8_t rr;
 uint8_t bl;
 uint8_t br;
-uint8_t bb;
+uint8_t bc;
 
 // Motoren 
 int drive_m1;

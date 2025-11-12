@@ -87,8 +87,6 @@ void loop()
     switch ( selection )
     {
       case 0:
-        WRITE_LCD_TEXT(1, 2, "Default");
-
         _default();
 
       break;;
@@ -116,11 +114,11 @@ void loop()
       break;;
 
       case 3:
-        WRITE_LCD_TEXT(1, 2, "Input Test");
+        WRITE_LCD_TEXT(1, 2, "Ground Test");
         delay(700);
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
-        _input_test();
+        _ground_test();
         
         run = false;
 
@@ -138,11 +136,31 @@ void loop()
 
 
       case 5:
-        WRITE_LCD_TEXT(1, 2, "Prog 5"); 
+        WRITE_LCD_TEXT(1, 2, "IMU READ"); 
         _SPIs(); 
         _imu_read();
         _default();
-      break;;         
+      break;;      
+
+
+      case 6:
+        WRITE_LCD_TEXT(1, 2, "BODEN READ"); 
+        delay(700);
+        if (READ_BUTTON_CLOSED(B1) == 1){exit;}
+
+
+      break;;
+
+
+      case 7:
+        WRITE_LCD_TEXT(1, 2, "DUMP LOG"); 
+
+      break;;
+
+
+      case 8:
+
+      break;;   
 
     }
 
@@ -153,13 +171,143 @@ void loop()
   else{WRITE_LCD_TEXT(1, 2, "-  ()   +");}  
 }
 
+int check_ground_error(int base)
+{
+  return std::max( { abs(fl - base), abs(fc - base), abs(fr - base), abs(rr - base), abs(br - base), abs(bc - base), abs(bl - base), abs(ll - base) } );
+}
+
+int check_ground_sensor(int base, int threshold)
+{
+  // fl 0
+  // fc 1
+  // fr 2
+  // rr 3
+  // br 4
+  // bc 5
+  // bl 6
+  // ll 7
+
+  if(abs(fl - base) >= threshold) {return 0;}
+  if(abs(fc - base) >= threshold) {return 1;}
+  if(abs(fr - base) >= threshold) {return 2;}
+  if(abs(rr - base) >= threshold) {return 3;}
+  if(abs(br - base) >= threshold) {return 4;}
+  if(abs(bc - base) >= threshold) {return 5;}
+  if(abs(bl - base) >= threshold) {return 6;}
+  if(abs(ll - base) >= threshold) {return 7;}
+}
+
+int check_ground_sensor_time(int base, int threshold, int time_threshold_ms)
+{
+  if(abs(fl - base) >= threshold) {
+     if( millis() - line_timers[1] >= time_threshold_ms) {
+      line_timers[1] = millis(); return 1;}
+       line_timers[1] = millis(); 
+  }else
+  {
+    line_timers[1] = 0; 
+  }
+
+  if(abs(fc - base) >= threshold) {
+      if( millis() - line_timers[2] >= time_threshold_ms) {
+       line_timers[2] = millis(); return 2;}
+        line_timers[2] = millis(); 
+  }else
+  {
+    line_timers[2] = 0; 
+  }
+
+  if(abs(fr - base) >= threshold) {
+      if( millis() - line_timers[3] >= time_threshold_ms) {
+       line_timers[3] = millis(); return 3;}
+        line_timers[3] = millis(); 
+  }else
+  {
+    line_timers[3] = 0; 
+  }
+
+  if(abs(rr - base) >= threshold) {
+      if( millis() - line_timers[4] >= time_threshold_ms) {
+       line_timers[4] = millis(); return 4;}
+        line_timers[4] = millis(); 
+  }else
+  {
+    line_timers[4] = 0; 
+  }
+
+  if(abs(br - base) >= threshold) {
+      if( millis() - line_timers[5] >= time_threshold_ms) {
+       line_timers[5] = millis(); return 5;}
+        line_timers[5] = millis(); 
+  }else
+  {
+    line_timers[5] = 0; 
+  }
+
+  if(abs(bc - base) >= threshold) {
+      if( millis() - line_timers[6] >= time_threshold_ms) {
+       line_timers[6] = millis(); return 6;}
+        line_timers[6] = millis(); 
+  }else
+  {
+    line_timers[6] = 0; 
+  }
+
+  if(abs(bl - base) >= threshold) {
+      if( millis() - line_timers[7] >= time_threshold_ms) {
+       line_timers[7] = millis(); return 7;}
+        line_timers[7] = millis(); 
+  }else
+  {
+    line_timers[7] = 0; 
+  }
+
+  if(abs(ll - base) >= threshold) {
+      if( millis() - line_timers[8] >= time_threshold_ms) {
+       line_timers[8] = millis(); return 8;}
+        line_timers[8] = millis(); 
+  }else
+  {
+    line_timers[8] = 0; 
+  }
+
+  return -1;    
+
+}
+
 void _default(){
-  i++;
   _imu_read();
-  move_angle_correction(45, 20, 1);
-  rotate_to(0, 5, 40, 0.000004, 0.00000006, 7);
+  _SPIs();
+
+  //move_angle_correction(45, correction_speed, 1);
+  rotate_to(0, 5, target_speed, 0.000004, 0.00000006, 7);
   //rotate_to(0, 5, 0.00005, 7);
+
+  //if ()
+
+  //_log("default", String(check_ground_error(line_threshold)));
+
+  if (check_ground_sensor_time(24, 1, 50) > -1)
+  {
+    drive_m1 = 0;
+    drive_m2 = 0;
+    drive_m3 = 0;
+    drive_m4 = 0;
+
+
+    
+    move_angle( (check_ground_sensor(line_threshold, 1) * 45) - 180, target_speed);
+
+    //delay(1000);
+
+    //motors(0, 0, 0, 0);
+    //motors(-drive_m1, -drive_m2, -drive_m3, -drive_m4);
+
+  }
+  
   motors(drive_m1, drive_m2, drive_m3, drive_m4);
+  
+
 }
 
 void _default_old()//  _imu_read();
@@ -214,20 +362,20 @@ void _default_old()//  _imu_read();
   // alle spi übertragungen der anderen stm32 (e.g. boden; abstand; infrarot)  
 void _SPIs()
 {      // spi übertageung von den boden sensoren 8 bytes. jeweil der sensor an der boden platte. wie die werte aussehen kann man auf der lbotics website sehen. 
-	digitalWrite(SPI1, LOW);
+	digitalWrite(SPI2, LOW);
   if(spi.transfer(0XFF) == 250)
   { 
-    ff = spi.transfer(0XFF); // front 
+    fc = spi.transfer(0XFF); // front 
     fl = spi.transfer(0XFF); // front left 
     fr = spi.transfer(0XFF); // front right 
     ll = spi.transfer(0XFF); // left
     rr = spi.transfer(0XFF); // right 
     bl = spi.transfer(0XFF); // back left
     br = spi.transfer(0XFF); // back right
-    bb = spi.transfer(0XFF); // back back 
+    bc = spi.transfer(0XFF); // back back 
   }
  
-  digitalWrite(SPI1, HIGH);
+  digitalWrite(SPI2, HIGH);
 }  
 
 
