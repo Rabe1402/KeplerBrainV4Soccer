@@ -41,7 +41,7 @@ uint8_t ll;
 uint8_t rr;
 uint8_t bl;
 uint8_t br;
-uint8_t bb;
+uint8_t bc;
 
 // Motoren 
 int drive_m1;

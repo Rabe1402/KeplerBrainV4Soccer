@@ -138,11 +138,31 @@ void loop()
 
 
       case 5:
-        WRITE_LCD_TEXT(1, 2, "Prog 5"); 
+        WRITE_LCD_TEXT(1, 2, "IMU READ"); 
         _SPIs(); 
         _imu_read();
         _default();
-      break;;         
+      break;;      
+
+
+      case 6:
+        WRITE_LCD_TEXT(1, 2, "BODEN READ"); 
+        delay(700);
+        if (READ_BUTTON_CLOSED(B1) == 1){exit;}
+
+
+      break;;
+
+
+      case 7:
+        WRITE_LCD_TEXT(1, 2, "DUMP LOG"); 
+
+      break;;
+
+
+      case 8:
+
+      break;;   
 
     }
 
@@ -156,7 +176,7 @@ void loop()
 void _default(){
   i++;
   _imu_read();
-  move_angle_correction(45, 20, 1);
+  move_angle_correction(45, 70, 1);
   rotate_to(0, 5, 40, 0.000004, 0.00000006, 7);
   //rotate_to(0, 5, 0.00005, 7);
   motors(drive_m1, drive_m2, drive_m3, drive_m4);
@@ -224,7 +244,7 @@ void _SPIs()
     rr = spi.transfer(0XFF); // right 
     bl = spi.transfer(0XFF); // back left
     br = spi.transfer(0XFF); // back right
-    bb = spi.transfer(0XFF); // back back 
+    bc = spi.transfer(0XFF); // back back 
   }
  
   digitalWrite(SPI1, HIGH);
