@@ -1,12 +1,14 @@
 #include "../shared/KeplerBRAIN_V4.h"
 #include "KEPLER_UPDATE.h" // wird in echte header migrirt wenn randl gut findet 
 #include "powersense.h" //powersensor read 
+#include "SPIs.h" //alle spi übertrageungen
 
 #include <vector>
 #include <iostream>
 #include <math.h>
 
 #include "Variables.h" //alle variablen usw. sind in dieser datei, um diese ein wenig aufzuräumen 
+
 
 void _imu_read()
 {
@@ -359,23 +361,5 @@ void _default_old()//  _imu_read();
   WRITE_LCD_TEXT(1, 2, String(yaw_direction));
 }
 
-  // alle spi übertragungen der anderen stm32 (e.g. boden; abstand; infrarot)  
-void _SPIs()
-{      // spi übertageung von den boden sensoren 8 bytes. jeweil der sensor an der boden platte. wie die werte aussehen kann man auf der lbotics website sehen. 
-	digitalWrite(SPI2, LOW);
-  if(spi.transfer(0XFF) == 250)
-  { 
-    fc = spi.transfer(0XFF); // front 
-    fl = spi.transfer(0XFF); // front left 
-    fr = spi.transfer(0XFF); // front right 
-    ll = spi.transfer(0XFF); // left
-    rr = spi.transfer(0XFF); // right 
-    bl = spi.transfer(0XFF); // back left
-    br = spi.transfer(0XFF); // back right
-    bc = spi.transfer(0XFF); // back back 
-  }
- 
-  digitalWrite(SPI2, HIGH);
-}  
 
 
