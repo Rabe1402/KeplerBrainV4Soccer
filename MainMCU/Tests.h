@@ -230,7 +230,6 @@ void _batt_test()
     }
 
     WRITE_LCD_TEXT(3, 2, "DT: " + String(millis() - old_time) + "                  ");
-
   }
 
   WRITE_LCD_TEXT(1, 2, "o");
