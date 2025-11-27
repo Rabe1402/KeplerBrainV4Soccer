@@ -12,11 +12,15 @@ int error = 0;
 //Default
 
 int target_angle = 45;
-int target_speed = 20;
+int target_speed = 40;
 int correction_speed = 70;
 
 int line_timers[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-int line_threshold = 24;
+bool line_tmp[8]   = {0, 0, 0, 0, 0, 0, 0, 0};
+int groundtimer = 0;
+int line_last;
+int line_base      = 244;
+int line_threshold = 3;
 
 //Debug
 bool debug = true;

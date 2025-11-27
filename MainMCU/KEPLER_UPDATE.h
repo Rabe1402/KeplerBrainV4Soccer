@@ -108,7 +108,6 @@ void KEPLER_UPDATE()
     Serial.print("Error count: ");
     Serial.println(ina231_error_count);
     Serial.println("INA231 measurements updated");
-    #endif
 
     //seriel schreiben der werte 
     Serial.print("BatVolatge: ");
@@ -121,6 +120,7 @@ void KEPLER_UPDATE()
     Serial.print("    "); //bissi platz das net alles so aufeinander bickt 
     Serial.print(ina231_error_count);
     Serial.println(); //nur für neue zeile so , dass der code gut ausschaut
+    #endif
     SLEEP(100);
 
     //led steuerung

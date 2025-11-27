@@ -195,14 +195,14 @@ void setup()
  
 void loop() 
 {
-  spi_data[1] = adcValues[0] / 10;
-  spi_data[2] = adcValues[1] / 10;
-  spi_data[3] = adcValues[2] / 10;
-  spi_data[4] = adcValues[3] / 10;
-  spi_data[5] = adcValues[4] / 10;
-  spi_data[6] = adcValues[5] / 10;
-  spi_data[7] = adcValues[6] / 10;
-  spi_data[8] = adcValues[7] / 10;
+  spi_data[1] = adcValues[0]; // add / 10 for default behaviour
+  spi_data[2] = adcValues[1]; // add / 10 for default behaviour
+  spi_data[3] = adcValues[2]; // add / 10 for default behaviour
+  spi_data[4] = adcValues[3]; // add / 10 for default behaviour
+  spi_data[5] = adcValues[4]; // add / 10 for default behaviour
+  spi_data[6] = adcValues[5]; // add / 10 for default behaviour
+  spi_data[7] = adcValues[6]; // add / 10 for default behaviour
+  spi_data[8] = adcValues[7]; // add / 10 for default behaviour
  
   // User Code
   
