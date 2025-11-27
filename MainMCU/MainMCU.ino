@@ -302,7 +302,7 @@ void _default(){
   int groundsenstime = check_ground_error(line_base);
   //_log("default groundsenstime", String(groudsenstime));
   //int groundsenstime = 0;
-
+wwwwwwwwwwwwwwwwwwwwwwwww
   if (groundsenstime > line_threshold || groundtimer < 100)
   {
     if (groundtimer <= 0)
