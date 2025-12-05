@@ -299,10 +299,10 @@ void _default(){
   _imu_read();
   _SPIs();
 
-  int groundsenstime = check_ground_error(line_base);
+  //int groundsenstime = check_ground_error(line_base);
   //_log("default groundsenstime", String(groudsenstime));
   //int groundsenstime = 0;
-  if (groundsenstime > line_threshold || groundtimer < 100)
+  /*if (groundsenstime > line_threshold || groundtimer < 100)
   {
     if (groundtimer <= 0)
     {
@@ -327,7 +327,7 @@ void _default(){
     motors(0, 0, 0, 0);
     //motors(-drive_m1, -drive_m2, -drive_m3, -drive_m4);
     return;
-  }
+  }*/
 
   //_log("default", "triggered");
 
