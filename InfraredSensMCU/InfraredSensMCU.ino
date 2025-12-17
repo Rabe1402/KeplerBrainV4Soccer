@@ -11,7 +11,7 @@ volatile uint8_t spi_data[9] = {250,1,2,3,4,5,6,7,8};
 volatile uint8_t tx_index = 0;
 
 #define Debug 
-//#define Debug1TO8
+//#define Debug1TO8  //nur eines der einzel sensor debug gleichzeitig, da dies die einzel sensor werte über spi sendet!!!
 //#define Debug8TO16
 
 void setup()
