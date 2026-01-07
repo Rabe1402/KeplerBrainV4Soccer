@@ -1,3 +1,4 @@
+//#include "/home/arch/daata/School/6_klasse/IT/KeplerBrainV4Soccer/shared/KeplerBRAIN_V4.h" //idk warum aber ../shared/KE... geht bei mir ned mehr.
 #include "../shared/KeplerBRAIN_V4.h"
 #include "KEPLER_UPDATE.h" // wird in echte header migrirt wenn randl gut findet 
 #include "powersense.h" //powersensor read 
@@ -21,7 +22,7 @@ void _log(String name, String message)
 {
   if (debug)
   {
-    log_message = "\n## Got log from " + String(name) + " at " + String(millis()) + "ms:\n " + String(message);
+    log_message = "\n## Got log from " + String(name) + " at " + String(millis()) + "ms:\n " + message;
     if (debug_over_serial)
     {
       Serial.println(log_message);
@@ -61,6 +62,7 @@ void setup()
 void loop()
 {
   KEPLER_UPDATE(); //um hintergrund aktionen automatisch auszuführen 
+  _log("void loop", "run is " + String(run));
   if (!run)
   {
     if (READ_BUTTON_CLOSED(B1) == 1 && selection_cursor > 0){selection_cursor--;WRITE_LCD_TEXT(1, 2, "o");}
@@ -86,10 +88,15 @@ void loop()
     }
   }else
   {
+    //_log("void loop", "run is true");
     switch ( selection )
     {
       case 0:
-        _default();
+        while (true)
+        {
+          KEPLER_UPDATE();
+          _default();
+        }
 
       break;;
 
@@ -141,7 +148,7 @@ void loop()
         WRITE_LCD_TEXT(1, 2, "IMU READ"); 
         _SPIs(); 
         _imu_read();
-        _default();
+        //_default();
       break;;      
 
 
@@ -189,91 +196,104 @@ int check_ground_sensor(int base, int threshold)
   // bl 6
   // ll 7
 
-  if(abs(fl - base) >= threshold) {return 0;}
-  if(abs(fc - base) >= threshold) {return 1;}
-  if(abs(fr - base) >= threshold) {return 2;}
-  if(abs(rr - base) >= threshold) {return 3;}
-  if(abs(br - base) >= threshold) {return 4;}
-  if(abs(bc - base) >= threshold) {return 5;}
-  if(abs(bl - base) >= threshold) {return 6;}
-  if(abs(ll - base) >= threshold) {return 7;}
+  if(abs(fc - base) >= threshold) {line_tmp[0] = true;} else {line_tmp[0] = false;}
+  if(abs(fr - base) >= threshold) {line_tmp[1] = true;} else {line_tmp[1] = false;}
+  if(abs(rr - base) >= threshold) {line_tmp[2] = true;} else {line_tmp[2] = false;}
+  if(abs(br - base) >= threshold) {line_tmp[3] = true;} else {line_tmp[3] = false;}
+  if(abs(bc - base) >= threshold) {line_tmp[4] = true;} else {line_tmp[4] = false;}
+  if(abs(bl - base) >= threshold) {line_tmp[5] = true;} else {line_tmp[5] = false;}
+  if(abs(ll - base) >= threshold) {line_tmp[6] = true;} else {line_tmp[6] = false;}
+  if(abs(fl - base) >= threshold) {line_tmp[7] = true;} else {line_tmp[7] = false;}
+
+  if( line_tmp[0] == true ) {/*fc */ if( line_tmp[4] == true                        ) {return line_last;} line_last = 180;}
+  if( line_tmp[1] == true ) {/*fr */ if( line_tmp[5] == true || line_tmp[7] == true ) {return line_last;} line_last = 135;}
+  if( line_tmp[2] == true ) {/*rr */ if( line_tmp[6] == true                        ) {return line_last;} line_last = 90; }
+  if( line_tmp[3] == true ) {/*br */ if( line_tmp[7] == true || line_tmp[5] == true ) {return line_last;} line_last = 45; }
+  if( line_tmp[4] == true ) {/*bc */ line_last = 0;  }
+  if( line_tmp[5] == true ) {/*bl */ line_last = 315;}
+  if( line_tmp[6] == true ) {/*ll */ line_last = 270;}
+  if( line_tmp[7] == true ) {/*fl */ line_last = 225;}
+
+  return line_last;
 }
 
 int check_ground_sensor_time(int base, int threshold, int time_threshold_ms)
 {
-  if(abs(fl - base) >= threshold) {
-     if( millis() - line_timers[1] >= time_threshold_ms) {
-      line_timers[1] = millis(); return 1;}
-       line_timers[1] = millis(); 
+  //_log("check_ground_sensor_time", String(abs(fl - base)));
+
+
+  if(abs(fc - base) >= threshold) {
+      if( millis() - line_timers[0] >= time_threshold_ms) {
+       line_timers[0] = millis(); return 0;}
+        line_timers[0] = millis(); 
+  }else
+  {
+    line_timers[0] = 0; 
+  }
+
+  if(abs(fr - base) >= threshold) {
+      if( millis() - line_timers[1] >= time_threshold_ms) {
+       line_timers[1] = millis(); return 45;}
+        line_timers[1] = millis(); 
   }else
   {
     line_timers[1] = 0; 
   }
 
-  if(abs(fc - base) >= threshold) {
+  if(abs(rr - base) >= threshold) {
       if( millis() - line_timers[2] >= time_threshold_ms) {
-       line_timers[2] = millis(); return 2;}
+       line_timers[2] = millis(); return 90;}
         line_timers[2] = millis(); 
   }else
   {
     line_timers[2] = 0; 
   }
 
-  if(abs(fr - base) >= threshold) {
-      if( millis() - line_timers[3] >= time_threshold_ms) {
-       line_timers[3] = millis(); return 3;}
-        line_timers[3] = millis(); 
-  }else
-  {
-    line_timers[3] = 0; 
-  }
-
-  if(abs(rr - base) >= threshold) {
+  if(abs(br - base) >= threshold) {
       if( millis() - line_timers[4] >= time_threshold_ms) {
-       line_timers[4] = millis(); return 4;}
+       line_timers[4] = millis(); return 135;}
         line_timers[4] = millis(); 
   }else
   {
     line_timers[4] = 0; 
   }
 
-  if(abs(br - base) >= threshold) {
+  if(abs(bc - base) >= threshold) {
+      if( millis() - line_timers[4] >= time_threshold_ms) {
+       line_timers[4] = millis(); return 180;}
+        line_timers[4] = millis(); 
+  }else
+  {
+    line_timers[4] = 0; 
+  }
+
+  if(abs(bl - base) >= threshold) {
       if( millis() - line_timers[5] >= time_threshold_ms) {
-       line_timers[5] = millis(); return 5;}
+       line_timers[5] = millis(); return 225;}
         line_timers[5] = millis(); 
   }else
   {
     line_timers[5] = 0; 
   }
 
-  if(abs(bc - base) >= threshold) {
-      if( millis() - line_timers[6] >= time_threshold_ms) {
-       line_timers[6] = millis(); return 6;}
+  if(abs(ll - base) >= threshold) {
+      if( millis() - line_timers[8] >= time_threshold_ms) {
+       line_timers[6] = millis(); return 270;}
         line_timers[6] = millis(); 
   }else
   {
     line_timers[6] = 0; 
   }
-
-  if(abs(bl - base) >= threshold) {
-      if( millis() - line_timers[7] >= time_threshold_ms) {
-       line_timers[7] = millis(); return 7;}
-        line_timers[7] = millis(); 
+  if(abs(fl - base) >= threshold) {
+   if( millis() - line_timers[1] >= time_threshold_ms) {
+    line_timers[7] = millis(); return 315;}
+     line_timers[7] = millis(); 
   }else
   {
     line_timers[7] = 0; 
   }
 
-  if(abs(ll - base) >= threshold) {
-      if( millis() - line_timers[8] >= time_threshold_ms) {
-       line_timers[8] = millis(); return 8;}
-        line_timers[8] = millis(); 
-  }else
-  {
-    line_timers[8] = 0; 
-  }
-
-  return -1;    
+  return -1;
 
 }
 
@@ -281,31 +301,46 @@ void _default(){
   _imu_read();
   _SPIs();
 
-  //move_angle_correction(45, correction_speed, 1);
-  rotate_to(0, 5, target_speed, 0.000004, 0.00000006, 7);
-  //rotate_to(0, 5, 0.00005, 7);
-
-  //if ()
-
-  //_log("default", String(check_ground_error(line_threshold)));
-
-  if (check_ground_sensor_time(24, 1, 50) > -1)
+  //int groundsenstime = check_ground_error(line_base);
+  //_log("default groundsenstime", String(groudsenstime));
+  //int groundsenstime = 0;
+  /*if (groundsenstime > line_threshold || groundtimer < 100)
   {
+    if (groundtimer <= 0)
+    {
+      groundtimer = 100;
+    }else
+    {
+      groundtimer--;
+    }
     drive_m1 = 0;
     drive_m2 = 0;
     drive_m3 = 0;
     drive_m4 = 0;
 
 
-    
-    move_angle( (check_ground_sensor(line_threshold, 1) * 45) - 180, target_speed);
+    int sensor = check_ground_sensor(line_base, line_threshold);
+    move_angle( (sensor), 70);
+    //_log("default sensor", String(sensor));
+    //move_angle( (check_ground_sensor(line_threshold, 1) * 45) - 225, std::min(target_speed + 30, 100) );
 
-    //delay(1000);
+    delay(500);
 
-    //motors(0, 0, 0, 0);
+    motors(0, 0, 0, 0);
     //motors(-drive_m1, -drive_m2, -drive_m3, -drive_m4);
+    return;
+  }*/
 
-  }
+  //_log("default", "triggered");
+
+  move_angle_correction(-45, 30, 1);
+  rotate_to(0, 2, 30, 0.000004, 0.00000006, 7); // good for moving
+  //rotate_to(0, 2, 10, 0.000004, 0.00000006, 7); good for static
+  //rotate_to(0, 5, 0.00005, 7);
+
+  //if ()
+
+
   
   motors(drive_m1, drive_m2, drive_m3, drive_m4);
   

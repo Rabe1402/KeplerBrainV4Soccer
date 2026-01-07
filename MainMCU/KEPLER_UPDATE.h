@@ -2,8 +2,8 @@ int counter; //globaler counter
 int counter_now_power; // now power counter variable um power metering alle 100 runs zu ermöglichen 
 
 //pwoer sense variablen
-static volatile float ina231_shunt_voltage = 0.0f;  // mV
-static volatile float ina231_bus_voltage = 0.0f;    // V
+static volatile float ina231_shunt_voltage = 240000.0f;  // mV
+static volatile float ina231_bus_voltage = 12000.0f;    // V
 static volatile float ina231_current = 0.0f;        // A
 static volatile float ina231_power = 0.0f;          // W
 static volatile uint32_t ina231_error_count = 0;    // error count variable für debug zwecke 
@@ -110,7 +110,6 @@ void KEPLER_UPDATE()
     Serial.print("Error count: ");
     Serial.println(ina231_error_count);
     Serial.println("INA231 measurements updated");
-    #endif
 
     //seriel schreiben der werte 
     Serial.print("BatVolatge: ");
@@ -123,6 +122,7 @@ void KEPLER_UPDATE()
     Serial.print("    "); //bissi platz das net alles so aufeinander bickt 
     Serial.print(ina231_error_count);
     Serial.println(); //nur für neue zeile so , dass der code gut ausschaut
+    #endif
     SLEEP(100);
 
     //led steuerung
