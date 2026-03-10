@@ -17,10 +17,10 @@
 uint8_t SPICAM_Data0 = 0; //this is the trigger for the reading sequence (250 in cam code) 
 uint8_t SPICAM_Data1 = 0; // boolean for if there is a Ball in sight
 uint8_t SPICAM_Data2 = 0; // relative angle to the ball (0-180, 90 is straight ahead, 0 is left, 180 is right)
-uint8_t SPICAM_Data3 = 0; // distance estimate
-uint8_t SPICAM_Data4 = 0; // area MSB
-uint8_t SPICAM_Data5 = 0; // area LSB
-uint8_t SPICAM_Data6 = 0; // elongation
+uint8_t SPICAM_Data3 = 0; // distance MSB in mm
+uint8_t SPICAM_Data4 = 0; // dstance LSB in mm
+uint8_t SPICAM_Data5 = 0; // reserved
+uint8_t SPICAM_Data6 = 0; // reserved
 uint8_t SPICAM_Data7 = 0; // reserved
 
 uint8_t SPI2_Data0 = 0;

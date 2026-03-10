@@ -13,6 +13,21 @@ spi_list = [250, 0, 0, 0, 0, 0, 0, 0]
 spi_data = bytearray(spi_list)
 threshold_index = 0
 
+# Kamera & Objekt Konstanten
+FRAME_W         = 320
+FRAME_H         = 240
+HFOV_DEG        = 47.5   # echter HFOV mit MT9M114 laut Datenblatt
+VFOV_DEG        = 36.6   # echter VFOV
+H_FOV_HALF      = HFOV_DEG / 2.0
+BALL_DIAMETER_MM = 43    # <-- hier Balldurchmesser anpassen
+
+# Brennweite in Pixel (aus HFOV berechnet)
+FOCAL_LEN_PX = (FRAME_W / 2.0) / math.tan(math.radians(H_FOV_HALF))
+# ergibt ~364px für diese Linse
+
+# Maximale sinnvolle Distanz für uint8-Skalierung (alles drüber = 255)
+MAX_DIST_MM = 3000  # 3 Meter
+
 def nss_callback(line):
     global spi, spi_data
     try:
@@ -74,30 +89,32 @@ while True:
 
     # Image Calculations
     if biggestblobarea > 0 and biggestblob is not None:
-        # Relativer Winkel: negativ = Ball links, positiv = Ball rechts
         norm_x  = (biggestblob.cx() - FRAME_W / 2.0) / (FRAME_W / 2.0)
-        angle_h = int(norm_x * H_FOV_HALF)  # ca. -35 bis +35°
+        angle_h = int(norm_x * H_FOV_HALF)  # -23..+23°
 
-        # Distanzschätzung über Blob-Höhe (größerer Blob = näher = höherer Wert)
-        dist_byte = max(0, min(255, int((biggestblob.h() / FRAME_H) * 255)))
+        # Distanz über Pinhole-Formel (blob.w() = Breite des Blobs in Pixeln)
+        blob_w_px = max(1, biggestblob.w())  # Division durch 0 vermeiden
+        dist_mm   = (BALL_DIAMETER_MM * FOCAL_LEN_PX) / blob_w_px
+        dist_mm   = int(max(0, min(MAX_DIST_MM, dist_mm)))
 
-        # Area auf zwei Bytes
-        area_clamped = min(biggestblobarea, 65535)
-        area_hi = (area_clamped >> 8) & 0xFF
-        area_lo =  area_clamped       & 0xFF
+        # Auf uint8 skalieren: 0=weit/kein Ball, 255=sehr nah
+        dist_byte = int((1.0 - dist_mm / MAX_DIST_MM) * 255)
 
-        # Winkel mit Offset +90 als uint8 senden (90 = geradeaus)
+        # Rohe Distanz in mm auf zwei Bytes (besser für MCU-Seite!)
+        dist_hi = (dist_mm >> 8) & 0xFF
+        dist_lo =  dist_mm       & 0xFF
+
         angle_byte = max(0, min(255, angle_h + 90))
 
         spi_list[1] = 1           # Ball erkannt
-        spi_list[2] = angle_byte  # rel. Winkel (MCU: angle_h = spi[2] - 90)
-        spi_list[3] = dist_byte   # Distanzschätzung
-        spi_list[4] = area_hi     # Area MSB
-        spi_list[5] = area_lo     # Area LSB
-        spi_list[6] = max(0, min(255, int(biggestblob.elongation() * 100)))
+        spi_list[2] = angle_byte  # rel. Winkel (MCU: angle = spi[2] - 90)
+        spi_list[3] = dist_hi     # Distanz MSB in mm
+        spi_list[4] = dist_lo     # Distanz LSB in mm
+        spi_list[5] = 0           # reserviert
+        spi_list[6] = 0           # reserviert
         spi_list[7] = 0           # reserviert
 
-        print("Ball: angle={} dist={}".format(angle_h, dist_byte))
+        print("Ball: angle={}° dist={}mm".format(angle_h, dist_mm))
     else:
         spi_list[1] = 0   # kein Ball
         spi_list[2] = 90  # Mitte als Default → MCU rechnet 90-90=0, kein Drift
