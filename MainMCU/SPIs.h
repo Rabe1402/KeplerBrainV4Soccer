@@ -72,3 +72,6 @@ void _SPIs()
     }
   }
 }
+
+
+#fuck git i do not understand vsc code
