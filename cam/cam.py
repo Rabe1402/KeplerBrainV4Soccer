@@ -1,9 +1,32 @@
 import sensor
+import image
+import pyb
 import time
 import math
- 
+
+led_green = pyb.LED(2)  # Green LED on the OpenMV Cam
+led_red = pyb.LED(1)  # Red LED on the OpenMV Cam
+led_blue = pyb.LED(3)  # Blue LED on the OpenMV Cam
+led_ir = pyb.LED(4)  # IR LED on the OpenMV Cam
+
+spi_list = [250, 0, 0, 0, 0, 0, 0, 0]  # SPI data list to send to the microcontroller. The first value is the SPI command, the rest are data values.
+spi_data = bytearray(spi_list)  # Convert the SPI data list to a bytearray for sending.
 threshold_index = 0  # 0 for red
  
+def nss_callback(line):
+    global spi, spi_data
+    try:
+        spi.send(spi_data, timeout=1000)
+        led_green.on()
+        led_red.off()
+    except OSError as err:
+        led_green.off()
+        led_red.on()
+        pass
+ 
+pyb.ExtInt(pyb.Pin("P3"), pyb.ExtInt.IRQ_FALLING, pyb.Pin.PULL_UP, nss_callback)
+
+
 # Color Tracking Thresholds (L Min, L Max, A Min, A Max, B Min, B Max)
 # The below thresholds track in general red/green/blue things. You may wish to tune them...
 thresholds = [
@@ -62,3 +85,22 @@ while True:
             print(str(biggestblob.cx()) + "A" + str(biggestblob.cy()) )
         else:
             print("B")
+
+    #Image Calculations (move as much calculation on to the openmv cam as possible to save time on the microcontroller)
+    
+
+
+    #SPI Data Publishing
+    
+    #spi_list[1] = <some value calculated from the image>
+    #spi_list[2] = <some value calculated from the image>
+    #spi_list[3] = <some value calculated from the image>
+    #spi_list[4] = <some value calculated from the image>
+    #spi_list[5] = <some value calculated from the image>
+    #spi_list[6] = <some value calculated from the image>
+    #spi_list[7] = <some value calculated from the image>
+    spi_data = bytearray(spi_list)  # Update the SPI data bytearray with
+    print(spi_data) # Print the SPI data for debugging purposes. #remove this line in production.
+
+
+    print (clock.fps())  # Print the FPS 
