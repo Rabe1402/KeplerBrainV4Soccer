@@ -104,8 +104,8 @@ void _ground_test()
         WRITE_LCD_TEXT(1,  1, String(fc) + " ");
         WRITE_LCD_TEXT(4,  1, String(fl) + " ");
         WRITE_LCD_TEXT(7,  1, String(fr) + " ");
-        WRITE_LCD_TEXT(10,  1, String(ll) + " ");
-        WRITE_LCD_TEXT(13, 1, String(rr) + " ");
+        WRITE_LCD_TEXT(10,  1, String(lc) + " ");
+        WRITE_LCD_TEXT(13, 1, String(rc) + " ");
 
       break;;
 

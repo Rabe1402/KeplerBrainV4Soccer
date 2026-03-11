@@ -18,6 +18,7 @@ void _imu_read()
   roll = READ_I2C_BNO055_ROLL();
   _log("imu_read", "Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll));
 }
+
 void _log(String name, String message)
 {
   if (debug)
@@ -33,9 +34,8 @@ void _log(String name, String message)
   }
 }
 
-#include "Tests.h" // alle test codes 
 #include "Move.h"
-
+#include "Tests.h" // alle test codes 
 
 
 void setup()
@@ -187,11 +187,11 @@ int smallest_ground_sensor_id(int base)
 
   ground_sensor[0] = fc;
   ground_sensor[1] = fr;
-  ground_sensor[2] = rr;
+  ground_sensor[2] = rc;
   ground_sensor[3] = br;
   ground_sensor[4] = bc;
   ground_sensor[5] = bl;
-  ground_sensor[6] = ll;
+  ground_sensor[6] = lc;
   ground_sensor[7] = fl;
 
 
@@ -212,8 +212,7 @@ void _default(){
   _SPIs();
 
   _log("default", "Done SPIs");
-
-  ground_avg = (fc + fr + rr + br + bc + bl + ll + fl)/8;
+  ground_avg = (fc + fr + rc + br + bc + bl + lc + fl)/8;
   
   smallest_ground_sensor_id(ground_avg);
 

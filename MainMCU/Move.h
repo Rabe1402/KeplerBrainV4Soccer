@@ -1,4 +1,4 @@
-void motors(int Motor1, int Motor2, int Motor3, int Motor4)
+void motors(int Motor1, int Motor2, int Motor3, int Motor4, bool reset)
 {
   _log("move", String(Motor1) + String(Motor2) + String(Motor3) + String(Motor4));
   WRITE_MOTOR(M1, Motor1);
@@ -6,10 +6,13 @@ void motors(int Motor1, int Motor2, int Motor3, int Motor4)
   WRITE_MOTOR(M3, Motor3);
   WRITE_MOTOR(M4, Motor4);
 
-  drive_m1 = 0;
-  drive_m2 = 0;
-  drive_m3 = 0;
-  drive_m4 = 0;
+  if(reset)
+  {
+    drive_m1 = 0;
+    drive_m2 = 0;
+    drive_m3 = 0;
+    drive_m4 = 0;
+  }
 
 }
 
