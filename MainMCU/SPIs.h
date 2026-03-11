@@ -13,24 +13,26 @@
     //if (target <   0) target += 360;
     //if (target >= 360) target -= 360;
 
-#spi Variables: 
-uint8_t SPICAM_Data0 = 0; //this is the trigger for the reading sequence (250 in cam code) 
-uint8_t SPICAM_Data1 = 0; // boolean for if there is a Ball in sight
-uint8_t SPICAM_Data2 = 0; // relative angle to the ball (0-180, 90 is straight ahead, 0 is left, 180 is right)
-uint8_t SPICAM_Data3 = 0; // distance MSB in mm
-uint8_t SPICAM_Data4 = 0; // dstance LSB in mm
-uint8_t SPICAM_Data5 = 0; // reserved
-uint8_t SPICAM_Data6 = 0; // reserved
-uint8_t SPICAM_Data7 = 0; // reserved
+//spi Variables: 
+uint8_t SPICAM_Data0; //this is the trigger for the reading sequence (250 in cam code) 
+uint8_t SPICAM_Data1; // boolean for if there is a Ball in sight
+uint8_t SPICAM_Data2; // relative angle to the ball (0-180, 90 is straight ahead, 0 is left, 180 is right)
+uint8_t SPICAM_Data3; // distance MSB in mm
+uint8_t SPICAM_Data4; // distance LSB in mm
+uint8_t SPICAM_Data5; // reserved
+uint8_t SPICAM_Data6; // reserved
+uint8_t SPICAM_Data7; // reserved
 
-uint8_t SPI2_Data0 = 0;
-uint8_t SPI2_Data1 = 0;
-uint8_t SPI2_Data2 = 0;
-uint8_t SPI2_Data3 = 0;
-uint8_t SPI2_Data4 = 0; 
-uint8_t SPI2_Data5 = 0;
-uint8_t SPI2_Data6 = 0;
-uint8_t SPI2_Data7 = 0;
+  //Variablen bodensensor
+unit8_t fc; // front 
+unit8_t fl; // front left 
+unit8_t fr; // front right 
+unit8_t ll; // left
+unit8_t rr; // right 
+unit8_t bl; // back left
+unit8_t br; // back right
+unit8_t bc; // back back 
+
 
 void _SPIs()
 {
@@ -42,36 +44,33 @@ void _SPIs()
  
   if(SPICAM_Data0.transfer(1) == 250) #change this number in BOTH codes when 250 coud be one of the other 7 numbers. this number is here as indcation to start the data reader
   { 
-    SPICAM_Data1 = spi_cam.transfer(0);
-    SPICAM_Data2 = spi_cam.transfer(0);
-    SPICAM_Data3 = spi_cam.transfer(0);
-    SPICAM_Data4 = spi_cam.transfer(0);
-    SPICAM_Data5 = spi_cam.transfer(0);
-    SPICAM_Data6 = spi_cam.transfer(0);
-    SPICAM_Data7 = spi_cam.transfer(0);
+    SPICAM_Data1 = spi_cam.transfer(0XFF);
+    SPICAM_Data2 = spi_cam.transfer(0XFF);
+    SPICAM_Data3 = spi_cam.transfer(0XFF);
+    SPICAM_Data4 = spi_cam.transfer(0XFF);
+    SPICAM_Data5 = spi_cam.transfer(0XFF);
+    SPICAM_Data6 = spi_cam.transfer(0XFF);
+    SPICAM_Data7 = spi_cam.transfer(0XFF);
   }
  
   digitalWrite(SPICAM, HIGH);
  
   // read 8 Bytes from OpenMV END
  
-    // read 8 Bytes from Ground Sensors BEGIN
 
-    digitalWrite(SPI2, LOW);
-    delay(1);
+	digitalWrite(SPI2, LOW);
+ 	if(spi.transfer(0XFF) == 250)
+ 	{
+		ff = spi.transfer(0XFF); // front 
+		fl = spi.transfer(0XFF); // front left 
+		fr = spi.transfer(0XFF); // front right 
+		ll = spi.transfer(0XFF); // left
+		rr = spi.transfer(0XFF); // right 
+		bl = spi.transfer(0XFF); // back left
+		br = spi.transfer(0XFF); // back right
+		bc = spi.transfer(0XFF); // back back 
+	}
+	
+	digitalWrite(SPI2, HIGH);
 
-    if(SPI2_Data0.transfer(1) == 250) #change this number in BOTH codes when 250 coud be one of the other 7 numbers. this number is here as indcation to start the data reader
-    { 
-      SPI2_Data1 = spi.transfer(0);
-      SPI2_Data2 = spi.transfer(0);
-      SPI2_Data3 = spi.transfer(0);
-      SPI2_Data4 = spi.transfer(0);
-      SPI2_Data5 = spi.transfer(0);
-      SPI2_Data6 = spi.transfer(0);
-      SPI2_Data7 = spi.transfer(0);
-    }
-  }
 }
-
-
-#fuck git i do not understand vsc code
