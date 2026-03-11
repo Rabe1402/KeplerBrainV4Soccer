@@ -1,5 +1,4 @@
 
-
 //sonstige 
 int serial_baud = 115200;
 
@@ -51,15 +50,6 @@ int drive_base = 10; // Basisgeschwindigkeit
 float yaw_direction = 20; // Ziel-Yaw-Wert
 float yaw_difference = 0; // yaw difference zum anfahren an einen bestimmten imu wert 
 
-//spi1 (bodensens)
-uint8_t fc;
-uint8_t fl;
-uint8_t fr;
-uint8_t ll;
-uint8_t rr;
-uint8_t bl;
-uint8_t br;
-uint8_t bc;
 
 // Motoren 
 int drive_m1;

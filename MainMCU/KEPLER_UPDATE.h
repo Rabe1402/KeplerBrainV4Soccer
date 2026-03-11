@@ -11,6 +11,8 @@ static volatile uint32_t ina231_error_count = 0;    // error count variable für
 void KEPLER_UPDATE()
 {
   counter++;  // kepler update counter um stetige messungen wie powersens zu ermöglichen 
+
+
   // power redaing und led writing alle 1000 mal 
   if (counter = counter_now_power + 1000) 
   {
@@ -148,6 +150,10 @@ void KEPLER_UPDATE()
       WRITE_LED(L1,0);
       SLEEP(399);
     }
+
+    //POWER READ END
+
+    
 
     counter_now_power = counter;  //counter schaltung 
   }

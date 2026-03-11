@@ -1,6 +1,30 @@
-// alle spi übertragungen der anderen stm32 (e.g. boden; "abstand"; infrarot)  
+#include "../shared/KeplerBRAIN_V4.h"
+//here are all the spi connections to the main mcu. 
+//This file is included in the main mcu code.
+//The spi communication is only used to recieve information
+//There are four SPI ports on the mainboard, SPICAM, SPI1, SPI2, and SPI3.
+//SPICAM is used to read camera Data.
+//SPI2 is used to read the Ground sensors 
+
+//Example für Winkel von Kamera zurück rechnen. 
+    //uint8_t rel_angle  = (int8_t)(SPICAM_Data2 - 90);  // -35..+35°
+    //float  target     = imu_heading + rel_angle;
+
+    //if (target <   0) target += 360;
+    //if (target >= 360) target -= 360;
+
+//spi Variables: 
+uint8_t SPICAM_Data0; //this is the trigger for the reading sequence (250 in cam code) 
+uint8_t SPICAM_Data1; // boolean for if there is a Ball in sight
+uint8_t SPICAM_Data2; // relative angle to the ball (0-180, 90 is straight ahead, 0 is left, 180 is right)
+uint8_t SPICAM_Data3; // distance MSB in mm
+uint8_t SPICAM_Data4; // distance LSB in mm
+uint8_t SPICAM_Data5; // reserved
+uint8_t SPICAM_Data6; // reserved
+uint8_t SPICAM_Data7; // reserved
 
 //Variablen bodensensor
+
 unit8_t fc; // front 
 unit8_t fl; // front left 
 unit8_t fr; // front right 
@@ -10,23 +34,30 @@ unit8_t bl; // back left
 unit8_t br; // back right
 unit8_t bc; // back back 
 
-//variable fpr inrarot normal 
-unit8_t isN;
-
-//varablen für infrarot debug1 
-unit8_t is1;
-unit8_t is2;
-unit8_t is3;
-unit8_t is4;
-unit8_t is5:
-unit8_t is6;
-unit8_t is7;
-unit8_t is8;
-
 
 void _SPIs()
-
-{   // spi übertageung von den boden sensoren 8 bytes. jeweil der sensor an der boden platte. wie die werte aussehen kann man auf der lbotics website sehen. 
+{
+  
+  // read 8 Bytes from OpenMV BEGIN
+ 
+  digitalWrite(SPICAM, LOW);
+  delay(1);
+ 
+  if(SPICAM_Data0.transfer(1) == 250) #change this number in BOTH codes when 250 coud be one of the other 7 numbers. this number is here as indcation to start the data reader
+  { 
+    SPICAM_Data1 = spi_cam.transfer(0XFF);
+    SPICAM_Data2 = spi_cam.transfer(0XFF);
+    SPICAM_Data3 = spi_cam.transfer(0XFF);
+    SPICAM_Data4 = spi_cam.transfer(0XFF);
+    SPICAM_Data5 = spi_cam.transfer(0XFF);
+    SPICAM_Data6 = spi_cam.transfer(0XFF);
+    SPICAM_Data7 = spi_cam.transfer(0XFF);
+  }
+ 
+  digitalWrite(SPICAM, HIGH);
+ 
+  // read 8 Bytes from OpenMV END
+ 
 
 	digitalWrite(SPI2, LOW);
  	if(spi.transfer(0XFF) == 250)
@@ -42,27 +73,5 @@ void _SPIs()
 	}
 	
 	digitalWrite(SPI2, HIGH);
-
-	// spi übertragung von dem infrarot Sensorkreis
-	digitalWrite(SPI1, LOW);
-	if(spi.transfar(0XFF) == 250)
-	{	
-		#ifndef InfrarotDebug
-		isN = spi.transfer(0XFF); // number of the sensor with the loweest number that still has a signal
-		#endif
-		//debug mode for infrared sens. for further information look at the infraMCU code... 
-		#ifdef InfrarotDebug 
-		is1 = spi.transfer(0XFF);
-		is2 = spi.transfer(0XFF);
-		is3 = spi.transfer(0XFF);
-		is4 = spi.transfer(0XFF);
-		is5 = spi.transfer(0XFF);
-		is6 = spi.transfer(0XFF);
-		is7 = spi.transfer(0XFF);
-		is8 = spi.transfer(0XFF);
-		#endif
-
-	//der abstand sensor ist immoment gar nicht eingebaut desswegen fehlt auch der code... 
-	//aber er wäre HIER 
-		
+    
 }
