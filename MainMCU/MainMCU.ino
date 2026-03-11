@@ -60,7 +60,7 @@ void setup()
 void loop()
 {
   KEPLER_UPDATE(); //um hintergrund aktionen automatisch auszuführen 
-  _log("void loop", "run is " + String(run));
+  //_log("void loop", "run is " + String(run));
   if (!run)
   {
     if (READ_BUTTON_CLOSED(B1) == 1 && selection_cursor > 0){selection_cursor--;WRITE_LCD_TEXT(1, 2, "o");}
@@ -92,7 +92,7 @@ void loop()
       case 0:
         while (true)
         {
-          KEPLER_UPDATE();
+          //KEPLER_UPDATE();
           _default();
         }
 
@@ -178,9 +178,36 @@ void loop()
   else{WRITE_LCD_TEXT(1, 2, "-  ()   +");}  
 }
 
-int check_ground_error(int base)
+int check_ground_error_min(int base)
 {
-  return std::max( { abs(fl - base), abs(fc - base), abs(fr - base), abs(rr - base), abs(br - base), abs(bc - base), abs(bl - base), abs(ll - base) } );
+  return std::min( { fl - base, fc - base, fr - base, rr - base, br - base, bc - base, bl - base, ll - base } );
+}
+
+int smallest_ground_sensor_id(int base)
+{
+  int id = 255;
+  ground_smallest = 1023;
+
+  ground_sensor[0] = fc;
+  ground_sensor[1] = fr;
+  ground_sensor[2] = rr;
+  ground_sensor[3] = br;
+  ground_sensor[4] = bc;
+  ground_sensor[5] = bl;
+  ground_sensor[6] = ll;
+  ground_sensor[7] = fl;
+
+
+  for (int i = 0; i < 8; i++)
+  {
+    if ( ground_sensor[i] - base < ground_smallest ) {
+       ground_smallest = ground_sensor[i] - base;
+       id = i; 
+    }
+
+  }
+
+  return id;
 }
 
 int check_ground_sensor(int base, int threshold)
@@ -299,99 +326,35 @@ void _default(){
   _imu_read();
   _SPIs();
 
-  //int groundsenstime = check_ground_error(line_base);
-  //_log("default groundsenstime", String(groudsenstime));
-  //int groundsenstime = 0;
-  /*if (groundsenstime > line_threshold || groundtimer < 100)
+  _log("default", "Done SPIs");
+
+  ground_avg = (fc + fr + rr + br + bc + bl + ll + fl)/8;
+  
+  smallest_ground_sensor_id(ground_avg);
+
+  _log("ground smallest", String(ground_smallest));
+  
+  
+
+  if (ground_smallest < -2)
   {
-    if (groundtimer <= 0)
-    {
-      groundtimer = 100;
-    }else
-    {
-      groundtimer--;
-    }
-    drive_m1 = 0;
-    drive_m2 = 0;
-    drive_m3 = 0;
-    drive_m4 = 0;
-
-
-    int sensor = check_ground_sensor(line_base, line_threshold);
-    move_angle( (sensor), 70);
-    //_log("default sensor", String(sensor));
-    //move_angle( (check_ground_sensor(line_threshold, 1) * 45) - 225, std::min(target_speed + 30, 100) );
-
-    delay(500);
-
-    motors(0, 0, 0, 0);
-    //motors(-drive_m1, -drive_m2, -drive_m3, -drive_m4);
+    if(!reverse) motors(-drive_m1, -drive_m2, -drive_m3, -drive_m4, true);
+    //rotate_to(0, 2, 10, 0.000004, 0.00000006, 7);
+    reverse = true;
+    WRITE_LCD_TEXT(1, 1, "STOOOP");
+    //delay(1000);
     return;
-  }*/
-
-  //_log("default", "triggered");
-
-  move_angle_correction(-45, 30, 1);
-  rotate_to(0, 2, 30, 0.000004, 0.00000006, 7); // good for moving
-  //rotate_to(0, 2, 10, 0.000004, 0.00000006, 7); good for static
-  //rotate_to(0, 5, 0.00005, 7);
-
-  //if ()
-
-
-  
-  motors(drive_m1, drive_m2, drive_m3, drive_m4);
-  
-
-}
-
-void _default_old()//  _imu_read();
-{
-  unsigned long now = millis();
-  float dt = (now - last_time) / 1000.0; // Zeitdelta in Sekunden
-  if (dt <= 0) dt = 0.001; // Verhindern von Division durch Null
-  last_time = now;
-
-  // Yaw-Wert ins History-Array einfügen
-  yaw_history[history_index] = yaw;
-  history_index = (history_index + 1) % 5; // Zyklisch durch das Array
-  if (history_index == 0) history_filled = true; // Array ist voll nach 5 Werten
-
-  // Berechne den gleitenden Durchschnitt
-  float yaw_average = 0;
-  int count = history_filled ? 5 : history_index; // Anzahl der gültigen Werte
-  if (count > 0) { // Vermeide Division durch Null
-    for (int i = 0; i < count; i++) {
-      yaw_average += yaw_history[i];
-    }
-    yaw_average /= count;
+    //motors(0, 0, 0, 0, true);
   }
 
-  // Berechne den Fehler (mit Wrap-around für Winkel, 0-359 Grad)
-  float error = yaw_direction - yaw_average;
-  yaw_difference = fmod(error + 180, 360) - 180; // Normalisiere auf -180 bis 180 für kürzeste Drehung
+  reverse = false;
 
-  // Motorsteuerung
-  drive_m1 = drive_base - yaw_difference;
-  drive_m2 = drive_base + yaw_difference;
-  drive_m3 = drive_base + yaw_difference;
-  drive_m4 = drive_base - yaw_difference;
+  motors(drive_m1, drive_m2, drive_m3, drive_m4, true);
 
-  // Begrenze die Motorwerte
-  drive_m1 = constrain(drive_m1, -20, 20);
-  drive_m2 = constrain(drive_m2, -20, 20);
-  drive_m3 = constrain(drive_m3, -20, 20);
-  drive_m4 = constrain(drive_m4, -20, 20);
+  rotate_to(0, 2, 10, 0.000004, 0.00000006, 7);
+  //move_angle_correction(45, 40, 1);
 
-  // Schreibe die Motorwerte
-  WRITE_MOTOR(M1, drive_m1);
-  WRITE_MOTOR(M2, drive_m2);
-  WRITE_MOTOR(M3, -drive_m3);
-  WRITE_MOTOR(M4, -drive_m4);
-
-  // LCD-Ausgabe
-  WRITE_LCD_TEXT(1, 1, String(yaw) + "   ");
-  WRITE_LCD_TEXT(1, 2, String(yaw_direction));
+  
 }
 
   // alle spi übertragungen der anderen stm32 (e.g. boden; abstand; infrarot)  

@@ -64,7 +64,7 @@ void WRITE_I2C_INA231_INIT(void)
   if (i2c.endTransmission() != 0) {
     ina231_error_count++;
     #ifdef INA231_DEBUG
-    Serial.println("INA231 Config write successful");
+    Serial.println("INA231 Config write (un?) successful");
     #endif
   } else {
     #ifdef INA231_DEBUG
@@ -87,6 +87,22 @@ void WRITE_I2C_INA231_INIT(void)
     #ifdef INA231_DEBUG
     Serial.println("INA231 Calibration write successful");
     #endif
+  }
+
+  if (ina231_error_count > 0)
+  {
+    while(!READ_BUTTON_CLOSED(B2))
+    {
+      WRITE_LCD_TEXT(1, 1, "Hey, error ina23");
+      WRITE_LCD_TEXT(1, 2, "errorcount is !0");
+      delay(3000);
+      WRITE_LCD_TEXT(1, 1, "Eroor count = "  + String(ina231_error_count) + "   ");
+      WRITE_LCD_TEXT(1, 2, "Continue? (B2)  ");
+      delay(3000);
+    }
+    WRITE_LCD_CLEAR();
+    WRITE_LCD_TEXT(1, 2, "Continuining! OK");
+    delay(1000);
   }
 
 }

@@ -179,7 +179,7 @@ void _batt_test()
   {
     old_time = millis();
     
-    /*switch (mode)
+    switch (mode)
     {
       case 0:
         WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_BUS_VOLTAGE()) + "mV         ");
@@ -196,7 +196,7 @@ void _batt_test()
       case 3:
         WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_POWER()) + "idk                  ");
       break;;
-    }*/
+    }
     
 
     if (!full_speed){delay(100);}

@@ -9,6 +9,12 @@ bool run = false;
 
 int error = 0;
 
+int ground = 0;
+int ground_avg = 254;
+int ground_sensor[8]  = {0, 0, 0, 0, 0, 0, 0, 0};
+int ground_smallest = 1023;
+bool reverse = false;
+
 //Default
 
 int target_angle = 45;
