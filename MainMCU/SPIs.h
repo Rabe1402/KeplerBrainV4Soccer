@@ -1,4 +1,3 @@
-//#include "../shared/KeplerBRAIN_V4.h"
 //here are all the spi sonnections to the main mcu. 
 //This file is included in the main mcu code.
 //The spi communication is only used to recieve information
