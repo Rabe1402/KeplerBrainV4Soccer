@@ -1,4 +1,3 @@
-#include "../shared/KeplerBRAIN_V4.h"
 //here are all the spi sonnections to the main mcu. 
 //This file is included in the main mcu code.
 //The spi communication is only used to recieve information
@@ -24,25 +23,25 @@ uint8_t SPICAM_Data6; // reserved
 uint8_t SPICAM_Data7; // reserved
 
   //Variablen bodensensor
-unit8_t fc; // front 
-unit8_t fl; // front left 
-unit8_t fr; // front right 
-unit8_t ll; // left
-unit8_t rr; // right 
-unit8_t bl; // back left
-unit8_t br; // back right
-unit8_t bc; // back back 
+uint8_t fc; // front 
+uint8_t fl; // front left 
+uint8_t fr; // front right 
+uint8_t lc; // left
+uint8_t rc; // right 
+uint8_t bl; // back left
+uint8_t br; // back right
+uint8_t bc; // back back 
 
 
 void _SPIs()
 {
-  {
+  
   // read 8 Bytes from OpenMV BEGIN
  
   digitalWrite(SPICAM, LOW);
   delay(1);
  
-  if(SPICAM_Data0.transfer(1) == 250) #change this number in BOTH codes when 250 coud be one of the other 7 numbers. this number is here as indcation to start the data reader
+  if(spi_cam.transfer(1) == 250) //change this number in BOTH codes when 250 coud be one of the other 7 numbers. this number is here as indcation to start the data reader
   { 
     SPICAM_Data1 = spi_cam.transfer(0XFF);
     SPICAM_Data2 = spi_cam.transfer(0XFF);
@@ -61,11 +60,11 @@ void _SPIs()
 	digitalWrite(SPI2, LOW);
  	if(spi.transfer(0XFF) == 250)
  	{
-		ff = spi.transfer(0XFF); // front 
+		fc = spi.transfer(0XFF); // front 
 		fl = spi.transfer(0XFF); // front left 
 		fr = spi.transfer(0XFF); // front right 
-		ll = spi.transfer(0XFF); // left
-		rr = spi.transfer(0XFF); // right 
+		lc = spi.transfer(0XFF); // left
+		rc = spi.transfer(0XFF); // right 
 		bl = spi.transfer(0XFF); // back left
 		br = spi.transfer(0XFF); // back right
 		bc = spi.transfer(0XFF); // back back 
