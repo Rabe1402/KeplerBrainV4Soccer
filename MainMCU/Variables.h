@@ -28,6 +28,8 @@ int line_last;
 int line_base      = 244;
 int line_threshold = 3;
 
+int ball_target = 0;
+
 //Debug
 bool debug = true;
 bool debug_over_serial = true;

@@ -2,11 +2,11 @@
 #include "../shared/KeplerBRAIN_V4.h"
 #include "KEPLER_UPDATE.h" // wird in echte header migrirt wenn randl gut findet 
 #include "powersense.h" //powersensor read 
-#include "SPIs.h" //alle spi übertrageungen
 
 #include <vector>
 #include <iostream>
 #include <math.h>
+#include "data-calculation.h" //alle datenberechnungen wie winkel zu ball usw.
 
 #include "Variables.h" //alle variablen usw. sind in dieser datei, um diese ein wenig aufzuräumen 
 
@@ -256,17 +256,32 @@ void _default(){
     //motors(0, 0, 0, 0, true);
   }*/
 
-  reverse = false;
+  //reverse = false;
 
   motors(drive_m1, drive_m2, drive_m3, drive_m4, true);
 
   if(SPICAM_Data1 == 0)
   {
     //rotate to dir where ball last seen (future plan)?
-    rotate(15);
-  }
+    rotate(10);
+    reverse = false;
+
+  }else
   //move_angle_correction(45, 40, 1);
   //rotate_to(0, 2, 10, 0.000004, 0.00000006, 7);
-
+  {
+    //move to ball
+    if(!reverse) {
+    rotate(-50);
+    reverse = true;
+    delay(672);
+    }
+    rotate(_cam_data_calculation() / 3);
+    ball_target = yaw + _cam_data_calculation();
+    WRITE_LCD_TEXT(1,1, String(ball_target) + "   ");
+    rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
   
+    //move_angle(_cam_data_calculation(), 40);
+  }
+
 }

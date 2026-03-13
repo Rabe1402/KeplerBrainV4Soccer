@@ -45,18 +45,54 @@ void rotate_to(int target, int precision, int precision_switch,  float speed, fl
     return;
   }
 
+  out = error * error * error;
   if (abs(error) < precision_switch)
   {
     //use precise speed
-    out = error * error * error;
     out *= speed_precise;
   }else
   {
     //use general speed
-    out = error * error * error;
     out *= speed;
     out += base_speed;
   }
+  
+
+  set_motors(out, out, out, out);
+}
+
+void rotate_to_quadratic(int target, int precision, int precision_switch,  float speed, float speed_precise, int base_speed)
+{
+//  _imu_read();
+  int out;
+  error = yaw - target;
+
+  if (error >= 180) {
+    error = -(360 - error);
+    base_speed = -base_speed;
+  //  _log("rotate to 2", String(error));
+  }
+
+  _log("rotate to", String(error) + " " + String(precision));
+
+  if (abs(error) < precision)
+  {
+    return;
+  }
+
+  out = error * error;
+  if (abs(error) < precision_switch)
+  {
+    //use precise speed
+    out *= speed_precise;
+  }else
+  {
+    //use general speed
+    out *= speed;
+    out += base_speed;
+  }
+
+  if ( error < 0) out = -out;
   
 
   set_motors(out, out, out, out);
@@ -66,6 +102,8 @@ void rotate(int speed)
 {
   set_motors(speed, speed, speed, speed);
 }
+
+
 
 void move_angle(int target, int Speed)
 {
@@ -105,3 +143,4 @@ void move_angle_correction(int target, int Speed, int angle_precision)
 
   set_motors(YMotors, -XMotors, -YMotors, XMotors);
 }
+

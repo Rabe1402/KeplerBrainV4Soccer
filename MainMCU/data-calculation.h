@@ -6,8 +6,8 @@
 //SPI2 is used to read the Ground sensors 
 
 //Example für Winkel von Kamera zurück rechnen. 
-    //uint8_t rel_angle  = (int8_t)(SPICAM_Data2 - 90);  // -35..+35°
-    //float  target     = imu_heading + rel_angle;
+    //uint8_t rel_ball_angle  = (int8_t)(SPICAM_Data2 - 90);  // -35..+35°
+    //float  target     = imu_heading + rel_ball_angle;
 
     //if (target <   0) target += 360;
     //if (target >= 360) target -= 360;
@@ -73,4 +73,9 @@ void _SPIs()
 	
 	digitalWrite(SPI2, HIGH);
 
+}
+
+int _cam_data_calculation() 
+{
+    return (int8_t)(SPICAM_Data2 - 90);  /* -35..+35°*/ 
 }
