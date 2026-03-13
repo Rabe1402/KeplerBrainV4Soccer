@@ -62,6 +62,11 @@ void rotate_to(int target, int precision, int precision_switch,  float speed, fl
   set_motors(out, out, out, out);
 }
 
+void rotate(int speed)
+{
+  set_motors(speed, speed, speed, speed);
+}
+
 void move_angle(int target, int Speed)
 {
   // Y 1,3; cos(target - 45)

@@ -179,7 +179,7 @@ void _batt_test()
   {
     old_time = millis();
     
-    /*switch (mode)
+    switch (mode)
     {
       case 0:
         WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_BUS_VOLTAGE()) + "mV         ");
@@ -196,7 +196,7 @@ void _batt_test()
       case 3:
         WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_POWER()) + "idk                  ");
       break;;
-    }*/
+    }
     
 
     if (!full_speed){delay(100);}
@@ -213,7 +213,7 @@ void _batt_test()
       }
       delay(1000);
 
-      WRITE_LCD_TEXT(3, 2, "DT: " + String(millis() - old_time));
+      WRITE_LCD_TEXT(3, 2, "DT: " + String(millis() - old_time) + "     ");
     }
     if (READ_BUTTON_CLOSED(B2) == 1)
     {
@@ -230,6 +230,109 @@ void _batt_test()
     }
 
     WRITE_LCD_TEXT(3, 2, "DT: " + String(millis() - old_time) + "                  ");
+  }
+
+  WRITE_LCD_TEXT(1, 2, "o");
+  while(READ_BUTTON_CLOSED(B2) == 1){}
+  WRITE_LCD_CLEAR();
+}
+
+void _camera_test()
+{
+  WRITE_LCD_TEXT(1, 2, "x       ");
+
+  int old_time;
+  bool full_speed = false;
+  int mode = 0;
+ 
+
+  while(READ_BUTTON_CLOSED(B1) != 1)
+  {
+    old_time = millis();
+
+    _SPIs();
+    
+    switch (mode)
+    {
+      case 0:
+        WRITE_LCD_TEXT(1,  1, String(SPICAM_Data0) + "        ");
+      break;;
+
+      case 1:
+        WRITE_LCD_TEXT(1,  1, String(SPICAM_Data1) + "        ");
+      break;;
+
+      case 2:
+        WRITE_LCD_TEXT(1,  1, String(SPICAM_Data2) + "        ");
+      break;;
+
+      case 3:
+        WRITE_LCD_TEXT(1,  1, String(SPICAM_Data3) + "        ");
+      break;;
+
+      case 4:
+        WRITE_LCD_TEXT(1,  1, String(SPICAM_Data4) + "        ");
+      break;;
+      
+    }
+    
+    if (!full_speed){delay(100);}
+    if (READ_BUTTON_CLOSED(B3) == 1)
+    {
+          
+
+      full_speed = !full_speed;
+      if (full_speed)
+      {
+        WRITE_LCD_TEXT(11, 2, "fs:on ");
+      }
+      else
+      {
+        WRITE_LCD_TEXT(11, 2, "fs:off");
+      }
+      delay(1000);
+
+    }
+    if (READ_BUTTON_CLOSED(B2) == 1)
+    {
+      mode++;
+      if (mode > 4)
+      {
+        mode = 0;
+      }
+
+      WRITE_LCD_TEXT(1, 1, "              ");
+
+      switch (mode)
+      {
+        case 0:
+          WRITE_LCD_TEXT(1, 2, "0: trigger      ");
+        break;;
+  
+        case 1:
+          WRITE_LCD_TEXT(1, 2, "1: Ball in sight");
+        break;;
+
+        case 2:
+          WRITE_LCD_TEXT(1, 2, "2: ang to Ball  ");
+        break;;
+
+        case 3:
+          WRITE_LCD_TEXT(1, 2, "3: MSB in mm    ");
+        break;;
+
+        case 4:
+          WRITE_LCD_TEXT(1, 2, "4: LSB in mm    ");
+        break;;
+
+        
+      }
+
+      delay(1000);
+
+
+    }
+
   }
 
   WRITE_LCD_TEXT(1, 2, "o");

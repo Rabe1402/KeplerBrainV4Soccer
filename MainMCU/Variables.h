@@ -6,6 +6,8 @@ int selection_cursor = 0;
 int selection = 0;
 bool run = false;
 
+int current_state = 0;
+
 int error = 0;
 
 int ground_sensor[7];

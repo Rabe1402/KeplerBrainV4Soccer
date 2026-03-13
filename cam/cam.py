@@ -9,6 +9,7 @@ led_red = pyb.LED(1)
 led_blue = pyb.LED(3)
 led_ir = pyb.LED(4)
 
+spi = pyb.SPI(2, pyb.SPI.SLAVE, polarity=0, phase=0)
 spi_list = [250, 0, 0, 0, 0, 0, 0, 0]
 spi_data = bytearray(spi_list)
 threshold_index = 0
@@ -106,6 +107,7 @@ while True:
 
         angle_byte = max(0, min(255, angle_h + 90))
 
+        spi_list[0] = 250
         spi_list[1] = 1           # Ball erkannt
         spi_list[2] = angle_byte  # rel. Winkel (MCU: angle = spi[2] - 90)
         spi_list[3] = dist_hi     # Distanz MSB in mm
@@ -116,6 +118,7 @@ while True:
 
         print("Ball: angle={}° dist={}mm".format(angle_h, dist_mm))
     else:
+        spi_list[0] = 250
         spi_list[1] = 0   # kein Ball
         spi_list[2] = 90  # Mitte als Default → MCU rechnet 90-90=0, kein Drift
         spi_list[3] = 0
@@ -130,4 +133,3 @@ while True:
     spi_data = bytearray(spi_list)
 
     print(clock.fps())
-    

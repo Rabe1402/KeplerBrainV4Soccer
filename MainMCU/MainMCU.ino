@@ -168,9 +168,34 @@ void loop()
 
 
       case 8:
-
+        _camera_test();
       break;;   
 
+      case 9:
+
+        digitalWrite(SPICAM, LOW);
+        delay(1);
+
+        if(spi_cam.transfer(1) == 250)
+        { 
+          SPICAM_Data1 = spi_cam.transfer(0);
+          SPICAM_Data2 = spi_cam.transfer(0);
+          SPICAM_Data3 = spi_cam.transfer(0);
+          SPICAM_Data4 = spi_cam.transfer(0);
+          SPICAM_Data5 = spi_cam.transfer(0);
+          SPICAM_Data6 = spi_cam.transfer(0);
+          SPICAM_Data7 = spi_cam.transfer(0);
+        }
+
+        digitalWrite(SPICAM, HIGH);
+
+        // read 8 Bytes from OpenMV END
+
+        WRITE_LCD_TEXT(1, 1, String(SPICAM_Data1)+" "+String(SPICAM_Data2)+" "+String(SPICAM_Data3)+" "+String(SPICAM_Data4));
+        WRITE_LCD_TEXT(1, 2, String(SPICAM_Data5)+" "+String(SPICAM_Data6)+" "+String(SPICAM_Data7));
+      
+        delay(1000);
+      break;;
     }
 
   }
@@ -220,7 +245,7 @@ void _default(){
   
   
 
-  if (ground_smallest < -2)
+  /*if (ground_smallest < -2)
   {
     if(!reverse) motors(-drive_m1, -drive_m2, -drive_m3, -drive_m4, true);
     //rotate_to(0, 2, 10, 0.000004, 0.00000006, 7);
@@ -229,14 +254,19 @@ void _default(){
     //delay(1000);
     return;
     //motors(0, 0, 0, 0, true);
-  }
+  }*/
 
   reverse = false;
 
   motors(drive_m1, drive_m2, drive_m3, drive_m4, true);
 
-  rotate_to(0, 2, 10, 0.000004, 0.00000006, 7);
+  if(SPICAM_Data1 == 0)
+  {
+    //rotate to dir where ball last seen (future plan)?
+    rotate(15);
+  }
   //move_angle_correction(45, 40, 1);
+  //rotate_to(0, 2, 10, 0.000004, 0.00000006, 7);
 
   
 }
