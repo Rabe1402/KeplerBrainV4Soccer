@@ -14,7 +14,7 @@ void KEPLER_UPDATE()
 
 
   // power redaing und led writing alle 1000 mal 
-  if (counter = counter_now_power + 1000) 
+  if (counter == counter_now_power + 1000) 
   {
     #ifdef INA231_DEBUG
     Serial.println("Updating INA231 measurements...");
