@@ -121,8 +121,8 @@ void move_angle_correction(int target, int Speed, int angle_precision)
   //  _imu_read();
 
   error = yaw - target;
-  if (! error < angle_precision)
-  {
+  if ( !(abs(error) < angle_precision) )
+  { 
 
     _log("move angle correction", String(error));
 
