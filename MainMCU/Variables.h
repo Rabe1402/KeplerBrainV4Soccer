@@ -10,7 +10,7 @@ int current_state = 0;
 
 int error = 0;
 
-int ground_sensor[7];
+int ground_sensor[8];
 
 int ground_smallest; 
 bool reverse = false;
