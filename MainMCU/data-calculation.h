@@ -39,7 +39,7 @@ void _SPIs()
   // read 8 Bytes from OpenMV BEGIN
  
   digitalWrite(SPICAM, LOW);
-  delay(1);
+  delayMicroseconds(10);
 
   if(spi_cam.transfer(1) == 250)//change this number in BOTH codes when 250 coud be one of the other 7 numbers. this number is here as indcation to start the data reader
   { 
@@ -59,6 +59,8 @@ void _SPIs()
  
 
 	digitalWrite(SPI2, LOW);
+  delayMicroseconds(10);
+
  	if(spi.transfer(0XFF) == 250)
  	{
 		fc = spi.transfer(0XFF); // front 
