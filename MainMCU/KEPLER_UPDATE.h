@@ -123,7 +123,6 @@ void KEPLER_UPDATE()
     Serial.print(ina231_error_count);
     Serial.println(); //nur für neue zeile so , dass der code gut ausschaut
     #endif
-    SLEEP(100);
 
     //led steuerung
     if (ina231_bus_voltage > 12000)
