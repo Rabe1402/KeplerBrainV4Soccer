@@ -101,6 +101,7 @@ void loop()
       break;;
 
       case 1:
+        KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "Motor Test");
         delay(700);
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
@@ -112,6 +113,7 @@ void loop()
       break;;
 
       case 2:
+        KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "IMU Test");
         delay(700);
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
@@ -123,6 +125,7 @@ void loop()
       break;;
 
       case 3:
+        KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "Ground Test");
         delay(700);
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
@@ -134,6 +137,7 @@ void loop()
       break;;
 
       case 4:
+        KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "Show BATT info");
         delay(700);
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
@@ -145,6 +149,7 @@ void loop()
 
 
       case 5:
+        KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "IMU READ"); 
         _SPIs(); 
         _imu_read();
@@ -153,6 +158,7 @@ void loop()
 
 
       case 6:
+        KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "BODEN READ"); 
         delay(700);
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
@@ -162,17 +168,19 @@ void loop()
 
 
       case 7:
+        KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "DUMP LOG"); 
 
       break;;
 
 
       case 8:
+        KEPLER_UPDATE();
         _camera_test();
       break;;   
 
       case 9:
-
+        KEPLER_UPDATE();
         digitalWrite(SPICAM, LOW);
         delay(1);
 
