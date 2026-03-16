@@ -286,7 +286,7 @@ void _default(){
     }
     rotate(_cam_data_calculation() / 3);
     ball_target = yaw + _cam_data_calculation();
-    WRITE_LCD_TEXT(1,1, String(ball_target) + "   ");
+    WRITE_LCD_TEXT(1,1, String(ball_target) + " " + String(_cam_data_calculation()));
     rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
   
     //move_angle(_cam_data_calculation(), 40);
