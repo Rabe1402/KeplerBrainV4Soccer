@@ -1,5 +1,5 @@
 int counter; //globaler counter 
-int counter_now_power; // now power counter variable um power metering alle 100 runs zu ermöglichen 
+int counter_now_power = 0; // now power counter variable um power metering alle 100 runs zu ermöglichen 
 
 //pwoer sense variablen
 static volatile float ina231_shunt_voltage = 240000.0f;  // mV
