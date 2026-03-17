@@ -60,7 +60,7 @@ void loop()
   {
     if (READ_BUTTON_CLOSED(B1) == 1 && selection_cursor > 0){selection_cursor--;WRITE_LCD_TEXT(1, 2, "o");}
     if (READ_BUTTON_CLOSED(B3) == 1 && selection_cursor < 10){selection_cursor++;WRITE_LCD_TEXT(9, 2, "o");}
-    delay(1);
+    delay(100);
 
     //Display
     WRITE_LCD_TEXT(1, 1, String(selection_cursor) + "              ");
