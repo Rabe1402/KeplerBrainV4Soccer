@@ -108,25 +108,17 @@ while True:
 
         angle_byte = max(0, min(255, angle_h + 90))
 
-        spi_list[0] = 250
         spi_list[1] = 1           # Ball erkannt
         spi_list[2] = angle_byte  # rel. Winkel (MCU: angle = spi[2] - 90)
         spi_list[3] = dist_hi     # Distanz MSB in mm
         spi_list[4] = dist_lo     # Distanz LSB in mm
-        spi_list[5] = 0           # reserviert
-        spi_list[6] = 0           # reserviert
-        spi_list[7] = 0           # reserviert
 
         print("Ball: angle={}° dist={}mm".format(angle_h, dist_mm))
     else:
-        spi_list[0] = 250
         spi_list[1] = 0   # kein Ball
         spi_list[2] = 90  # Mitte als Default → MCU rechnet 90-90=0, kein Drift
         spi_list[3] = 0
         spi_list[4] = 0
-        spi_list[5] = 0
-        spi_list[6] = 0
-        spi_list[7] = 0
 
         print("Kein Ball")
 
