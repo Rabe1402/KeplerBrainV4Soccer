@@ -1,4 +1,4 @@
-//here are all the spi sonnections to the main mcu. 
+ //here are all the spi sonnections to the main mcu. 
 //This file is included in the main mcu code.
 //The spi communication is only used to recieve information
 //There are four SPI ports on the mainboard, SPICAM, SPI1, SPI2, and SPI3.
@@ -107,4 +107,12 @@ int smallest_ground_sensor_id(int base)
   }
 
   return id;
+}
+
+void _imu_read()
+{
+  yaw = READ_I2C_BNO055_YAW();
+  pitch = READ_I2C_BNO055_PITCH();
+  roll = READ_I2C_BNO055_ROLL();
+  _log("imu_read", "Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll));
 }

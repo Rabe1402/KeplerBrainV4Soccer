@@ -1,23 +1,19 @@
-//#include "/home/arch/daata/School/6_klasse/IT/KeplerBrainV4Soccer/shared/KeplerBRAIN_V4.h" //idk warum aber ../shared/KE... geht bei mir ned mehr.
-#include "../shared/KeplerBRAIN_V4.h"
-#include "KEPLER_UPDATE.h" // wird in echte header migrirt wenn randl gut findet 
-#include "powersense.h" //powersensor read 
-
 #include <vector>
 #include <iostream>
 #include <math.h>
-#include "data-calculation.h" //alle datenberechnungen wie winkel zu ball usw.
+
+#include "../shared/KeplerBRAIN_V4.h"
 
 #include "Variables.h" //alle variablen usw. sind in dieser datei, um diese ein wenig aufzuräumen 
 
+#include "KEPLER_UPDATE.h" // wird in echte header migrirt wenn randl gut findet 
+#include "powersense.h" //powersensor read 
+#include "data-calculation.h" //alle datenberechnungen wie winkel zu ball usw.
 
-void _imu_read()
-{
-  yaw = READ_I2C_BNO055_YAW();
-  pitch = READ_I2C_BNO055_PITCH();
-  roll = READ_I2C_BNO055_ROLL();
-  _log("imu_read", "Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll));
-}
+
+
+
+
 
 void _log(String name, String message)
 {
@@ -278,6 +274,6 @@ void _default(){
   
     //move_angle(_cam_data_calculation(), 40);
   }
-
+  WRITE_LCD_TEXT(1, 2, String(counter));
 }
 
