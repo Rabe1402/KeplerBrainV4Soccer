@@ -258,7 +258,7 @@ void _default(){
 
   }else
   {
-   motors(0, 0, 0, 0, true);
+  
     //move to ball
     ball_target = yaw + _cam_data_calculation();
     WRITE_LCD_TEXT(1,1, String(ball_target) + " " + String(_cam_data_calculation()));
