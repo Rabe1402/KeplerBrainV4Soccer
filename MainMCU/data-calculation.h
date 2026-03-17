@@ -79,7 +79,7 @@ void _SPIs()
 
 int _cam_data_calculation() 
 {
-    return (int8_t)(SPICAM_Data2 - 90);  /* -35..+35°*/ 
+    return (int8_t)(SPICAM_Data2 - 90);  /* -90..+90°*/ 
 }
 
 int smallest_ground_sensor_id(int base)
