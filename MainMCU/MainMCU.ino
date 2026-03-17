@@ -2,16 +2,6 @@
 #include <iostream>
 #include <math.h>
 
-#include "../shared/KeplerBRAIN_V4.h"
-
-#include "Variables.h" //alle variablen usw. sind in dieser datei, um diese ein wenig aufzuräumen 
-
-#include "KEPLER_UPDATE.h" // wird in echte header migrirt wenn randl gut findet 
-#include "powersense.h" //powersensor read 
-#include "data-calculation.h" //alle datenberechnungen wie winkel zu ball usw.
-
-
-
 void _log(String name, String message)
 {
   if (debug)
@@ -26,6 +16,16 @@ void _log(String name, String message)
     }
   }
 }
+
+#include "../shared/KeplerBRAIN_V4.h"
+
+#include "Variables.h" //alle variablen usw. sind in dieser datei, um diese ein wenig aufzuräumen 
+
+#include "KEPLER_UPDATE.h" // wird in echte header migrirt wenn randl gut findet 
+#include "powersense.h" //powersensor read 
+#include "data-calculation.h" //alle datenberechnungen wie winkel zu ball usw.
+
+
 
 #include "Move.h"
 #include "Tests.h" // alle test codes 
