@@ -85,13 +85,17 @@ void loop()
       _log("main loop", "Selected Program" + String(selection));
 
       run = true;
+      WRITE_LCD_CLEAR(); // to clean up dislplay. And hopefully find wehre it hangs 
     }
   }else
   {
-    //_log("void loop", "run is true");
+    _log("void loop", "run is true");
     switch ( selection )
     {
       case 0:
+        WRITE_LCD_TEXT(1, 2, "Default Code");
+        delay(700);
+        if (READ_BUTTON_CLOSED(B1) == 1){exit;}
         while (true)
         {
           KEPLER_UPDATE();
@@ -176,33 +180,43 @@ void loop()
 
       case 8:
         KEPLER_UPDATE();
+        WRITE_LCD_TEXT(1, 2, "Camera Test");
+        delay(700);
+        if (READ_BUTTON_CLOSED(B1) == 1){exit;}
         _camera_test();
       break;;   
 
       case 9:
-        KEPLER_UPDATE();
-        digitalWrite(SPICAM, LOW);
-        delay(1);
-
-        if(spi_cam.transfer(1) == 250)
+        WRITE_LCD_TEXT(1, 2, "Camera Test direct SPI read");
+        delay(700);
+        if (READ_BUTTON_CLOSED(B1) == 1){exit;}
+        while(true)
         { 
-          SPICAM_Data1 = spi_cam.transfer(0);
-          SPICAM_Data2 = spi_cam.transfer(0);
-          SPICAM_Data3 = spi_cam.transfer(0);
-          SPICAM_Data4 = spi_cam.transfer(0);
-          SPICAM_Data5 = spi_cam.transfer(0);
-          SPICAM_Data6 = spi_cam.transfer(0);
-          SPICAM_Data7 = spi_cam.transfer(0);
-        }
+          KEPLER_UPDATE();
+          digitalWrite(SPICAM, LOW);
+          delay(1);
 
-        digitalWrite(SPICAM, HIGH);
+          if(spi_cam.transfer(1) == 250)
+          { 
+            SPICAM_Data1 = spi_cam.transfer(0);
+            SPICAM_Data2 = spi_cam.transfer(0);
+            SPICAM_Data3 = spi_cam.transfer(0);
+            SPICAM_Data4 = spi_cam.transfer(0);
+            SPICAM_Data5 = spi_cam.transfer(0);
+            SPICAM_Data6 = spi_cam.transfer(0);
+            SPICAM_Data7 = spi_cam.transfer(0);
+          }
 
-        // read 8 Bytes from OpenMV END
+          digitalWrite(SPICAM, HIGH);
 
-        WRITE_LCD_TEXT(1, 1, String(SPICAM_Data1)+" "+String(SPICAM_Data2)+" "+String(SPICAM_Data3)+" "+String(SPICAM_Data4));
-        WRITE_LCD_TEXT(1, 2, String(SPICAM_Data5)+" "+String(SPICAM_Data6)+" "+String(SPICAM_Data7));
+          // read 8 Bytes from OpenMV END
+
+          WRITE_LCD_TEXT(1, 1, String(SPICAM_Data1)+" "+String(SPICAM_Data2)+" "+String(SPICAM_Data3)+" "+String(SPICAM_Data4));
+          WRITE_LCD_TEXT(1, 2, String(SPICAM_Data5)+" "+String(SPICAM_Data6)+" "+String(SPICAM_Data7));
       
-        delay(1000);
+          delay(1000);
+          if (READ_BUTTON_CLOSED(B1) == 1){exit;}
+        }
       break;;
     }
 
@@ -213,32 +227,6 @@ void loop()
   else{WRITE_LCD_TEXT(1, 2, "-  ()   +");}  
 }
 
-int smallest_ground_sensor_id(int base)
-{
-  int id = 255;
-  ground_smallest = 1023;
-
-  ground_sensor[0] = fc;
-  ground_sensor[1] = fr;
-  ground_sensor[2] = rc;
-  ground_sensor[3] = br;
-  ground_sensor[4] = bc;
-  ground_sensor[5] = bl;
-  ground_sensor[6] = lc;
-  ground_sensor[7] = fl;
-
-
-  for (int i = 0; i < 8; i++)
-  {
-    if ( ground_sensor[i] - base < ground_smallest ) {
-       ground_smallest = ground_sensor[i] - base;
-       id = i; 
-    }
-
-  }
-
-  return id;
-}
 
 void _default(){
   _imu_read();
@@ -273,10 +261,9 @@ void _default(){
     //rotate to dir where ball last seen (future plan)?
     rotate(10);
     reverse = false;
+    WRITE_LCD_TEXT(1, 1, "NO BALL");
 
   }else
-  //move_angle_correction(45, 40, 1);
-  //rotate_to(0, 2, 10, 0.000004, 0.00000006, 7);
   {
     //move to ball
     if(!reverse) {
@@ -293,3 +280,4 @@ void _default(){
   }
 
 }
+

@@ -186,7 +186,7 @@ void _batt_test()
       break;;
 
       case 1:
-        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_SHUNT_VOLTAGE()) + "idk 1µV              ");
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_SHUNT_VOLTAGE()) + "shunt              ");
       break;;
 
       case 2:

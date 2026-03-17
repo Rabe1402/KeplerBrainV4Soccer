@@ -81,3 +81,30 @@ int _cam_data_calculation()
 {
     return (int8_t)(SPICAM_Data2 - 90);  /* -35..+35°*/ 
 }
+
+int smallest_ground_sensor_id(int base)
+{
+  int id = 255;
+  ground_smallest = 1023;
+
+  ground_sensor[0] = fc;
+  ground_sensor[1] = fr;
+  ground_sensor[2] = rc;
+  ground_sensor[3] = br;
+  ground_sensor[4] = bc;
+  ground_sensor[5] = bl;
+  ground_sensor[6] = lc;
+  ground_sensor[7] = fl;
+
+
+  for (int i = 0; i < 8; i++)
+  {
+    if ( ground_sensor[i] - base < ground_smallest ) {
+       ground_smallest = ground_sensor[i] - base;
+       id = i; 
+    }
+
+  }
+
+  return id;
+}
