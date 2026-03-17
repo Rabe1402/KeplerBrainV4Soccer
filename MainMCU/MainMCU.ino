@@ -12,9 +12,6 @@
 
 
 
-
-
-
 void _log(String name, String message)
 {
   if (debug)
@@ -265,7 +262,6 @@ void _default(){
     if(!reverse) {
     rotate(-50);
     reverse = true;
-    delay(672);
     }
     rotate(_cam_data_calculation() / 3);
     ball_target = yaw + _cam_data_calculation();
