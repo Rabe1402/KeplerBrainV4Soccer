@@ -225,46 +225,32 @@ void _default(){
   _imu_read();
   _SPIs();
 
-  _log("default", "Done SPIs");
-  ground_avg = (fc + fr + rc + br + bc + bl + lc + fl)/8;
-  
+  ground_avg = (fc + fr + rc + br + bc + bl + lc + fl) / 8;
   smallest_ground_sensor_id(ground_avg);
-
-  _log("ground smallest", String(ground_smallest));
-  
-  
-
-  /*if (ground_smallest < -2)
-  {
-    if(!reverse) motors(-drive_m1, -drive_m2, -drive_m3, -drive_m4, true);
-    //rotate_to(0, 2, 10, 0.000004, 0.00000006, 7);
-    reverse = true;
-    WRITE_LCD_TEXT(1, 1, "STOOOP");
-    //delay(1000);
-    return;
-    //motors(0, 0, 0, 0, true);
-  }*/
-
-  //reverse = false;
 
   motors(drive_m1, drive_m2, drive_m3, drive_m4, true);
 
   if(SPICAM_Data1 == 0)
   {
-    //rotate to dir where ball last seen (future plan)?
+    ball_target_locked = false;  // Lock zurücksetzen wenn Ball weg
     rotate(8);
-    reverse = false;
-    WRITE_LCD_TEXT(1, 1, "NO BALL");
-
-  }else
+    WRITE_LCD_TEXT(1, 1, "NO BALL    ");
+  }
+  else
   {
-  
-    //move to ball
-    ball_target = yaw + _cam_data_calculation();
-    WRITE_LCD_TEXT(1,1, String(ball_target) + " " + String(_cam_data_calculation()));
+    int cam_angle = _cam_data_calculation();
+
+    // Target nur neu setzen wenn noch nicht eingerastet
+    // oder Ball fast zentriert ist (< 5°)
+    if (!ball_target_locked || abs(cam_angle) < 5)
+    {
+      ball_target = yaw + cam_angle;
+      ball_target_locked = true;
+    }
+
+    WRITE_LCD_TEXT(1, 1, String(ball_target) + " " + String(cam_angle) + "   ");
     rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
-    move_angle(_cam_data_calculation(), 40);
+    move_angle(cam_angle, 40);
   }
   WRITE_LCD_TEXT(1, 2, String(counter));
 }
-

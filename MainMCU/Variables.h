@@ -29,6 +29,7 @@ int line_base      = 244;
 int line_threshold = 3;
 
 int ball_target = 0;
+bool ball_target_locked = false;
 
 //Debug
 bool debug = true;
