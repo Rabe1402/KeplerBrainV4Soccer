@@ -1,6 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <math.h>
+#include "Variables.h" //alle variablen usw. sind in dieser datei, um diese ein wenig aufzuräumen 
 
 void _log(String name, String message)
 {
@@ -19,7 +20,6 @@ void _log(String name, String message)
 
 #include "../shared/KeplerBRAIN_V4.h"
 
-#include "Variables.h" //alle variablen usw. sind in dieser datei, um diese ein wenig aufzuräumen 
 
 #include "KEPLER_UPDATE.h" // wird in echte header migrirt wenn randl gut findet 
 #include "powersense.h" //powersensor read 
