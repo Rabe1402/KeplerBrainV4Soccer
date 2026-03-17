@@ -252,7 +252,7 @@ void _default(){
   if(SPICAM_Data1 == 0)
   {
     //rotate to dir where ball last seen (future plan)?
-    rotate(10);
+    rotate(8);
     reverse = false;
     WRITE_LCD_TEXT(1, 1, "NO BALL");
 
