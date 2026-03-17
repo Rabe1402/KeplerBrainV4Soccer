@@ -241,8 +241,8 @@ void _default(){
     int cam_angle = _cam_data_calculation();
 
     // Target nur neu setzen wenn noch nicht eingerastet
-    // oder Ball fast zentriert ist (< 10°)
-    if (!ball_target_locked || abs(cam_angle) < 10)
+    // oder Ball fast zentriert ist (< 2°)
+    if (!ball_target_locked || abs(cam_angle) < 2)
     {
       ball_target = yaw + cam_angle;
       ball_target_locked = true;
