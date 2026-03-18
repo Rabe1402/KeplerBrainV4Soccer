@@ -242,14 +242,15 @@ void _default(){
 
     // Target nur neu setzen wenn noch nicht eingerastet
     // oder Ball fast zentriert ist (< 2°)
-    if (!ball_target_locked || abs(cam_angle) < 2)
+    if (!ball_target_locked || abs(cam_angle) < 2 || last_ball_locked_time + 500 < millis())
     {
+      last_ball_locked_time = millis();
       ball_target = yaw + cam_angle;
       ball_target_locked = true;
     }
 
     WRITE_LCD_TEXT(1, 1, String(ball_target) + " " + String(cam_angle) + "   ");
-    rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
+    //rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
     move_angle(cam_angle, 40);
   }
   WRITE_LCD_TEXT(1, 2, String(counter));

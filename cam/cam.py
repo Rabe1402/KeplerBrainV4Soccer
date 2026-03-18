@@ -51,7 +51,8 @@ sensor.skip_frames(time=2000)
 sensor.set_auto_gain(False)
 sensor.set_auto_whitebal(False)
 sensor.set_auto_exposure(False)
-sensor.set_hmirror(True)
+sensor.set_hmirror(False)
+sensor.set_vflip(True)
 clock = time.clock()
 
 while True:

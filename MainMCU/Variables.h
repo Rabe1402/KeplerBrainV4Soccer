@@ -30,6 +30,7 @@ int line_threshold = 3;
 
 int ball_target = 0;
 bool ball_target_locked = false;
+int last_ball_locked_time = 0;
 
 //Debug
 bool debug = true;
