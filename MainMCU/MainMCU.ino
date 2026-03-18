@@ -89,10 +89,11 @@ void loop()
         WRITE_LCD_TEXT(1, 2, "Default Code");
         delay(700);
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
+      
         while (true)
         {
           KEPLER_UPDATE();
-          _default();
+          _default_statemachiene();
         }
 
       break;;
@@ -226,8 +227,18 @@ void _default(){
   _SPIs();
 
   ground_avg = (fc + fr + rc + br + bc + bl + lc + fl) / 8;
-  smallest_ground_sensor_id(ground_avg);
+  ground_sens_id = smallest_ground_sensor_id(ground_avg);
 
+  if (ground_smallest < -2)
+  {
+    //ground_millis = millis() + 200;
+    move_angle(ground_sens_id * 45, target_speed);
+    
+    motors(drive_m1, drive_m2, drive_m3, drive_m4, true);
+    delay(200);
+    return;;
+  }
+  
   motors(drive_m1, drive_m2, drive_m3, drive_m4, true);
 
   if(SPICAM_Data1 == 0)
@@ -242,7 +253,7 @@ void _default(){
 
     // Target nur neu setzen wenn noch nicht eingerastet
     // oder Ball fast zentriert ist (< 2°)
-    if (!ball_target_locked || abs(cam_angle) < 2 || last_ball_locked_time + 500 < millis())
+    if (!ball_target_locked || abs(cam_angle) < 2 || last_ball_locked_time + 250 < millis())
     {
       last_ball_locked_time = millis();
       ball_target = yaw + cam_angle;
@@ -254,4 +265,71 @@ void _default(){
     move_angle(cam_angle, 40);
   }
   WRITE_LCD_TEXT(1, 2, String(counter));
+}
+
+void _default_statemachiene(){
+  _SPIs();
+  _imu_read();
+
+  WRITE_LCD_TEXT(1, 1, String(current_state) );
+
+  switch (current_state)
+  {
+    case 0: // search
+    //rotate (preferabbly in last seen dir) till found
+      if(ball_last_seen_ang > 180)
+      {
+        rotate(target_speed);
+      }else{
+        rotate(-target_speed);
+      }
+
+    break;; //exit here
+    
+    //--------------
+    
+    case 1: // orbit
+      rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
+    break;; //exit here
+    
+    //--------------
+    
+    case 2: // shoot
+      rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
+    break;; //exit here
+    
+    //--------------
+    
+    case 3: // line
+      move_angle(ground_sens_id * 45, target_speed);
+      rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
+    break;; //exit here (last one not needed ig)
+  }
+
+  motors(drive_m1, drive_m2, drive_m3, drive_m4, true);
+
+  // determine state
+  
+  if(line_last_seen_millis + 500 < millis())
+  {
+    current_state = 3; //line
+    return;;
+  }
+  
+  ground_avg = (fc + fr + rc + br + bc + bl + lc + fl) / 8;
+  ground_sens_id = smallest_ground_sensor_id(ground_avg);
+  
+  if (ground_smallest < -3)
+  {
+    line_last_seen_millis = millis();
+    current_state = 3; //line
+    return;;
+  }
+
+  if (SPICAM_Data1 == 0)
+  {
+    current_state = 0; //search
+    return;;
+  }
+
 }

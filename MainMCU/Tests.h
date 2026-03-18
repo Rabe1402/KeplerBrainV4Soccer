@@ -113,6 +113,7 @@ void _ground_test()
         WRITE_LCD_TEXT(1, 1, String(bl) + " ");
         WRITE_LCD_TEXT(4, 1, String(br) + " ");
         WRITE_LCD_TEXT(7, 1, String(bc) + "    ");
+        WRITE_LCD_TEXT(11, 1, String((fc + fr + rc + br + bc + bl + lc + fl) / 8));
       break;;
     }
     

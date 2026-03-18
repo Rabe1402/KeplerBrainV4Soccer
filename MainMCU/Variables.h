@@ -2,11 +2,19 @@
 //sonstige 
 int serial_baud = 115200;
 
+int current_state = 0; //0 = Search, 1 = orbit, 2 = shoot, 3 = line
+int target_speed = 40;
+
+int ball_last_seen_ang = 0; // just SPICAM_Data1 aber nicht zuruckgesetzt falls kein ball gesehen
+
+int line_last_seen_millis = 0;
+
+//old
+
 int selection_cursor = 0;
 int selection = 0;
 bool run = false;
 
-int current_state = 0;
 
 int error = 0;
 
@@ -15,10 +23,12 @@ int ground_sensor[8];
 int ground_smallest; 
 bool reverse = false;
 int ground_avg;
+int ground_sens_id;
+int ground_millis = 0;
 //Default
 
 int target_angle = 45;
-int target_speed = 40;
+
 int correction_speed = 70;
 
 int line_timers[8] = {0, 0, 0, 0, 0, 0, 0, 0};

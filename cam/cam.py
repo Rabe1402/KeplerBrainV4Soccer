@@ -19,13 +19,13 @@ threshold_index = 0
 # Kamera & Objekt Konstanten
 FRAME_W          = 320
 FRAME_H          = 240
-HFOV_DEG         = 70.0
+HFOV_DEG         = 71.8
 H_FOV_HALF       = HFOV_DEG / 2.0
 BALL_DIAMETER_MM = 43
 
 FOCAL_LEN_PX = (FRAME_W / 2.0) / math.tan(math.radians(H_FOV_HALF))
 
-MAX_DIST_MM  = 3000
+MAX_DIST_MM  = 1500
 FRAME_W_HALF = FRAME_W / 2.0
 
 def nss_callback(line):
