@@ -92,6 +92,7 @@ void loop()
       
         while (true)
         {
+          WRITE_LCD_CLEAR();
           KEPLER_UPDATE();
           _default_statemachiene();
         }
@@ -273,6 +274,7 @@ void _default_statemachiene(){
 
   WRITE_LCD_TEXT(1, 1, String(current_state) );
 
+  WRITE_LCD_TEXT(1, 2, String(counter) );
   switch (current_state)
   {
     case 0: // search
@@ -288,8 +290,24 @@ void _default_statemachiene(){
     
     //--------------
     
-    case 1: // orbit
-      rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
+    case 1: // move to ball
+    {
+      int cam_angle = _cam_data_calculation();
+
+      // Target nur neu setzen wenn noch nicht
+      // oder Ball fast zentriert ist (< 2°)
+      // und fix alle 250ms
+      if (!ball_target_locked || abs(cam_angle) < 2 || last_ball_locked_time + 250 < millis())
+      {
+        last_ball_locked_time = millis();
+        ball_target = yaw + cam_angle;
+        ball_target_locked = true;
+      }
+
+      WRITE_LCD_TEXT(1, 1, String(ball_target) + " " + String(cam_angle) + "   ");
+      //rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
+      move_angle(cam_angle, 40);
+    }
     break;; //exit here
     
     //--------------
@@ -329,6 +347,12 @@ void _default_statemachiene(){
   if (SPICAM_Data1 == 0)
   {
     current_state = 0; //search
+    return;;
+  }
+  
+  if (SPICAM_Data1 == 1)
+  {
+    current_state = 1; 
     return;;
   }
 
