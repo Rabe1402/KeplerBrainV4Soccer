@@ -89,7 +89,11 @@ void loop()
         WRITE_LCD_TEXT(1, 2, "Default Code");
         delay(700);
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
-      
+
+        // run here the first time to get two set of data 
+        ground_avg = (fc + fr + rc + br + bc + bl + lc + fl) / 8;
+        ground_sens_id = smallest_ground_sensor_id(ground_avg);
+
         while (true)
         {
           WRITE_LCD_CLEAR();
@@ -148,19 +152,17 @@ void loop()
 
 
       case 5:
-        KEPLER_UPDATE();
-        WRITE_LCD_TEXT(1, 2, "IMU READ"); 
-        _SPIs(); 
-        _imu_read();
-        //_default();
+        WRITE_LCD_TEXT(1, 2, "NOTHING HERE ");
+        delay(1000);
+        exit;
+        
       break;;      
 
 
       case 6:
-        KEPLER_UPDATE();
-        WRITE_LCD_TEXT(1, 2, "BODEN READ"); 
-        delay(700);
-        if (READ_BUTTON_CLOSED(B1) == 1){exit;}
+        WRITE_LCD_TEXT(1, 2, "NOTHING HERE");
+        delay(1000);
+        exit;
 
 
       break;;
@@ -319,8 +321,7 @@ void _default_statemachiene(){
     //--------------
     
     case 3: // line
-      move_angle(ground_sens_id * 45, target_speed);
-      rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
+      move_angle(ground_sens_id * 45, (target_speed/2) );
     break;; //exit here (last one not needed ig)
   }
 
@@ -334,10 +335,11 @@ void _default_statemachiene(){
     return;;
   }
   
+  // run here second time for second set of date and continous readings
   ground_avg = (fc + fr + rc + br + bc + bl + lc + fl) / 8;
   ground_sens_id = smallest_ground_sensor_id(ground_avg);
   
-  if (ground_smallest < -3)
+  if (ground_smallest < -2 && counter > 200)
   {
     line_last_seen_millis = millis();
     current_state = 3; //line
@@ -352,7 +354,7 @@ void _default_statemachiene(){
   
   if (SPICAM_Data1 == 1)
   {
-    current_state = 1; 
+    current_state = 1; //move to ball
     return;;
   }
 

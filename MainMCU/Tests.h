@@ -90,7 +90,7 @@ void _ground_test()
   int old_time;
   bool full_speed = false;
   int mode = 0;
-
+  
   WRITE_LCD_TEXT(1, 2, "fc fl fr ll rr");
 
   while(READ_BUTTON_CLOSED(B1) != 1)
@@ -138,6 +138,7 @@ void _ground_test()
     }
     if (READ_BUTTON_CLOSED(B2) == 1)
     {
+      WRITE_LCD_CLEAR();
       mode++;
       if (mode > 1)
       {
@@ -157,10 +158,7 @@ void _ground_test()
         break;;
       }
 
-      WRITE_LCD_TEXT(16, 2, String(mode));
-
       delay(1000);
-
 
     }
 
