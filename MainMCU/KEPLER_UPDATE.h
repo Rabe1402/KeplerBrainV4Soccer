@@ -2,8 +2,8 @@ int counter; //globaler counter
 int counter_now_power = 0; // now power counter variable um power metering alle 100 runs zu ermöglichen 
 
 //pwoer sense variablen
-static volatile float ina231_shunt_voltage = 240000.0f;  // mV
-static volatile float ina231_bus_voltage = 12000.0f;    // V
+static volatile float ina231_shunt_voltage = 000000.0f;  // mV
+static volatile float ina231_bus_voltage = 00000.0f;    // V
 static volatile float ina231_current = 0.0f;        // A
 static volatile float ina231_power = 0.0f;          // W
 static volatile uint32_t ina231_error_count = 0;    // error count variable für debug zwecke 
@@ -13,8 +13,8 @@ void KEPLER_UPDATE()
   counter++;  // kepler update counter um stetige messungen wie powersens zu ermöglichen 
 
 
-  // power redaing und led writing alle 1000 mal 
-  if (counter >= counter_now_power + 100) 
+  // power redaing und led writing alle 100 mal und jedes mal in den ersten 100 runs
+  if (counter >= counter_now_power + 100 || counter < 100) 
   {
     #ifdef INA231_DEBUG
     Serial.println("Updating INA231 measurements...");
@@ -142,14 +142,19 @@ void KEPLER_UPDATE()
       WRITE_LED(L2, 1);
       WRITE_LED(L3, 0);
     }
-    while (ina231_bus_voltage < 9000)
+    while (500 > ina231_bus_voltage && ina231_bus_voltage < 9000)
     {
       WRITE_LED(L1,1);
       SLEEP(300);      //Fick alles wenn die baterie zu leer ist
       WRITE_LED(L1,0);
       SLEEP(399);
     }
-
+    if (ina231_bus_voltage < 500) //zeige das der ina ein problem hat un keine spannung lesen kann
+    {
+      WRITE_LED(L1,1);
+      WRITE_LED(L2,1);
+      WRITE_LED(L3,1);
+    }
     //POWER READ END
 
     

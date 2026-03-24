@@ -47,6 +47,7 @@ void _imu_test()
 
   while(READ_BUTTON_CLOSED(B1) != 1)
   {
+    KEPLER_UPDATE();
     old_time = millis();
     
     yaw = READ_I2C_BNO055_YAW();
@@ -94,6 +95,7 @@ void _ground_test()
 
   while(READ_BUTTON_CLOSED(B1) != 1)
   {
+    KEPLER_UPDATE();
     old_time = millis();
 
     _SPIs();
@@ -178,6 +180,7 @@ void _batt_test()
 
   while(READ_BUTTON_CLOSED(B1) != 1)
   {
+    KEPLER_UPDATE();
     old_time = millis();
     
     switch (mode)
@@ -187,7 +190,7 @@ void _batt_test()
       break;;
 
       case 1:
-        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_SHUNT_VOLTAGE()) + "shunt              ");
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_SHUNT_VOLTAGE()) + "shunt Voltage             ");
       break;;
 
       case 2:
@@ -195,7 +198,7 @@ void _batt_test()
       break;;
 
       case 3:
-        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_POWER()) + "idk                  ");
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_POWER()/10000) + "W                  ");
       break;;
     }
     
@@ -249,6 +252,7 @@ void _camera_test()
 
   while(READ_BUTTON_CLOSED(B1) != 1)
   {
+    KEPLER_UPDATE();
     old_time = millis();
 
     _SPIs();
