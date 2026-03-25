@@ -155,7 +155,7 @@ void loop()
         WRITE_LCD_TEXT(1, 2, "NOTHING HERE ");
         delay(1000);
         exit;
-        
+
       break;;      
 
 
@@ -283,9 +283,9 @@ void _default_statemachiene(){
     //rotate (preferabbly in last seen dir) till found
       if(ball_last_seen_ang > 180)
       {
-        rotate(target_speed);
+        rotate( 10);
       }else{
-        rotate(-target_speed);
+        rotate(-10);
       }
 
     break;; //exit here
@@ -321,19 +321,17 @@ void _default_statemachiene(){
     //--------------
     
     case 3: // line
-      move_angle(ground_sens_id * 45, (target_speed/2) );
+      // here again for most live readings
+      ground_avg = (fc + fr + rc + br + bc + bl + lc + fl) / 8;
+      ground_sens_id = smallest_ground_sensor_id(ground_avg);
+
+      move_angle((ground_sens_id * 45 + 180) % 360, (target_speed/2) );
     break;; //exit here (last one not needed ig)
   }
 
   motors(drive_m1, drive_m2, drive_m3, drive_m4, true);
 
   // determine state
-  
-  if(line_last_seen_millis + 500 < millis())
-  {
-    current_state = 3; //line
-    return;;
-  }
   
   // run here second time for second set of date and continous readings
   ground_avg = (fc + fr + rc + br + bc + bl + lc + fl) / 8;
