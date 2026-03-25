@@ -325,7 +325,15 @@ void _default_statemachiene(){
       ground_avg = (fc + fr + rc + br + bc + bl + lc + fl) / 8;
       ground_sens_id = smallest_ground_sensor_id(ground_avg);
 
-      move_angle((ground_sens_id * 45 + 180) % 360, (target_speed/2) );
+      // Verwende den ERSTEN erkannten Sensor für konsistente Ausweichrichtung
+      int escape_sensor_id = (line_first_sensor_id != -1) ? line_first_sensor_id : ground_sens_id;
+      
+      move_angle((escape_sensor_id * 45 + 180) % 360, (target_speed/2) );
+      
+      // Reset wenn keine Linie mehr erkannt wird
+      if (ground_smallest > -2) {
+        line_first_sensor_id = -1;  // Zurücksetzen für nächste Linienerkennung
+      }
     break;; //exit here (last one not needed ig)
   }
 
@@ -340,18 +348,26 @@ void _default_statemachiene(){
   if (ground_smallest < -2 && counter > 200)
   {
     line_last_seen_millis = millis();
+    
+    // Speichere den ersten Sensor, der die Linie erkannt hat
+    if (line_first_sensor_id == -1) {
+      line_first_sensor_id = ground_sens_id;
+    }
+    
     current_state = 3; //line
     return;;
   }
 
   if (SPICAM_Data1 == 0)
   {
+    line_first_sensor_id = -1;  // Reset beim Verlassen des line states
     current_state = 0; //search
     return;;
   }
   
   if (SPICAM_Data1 == 1)
   {
+    line_first_sensor_id = -1;  // Reset beim Verlassen des line states
     current_state = 1; //move to ball
     return;;
   }

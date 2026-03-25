@@ -25,6 +25,7 @@ bool reverse = false;
 int ground_avg;
 int ground_sens_id;
 int ground_millis = 0;
+int line_first_sensor_id = -1
 //Default
 
 int target_angle = 45;
