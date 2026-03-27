@@ -38,6 +38,9 @@ int line_first_sensor_id = -1;  // Erster Sensor der Linie erkannt hat
 int line_escape_start_time = 0; // Timer-Start für Ausweichbewegung
 int line_escape_duration = 400; // ANPASSEN: Dauer der Ausweichbewegung (ms)
 int line_last_seen_millis = 0;
+int allow_sens_again = 10; //time to wait to realow ground sens
+
+bool sens_allowed = true;
 
 //-----------------------------------------------------------------------------
 // BALL TRACKING

@@ -276,16 +276,16 @@ void _default_statemachiene(){
 
   WRITE_LCD_TEXT(1, 1, String(current_state) );
 
-  WRITE_LCD_TEXT(1, 2, String(counter) );
+  //WRITE_LCD_TEXT(1, 2, String(counter) ); //debug
   switch (current_state)
   {
     case 0: // search
     //rotate (preferabbly in last seen dir) till found
       if(ball_last_seen_ang > 180)
       {
-        rotate( 10);
+        //rotate( 10);
       }else{
-        rotate(-10);
+        //rotate(-10);
       }
 
     break;; //exit here
@@ -295,6 +295,7 @@ void _default_statemachiene(){
     case 1: // move to ball
     {
       int cam_angle = _cam_data_calculation();
+      rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
 
       // Target nur neu setzen wenn noch nicht
       // oder Ball fast zentriert ist (< 2°)
@@ -306,9 +307,9 @@ void _default_statemachiene(){
         ball_target_locked = true;
       }
 
-      WRITE_LCD_TEXT(1, 1, String(ball_target) + " " + String(cam_angle) + "   ");
+      //WRITE_LCD_TEXT(1, 1, String(ball_target) + " " + String(cam_angle) + "   ");
       //rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
-      move_angle(cam_angle, 40);
+      //move_angle(cam_angle, 40);
     }
     break;; //exit here
     
@@ -321,18 +322,34 @@ void _default_statemachiene(){
     //--------------
     
     case 3: // line
-      // here again for most live readings
-      ground_avg = (fc + fr + rc + br + bc + bl + lc + fl) / 8;
-      ground_sens_id = smallest_ground_sensor_id(ground_avg);
-
       // Verwende den gespeicherten Sensor für konsistente Ausweichrichtung
-      if (line_first_sensor_id != -1) {
-        move_angle((line_first_sensor_id * 45 + 180) % 360, target_speed/2);
+      move_angle((line_first_sensor_id * 45 + 180) % 360, target_speed/2);
+
+      if (millis() - line_last_seen_millis > allow_sens_again)
+      {
+        sens_allowed = true;
       }
-      if ((millis() - line_escape_start_time > line_escape_duration) && ground_smallest > -2) {
+
+      if ((millis() - line_escape_start_time > line_escape_duration) && ground_smallest > -2) 
+      {
         line_first_sensor_id = -1;  // Reset für nächste Erkennung
+
+        // Wechsle zurück zu search oder move_to_ball je nach Ball-Status
+        /*if (SPICAM_Data1 == 0) 
+        {
+          current_state = 0; // search
+          sens_allowed = true;
+          return;;
+        } else 
+        {
+          current_state = 1; // move to ball
+          sens_allowed = true;
+          return;; 
+        }*/
       }      
+
       
+
     break;; //exit here (last one not needed ig)
   }
 
@@ -343,14 +360,24 @@ void _default_statemachiene(){
   // run here second time for second set of date and continous readings
   ground_avg = (fc + fr + rc + br + bc + bl + lc + fl) / 8;
   ground_sens_id = smallest_ground_sensor_id(ground_avg);
-  
-  if (ground_smallest < -2 && counter > 200)
+
+  //Linie (muss ganz oben bleiben) 
+  if (millis() - line_escape_start_time > line_escape_duration && line_escape_start_time != 0) 
+  {
+    current_state = 3;
+    return;;
+  }
+
+  if (ground_smallest < -2)
   {
     line_last_seen_millis = millis();
     
     // Speichere den ersten Sensor, der die Linie erkannt hat
-    if (current_state != 3 || (line_first_sensor_id != -1 && line_first_sensor_id != ground_sens_id)) {
+    if (current_state != 3 || (line_first_sensor_id != -1 && line_first_sensor_id != ground_sens_id) && sens_allowed) 
+    {
       line_first_sensor_id = ground_sens_id;
+      WRITE_LCD_TEXT(2, 1, String(line_first_sensor_id) );
+      sens_allowed = false;
       line_escape_start_time = millis();
     }
     
@@ -358,12 +385,13 @@ void _default_statemachiene(){
     return;;
   }
 
+  // search
   if (SPICAM_Data1 == 0)
   {
     current_state = 0; //search
     return;;
   }
-  
+  // move to ball
   if (SPICAM_Data1 == 1)
   {
     current_state = 1; //move to ball
