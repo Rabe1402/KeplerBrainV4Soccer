@@ -1,68 +1,68 @@
-//INIT 
+//=============================================================================
+// VARIABLES.H - KeplerBrainV4 Soccer - Cleaned up version
+//=============================================================================
+
+//-----------------------------------------------------------------------------
+// SYSTEM
+//-----------------------------------------------------------------------------
 int serial_baud = 115200;
-int correction_speed = 70; //??ANPASSEN
-int current_state = 0; //0 = Search, 1 = orbit, 2 = shoot, 3 = line
-int target_speed = 40; //ANPASSEN
-int target_angle = 45; //ANPASSEN
-int error = 0;
-unsigned long last_time = millis(); // Zeitstempel für die Berechnung
-int drive_base = 10; // ??STILL NEEDED? Basisgeschwindigkeit
-float yaw_direction = 20; // ??STILL NEEDED? Ziel-Yaw-Wert
-float yaw_difference = 0; // yaw difference zum anfahren an einen bestimmten imu wert 
 
-//line
-int ground_sensor[8];
-int ground_smallest; 
-int ground_avg;
-int ground_sens_id;
-int ground_millis = 0;
-int line_first_sensor_id = -1;
-int line_escape_start_time = 0;
-int line_escape_duration = 400; //ANPASSEN
-int line_last_seen_millis = 0;
-int line_timers[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-bool line_tmp[8]   = {0, 0, 0, 0, 0, 0, 0, 0};
-int groundtimer = 0;
-int line_last;
-int line_base      = 244;
-int line_threshold = 3; //?? IN USE??
+//-----------------------------------------------------------------------------
+// STATE MACHINE
+//-----------------------------------------------------------------------------
+int current_state = 0;  // 0=Search, 1=Move to ball, 2=Shoot, 3=Line
+bool run = false;       // Hauptprogramm läuft
+int error = 0;          // Fehler für rotate_to Funktionen
 
+//-----------------------------------------------------------------------------
+// MOVEMENT
+//-----------------------------------------------------------------------------
+int target_speed = 40;  // ANPASSEN: Grundgeschwindigkeit
 
-//BALL
-int ball_last_seen_ang = 0; // just SPICAM_Data1 aber nicht zuruckgesetzt falls kein ball gesehen
-int ball_target = 0;
-bool ball_target_locked = false;
-int last_ball_locked_time = 0;
+// Motor outputs
+int drive_m1;
+int drive_m2;
+int drive_m3;
+int drive_m4;
 
+//-----------------------------------------------------------------------------
+// LINE DETECTION
+//-----------------------------------------------------------------------------
+int ground_sensor[8];           // Array für alle 8 Sensoren
+int ground_smallest;            // Kleinster Sensorwert (= dunkelste Linie)
+int ground_avg;                 // Durchschnitt aller Sensoren
+int ground_sens_id;             // ID des aktuell kleinsten Sensors
 
-//Default
-bool run = false;
-bool reverse = false;
+// Line escape logic
+int line_first_sensor_id = -1;  // Erster Sensor der Linie erkannt hat
+int line_escape_start_time = 0; // Timer-Start für Ausweichbewegung
+int line_escape_duration = 400; // ANPASSEN: Dauer der Ausweichbewegung (ms)
 
-//MENUE
+//-----------------------------------------------------------------------------
+// BALL TRACKING
+//-----------------------------------------------------------------------------
+int ball_last_seen_ang = 0;     // Letzter Winkel wo Ball gesehen wurde
+int ball_target = 0;            // Ziel-Heading für Ball
+bool ball_target_locked = false;// Ball-Target eingerastet?
+int last_ball_locked_time = 0;  // Letztes Lock-Update
+
+//-----------------------------------------------------------------------------
+// MENU SYSTEM
+//-----------------------------------------------------------------------------
 int selection_cursor = 0;
 int selection = 0;
 
-//Debug
+//-----------------------------------------------------------------------------
+// DEBUG
+//-----------------------------------------------------------------------------
 bool debug = true;
 bool debug_over_serial = true;
 std::vector<String> debug_log = {"Log initialized!"};
 String log_message = "";
 
-//IMU Sensor 
+//-----------------------------------------------------------------------------
+// IMU SENSOR
+//-----------------------------------------------------------------------------
 uint16_t yaw;
 int16_t pitch;
 int16_t roll;
-
-    // Globale Variablen für den gleitenden Durchschnitt ??NEEDED??
-float yaw_history[5] = {0, 0, 0, 0, 0}; // Array für die letzten 5 Yaw-Werte
-int history_index = 0; // Index für das Array
-bool history_filled = false; // Flag, ob das Array vollständig gefüllt ist
-int radtodeg = (M_PI / 180.0);
-
-
-// Motoren 
-int drive_m1;
-int drive_m2;
-int drive_m3;
-int drive_m4;
