@@ -37,6 +37,7 @@ int ground_sens_id;             // ID des aktuell kleinsten Sensors
 int line_first_sensor_id = -1;  // Erster Sensor der Linie erkannt hat
 int line_escape_start_time = 0; // Timer-Start für Ausweichbewegung
 int line_escape_duration = 400; // ANPASSEN: Dauer der Ausweichbewegung (ms)
+int line_last_seen_millis = 0;
 
 //-----------------------------------------------------------------------------
 // BALL TRACKING

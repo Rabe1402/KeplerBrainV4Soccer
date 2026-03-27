@@ -4,7 +4,7 @@ import pyb
 import time
 import math
 
-DEBUG_DRAW = True
+DEBUG_DRAW = False
 
 led_green = pyb.LED(2)
 led_red   = pyb.LED(1)
