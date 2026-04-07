@@ -283,16 +283,16 @@ void _default_statemachiene(){
     //rotate (preferabbly in last seen dir) till found
       if(ball_last_seen_ang > 180)
       {
-        //rotate( 10);
+        rotate( 10);
       }else{
-        //rotate(-10);
+        rotate(-10);
       }
 
     break;; //exit here
     
     //--------------
     
-    case 1: // move to ball
+    case 1: // rotate to ball
     {
       int cam_angle = _cam_data_calculation();
       rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
@@ -304,7 +304,7 @@ void _default_statemachiene(){
       {
         last_ball_locked_time = millis();
         ball_target = yaw + cam_angle;
-        ball_target_locked = true;
+        ball_target_locked = true;  
       }
 
       //WRITE_LCD_TEXT(1, 1, String(ball_target) + " " + String(cam_angle) + "   ");
@@ -316,7 +316,12 @@ void _default_statemachiene(){
     //--------------
     
     case 2: // shoot
-      rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
+    {
+      int cam_angle = _cam_data_calculation();
+      ball_target = yaw + cam_angle;
+
+      orbit_to_zero(ball_target, target_speed/2, 30);
+    }
     break;; //exit here
     
     //--------------
@@ -392,10 +397,17 @@ void _default_statemachiene(){
     return;;
   }
   // move to ball
-  if (SPICAM_Data1 == 1)
+  if (SPICAM_Data1 == 1 && SPICAM_Data2 < 85 && SPICAM_Data2 > 95 && current_state != 2) //rotate to ball if angle is bigger than 5° and smaller than 175° (also ignore if ball is behind us)
   {
-    current_state = 1; //move to ball
+    current_state = 1; //rotate to ball
+
     return;;
   }
 
+  if (SPICAM_Data1 == 1 && (SPICAM_Data2 >= 85 || SPICAM_Data2 <= 95)) //shoot if ball is in front of us (also ignore if ball is behind us)
+  {
+    current_state = 2; //orbit to zero and "shoot"
+
+    return;;
+  }
 }

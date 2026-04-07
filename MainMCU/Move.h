@@ -144,3 +144,23 @@ void move_angle_correction(int target, int Speed, int angle_precision)
   set_motors(YMotors, -XMotors, -YMotors, XMotors);
 }
 
+void orbit_to_zero (int target, int Speed, int orbit_radius)
+{
+    //_imu_read();
+
+  error = yaw - target;
+  if (error >= 180) {
+    error = -(360 - error);
+  }
+
+  // Y 1,3; cos(target - 45)
+  int YMotors= cos( (target - 45) * (M_PI / 180.0) ) * Speed ;
+
+  // X 2,4; sin(target - 45)
+  int XMotors = sin( (target - 45) * (M_PI / 180.0) ) * Speed ;
+
+  // Orbit correction
+  int orbit_correction = error * orbit_radius;
+  
+  set_motors(YMotors + orbit_correction, -XMotors + orbit_correction, -YMotors + orbit_correction, XMotors + orbit_correction);
+}
