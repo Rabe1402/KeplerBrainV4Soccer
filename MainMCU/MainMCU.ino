@@ -318,10 +318,22 @@ void _default_statemachiene(){
     
     case 2: // orbit around ball till yaw is 0 
     {
+      int yaw_orbit_target = 0; //needs better mechanic once we do look for goal with cam but for now we just want to orbit to 0
+
       int cam_angle = _cam_data_calculation();
       ball_target = yaw + cam_angle;
 
-      orbit_to_zero(ball_target, (target_speed/2), 30); //not working right idk why 
+      error = yaw - yaw_orbit_target;
+      if (error >= 180) {
+        error = -(360 - error);
+      }
+      if (error > 10 || error < -10) //if not in target area
+      {
+        orbit_to_zero(ball_target, (target_speed/2), 30); //not working right idk why
+      }else
+      {        
+        move_angle(error, target_speed); //move to ball if in target area
+      }  
     }
     break;; //exit here
     
