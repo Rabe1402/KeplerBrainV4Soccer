@@ -15,6 +15,7 @@ spi = pyb.SPI(2, pyb.SPI.SLAVE, polarity=0, phase=0)
 spi_list = [250, 0, 90, 0, 0, 0, 0, 0]
 spi_data = bytearray(spi_list)
 threshold_index = 0
+ball_last_seen_angle = 0 #zero before first ball is seen, so the robot will look straight forward
 
 # Kamera & Objekt Konstanten
 FRAME_W          = 320
@@ -114,7 +115,7 @@ while True:
 
         if DEBUG_DRAW:
             print("Ball: angle={}° dist={}mm".format(angle_h, dist_mm))
-            
+
         ball_last_seen_angle = max(0, min(255, angle_h + 90))
     else:
         spi_list[1] = 0
