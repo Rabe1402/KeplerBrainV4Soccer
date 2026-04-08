@@ -36,9 +36,9 @@ int ground_sens_id;             // ID des aktuell kleinsten Sensors
 
 // Line escape logic
 int line_first_sensor_id = -1;  // Erster Sensor der Linie erkannt hat
-int line_escape_start_time = 0; // Timer-Start für Ausweichbewegung
+unsigned long line_escape_start_time = 0; // Timer-Start für Ausweichbewegung
 int line_escape_duration = 400; // ANPASSEN: Dauer der Ausweichbewegung (ms)
-int line_last_seen_millis = 0;
+unsigned long line_last_seen_millis = 0; // Letzter Zeitpunkt, an dem die Linie gesehen wurde
 int allow_sens_again = 10; //time to wait to realow ground sens
 
 bool sens_allowed = true;
@@ -49,7 +49,7 @@ bool sens_allowed = true;
 int ball_last_seen_ang = 0;     // Letzter Winkel wo Ball gesehen wurde
 int ball_target = 0;            // Ziel-Heading für Ball
 bool ball_target_locked = false;// Ball-Target eingerastet?
-int last_ball_locked_time = 0;  // Letztes Lock-Update
+unsigned long last_ball_locked_time = 0;  // Letztes Lock-Update
 
 //-----------------------------------------------------------------------------
 // MENU SYSTEM

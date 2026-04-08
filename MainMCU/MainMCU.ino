@@ -398,7 +398,7 @@ void _default_statemachiene()
     return;;
   }
   // move to ball
-  if (SPICAM_Data1 == 1 && SPICAM_Data2 < 85 && SPICAM_Data2 > 95 && current_state != 2) //rotate to ball if angle is bigger than 5° and smaller than 175° (also ignore if ball is behind us)
+  if (SPICAM_Data1 == 1 && SPICAM_Data2 < 85 || SPICAM_Data2 > 95 && current_state != 2) //rotate to ball if angle is bigger than 5° and smaller than 175° (also ignore if ball is behind us)
   {
     if (last_state != 1) //set last_state for code exit block
     {
@@ -409,7 +409,7 @@ void _default_statemachiene()
     return;;
   }
 
-  if (SPICAM_Data1 == 1 && (SPICAM_Data2 >= 85 || SPICAM_Data2 <= 95)) //shoot if ball is in front of us (also ignore if ball is behind us)
+  if (SPICAM_Data1 == 1 && (SPICAM_Data2 >= 85 && SPICAM_Data2 <= 95)) //shoot if ball is in front of us (also ignore if ball is behind us)
   {
     if (last_state != 2) //set last_state for code exit block
     {

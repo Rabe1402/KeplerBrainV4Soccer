@@ -155,7 +155,7 @@ void KEPLER_UPDATE()
       WRITE_LED(L2, 1);
       WRITE_LED(L3, 0);
     }
-    while (500 > ina231_bus_voltage && ina231_bus_voltage < 9000)
+    while (ina231_bus_voltage > 500 && ina231_bus_voltage < 9000)
     {
       WRITE_LED(L1,1);
       SLEEP(300);      //Fick alles wenn die baterie zu leer ist
