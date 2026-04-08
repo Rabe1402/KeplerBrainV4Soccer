@@ -34,7 +34,7 @@ void _motor_test()
   WRITE_MOTOR(M4,00);
   WRITE_LCD_CLEAR();
   WRITE_LCD_TEXT(1, 1, "Test Complete :)");
-
+  _log("TEST", " [" + "MOTOR" + "] " + "Test Complete :) going back to menu in 1s");
   SLEEP(1000);
 }
 
@@ -47,12 +47,13 @@ void _imu_test()
 
   while(READ_BUTTON_CLOSED(B1) != 1)
   {
+    KEPLER_UPDATE();
     old_time = millis();
     
     yaw = READ_I2C_BNO055_YAW();
     pitch = READ_I2C_BNO055_PITCH();
     roll = READ_I2C_BNO055_ROLL();
-    _log("imu_read", "Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll));
+    _log("TEST"," [" + "IMU" + "] " + "Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll)+" DT: " + String(millis() - old_time) + "ms"+ "to get out press B2");
 
     WRITE_LCD_TEXT(1, 2, "Y"   + String(yaw)   );
     WRITE_LCD_TEXT(5, 2, " |P" + String(pitch) );
@@ -89,11 +90,15 @@ void _ground_test()
   int old_time;
   bool full_speed = false;
   int mode = 0;
+  
+  _log("TEST", " [" + "GROUND" + "] " + "Starting ground sensor test, press B2 to switch mode, B3 to toggle full speed, B1 to exit");
+  _log("TEST", " [" + "GROUND" + "] " + "SENSORS: fc: " + String(fc) + " fr: " + String(fr) + " rc: " + String(rc) + " br: " + String(br) + " bc: " + String(bc) + " bl: " + String(bl) + " lc: " + String(lc) + " fl: " + String(fl));
 
   WRITE_LCD_TEXT(1, 2, "fc fl fr ll rr");
 
   while(READ_BUTTON_CLOSED(B1) != 1)
   {
+    KEPLER_UPDATE();
     old_time = millis();
 
     _SPIs();
@@ -113,6 +118,7 @@ void _ground_test()
         WRITE_LCD_TEXT(1, 1, String(bl) + " ");
         WRITE_LCD_TEXT(4, 1, String(br) + " ");
         WRITE_LCD_TEXT(7, 1, String(bc) + "    ");
+        WRITE_LCD_TEXT(11, 1, String((fc + fr + rc + br + bc + bl + lc + fl) / 8));
       break;;
     }
     
@@ -135,6 +141,7 @@ void _ground_test()
     }
     if (READ_BUTTON_CLOSED(B2) == 1)
     {
+      WRITE_LCD_CLEAR();
       mode++;
       if (mode > 1)
       {
@@ -154,10 +161,7 @@ void _ground_test()
         break;;
       }
 
-      WRITE_LCD_TEXT(16, 2, String(mode));
-
       delay(1000);
-
 
     }
 
@@ -166,10 +170,12 @@ void _ground_test()
   WRITE_LCD_TEXT(1, 2, "o");
   while(READ_BUTTON_CLOSED(B2) == 1){}
   WRITE_LCD_CLEAR();
+  if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 }
 
 void _batt_test()
 {
+  _log("TEST", " [" + "BAT" + "] " + "please reffer to the KEPLERUPDATE log messages for bat info! Pres B2 to exit")
   WRITE_LCD_TEXT(1, 2, "x       ");
   int  old_time;
   bool full_speed = false;
@@ -177,26 +183,27 @@ void _batt_test()
 
   while(READ_BUTTON_CLOSED(B1) != 1)
   {
+    KEPLER_UPDATE();
     old_time = millis();
     
-    /*switch (mode)
+    switch (mode)
     {
       case 0:
-        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_BUS_VOLTAGE()) + "mV         ");
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_BUS_VOLTAGE()/1000) + " V         ");
       break;;
 
       case 1:
-        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_SHUNT_VOLTAGE()) + "idk 1µV              ");
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_SHUNT_VOLTAGE()) + " shunt Voltage             ");
       break;;
 
       case 2:
-        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_CURRENT()) + "mA                 ");
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_CURRENT()) + " mA                 ");
       break;;
 
       case 3:
-        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_POWER()) + "idk                  ");
+        WRITE_LCD_TEXT(1, 1, String(READ_I2C_INA231_POWER()/10000) + " W                  ");
       break;;
-    }*/
+    }
     
 
     if (!full_speed){delay(100);}
@@ -213,7 +220,7 @@ void _batt_test()
       }
       delay(1000);
 
-      WRITE_LCD_TEXT(3, 2, "DT: " + String(millis() - old_time));
+      WRITE_LCD_TEXT(3, 2, "DT: " + String(millis() - old_time) + "     ");
     }
     if (READ_BUTTON_CLOSED(B2) == 1)
     {
@@ -230,6 +237,111 @@ void _batt_test()
     }
 
     WRITE_LCD_TEXT(3, 2, "DT: " + String(millis() - old_time) + "                  ");
+  }
+
+  WRITE_LCD_TEXT(1, 2, "o");
+  while(READ_BUTTON_CLOSED(B2) == 1){}
+  WRITE_LCD_CLEAR();
+}
+
+void _camera_test()
+{
+  WRITE_LCD_TEXT(1, 2, "x       ");
+  _log("TEST", " [" + "CAM" + "] " + "Starting camera test, press B2 to switch mode, B3 to toggle full speed, B1 to exit");
+  _log("TEST", " [" + "CAM" + "] " + "SENSORS: Data0: " + String(SPICAM_Data0) + " Data1: " + String(SPICAM_Data1) + " Data2: " + String(SPICAM_Data2) + " Data3: " + String(SPICAM_Data3) + " Data4: " + String(SPICAM_Data4) + " Data5: " + String(SPICAM_Data5) + " Data6: " + String(SPICAM_Data6) + " Data7: " + String(SPICAM_Data7));
+  int old_time;
+  bool full_speed = false;
+  int mode = 0;
+ 
+
+  while(READ_BUTTON_CLOSED(B1) != 1)
+  {
+    KEPLER_UPDATE();
+    old_time = millis();
+
+    _SPIs();
+    
+    switch (mode)
+    {
+      case 0:
+        WRITE_LCD_TEXT(1,  1, String(SPICAM_Data0) + "        ");
+      break;;
+
+      case 1:
+        WRITE_LCD_TEXT(1,  1, String(SPICAM_Data1) + "        ");
+      break;;
+
+      case 2:
+        WRITE_LCD_TEXT(1,  1, String(SPICAM_Data2) + "        ");
+      break;;
+
+      case 3:
+        WRITE_LCD_TEXT(1,  1, String(SPICAM_Data3) + "        ");
+      break;;
+
+      case 4:
+        WRITE_LCD_TEXT(1,  1, String(SPICAM_Data4) + "        ");
+      break;;
+      
+    }
+    
+    if (!full_speed){delay(100);}
+    if (READ_BUTTON_CLOSED(B3) == 1)
+    {
+          
+
+      full_speed = !full_speed;
+      if (full_speed)
+      {
+        WRITE_LCD_TEXT(11, 2, "fs:on ");
+      }
+      else
+      {
+        WRITE_LCD_TEXT(11, 2, "fs:off");
+      }
+      delay(1000);
+
+    }
+    if (READ_BUTTON_CLOSED(B2) == 1)
+    {
+      mode++;
+      if (mode > 4)
+      {
+        mode = 0;
+      }
+
+      WRITE_LCD_TEXT(1, 1, "              ");
+
+      switch (mode)
+      {
+        case 0:
+          WRITE_LCD_TEXT(1, 2, "0: trigger      ");
+        break;;
+  
+        case 1:
+          WRITE_LCD_TEXT(1, 2, "1: Ball in sight");
+        break;;
+
+        case 2:
+          WRITE_LCD_TEXT(1, 2, "2: ang to Ball  ");
+        break;;
+
+        case 3:
+          WRITE_LCD_TEXT(1, 2, "3: MSB in mm    ");
+        break;;
+
+        case 4:
+          WRITE_LCD_TEXT(1, 2, "4: LSB in mm    ");
+        break;;
+
+        
+      }
+
+      delay(1000);
+
+
+    }
+
   }
 
   WRITE_LCD_TEXT(1, 2, "o");

@@ -1,9 +1,9 @@
 int counter; //globaler counter 
-int counter_now_power; // now power counter variable um power metering alle 100 runs zu ermöglichen 
+int counter_now_power = 0; // now power counter variable um power metering alle 100 runs zu ermöglichen 
 
 //pwoer sense variablen
-static volatile float ina231_shunt_voltage = 240000.0f;  // mV
-static volatile float ina231_bus_voltage = 12000.0f;    // V
+static volatile float ina231_shunt_voltage = 000000.0f;  // mV
+static volatile float ina231_bus_voltage = 00000.0f;    // V
 static volatile float ina231_current = 0.0f;        // A
 static volatile float ina231_power = 0.0f;          // W
 static volatile uint32_t ina231_error_count = 0;    // error count variable für debug zwecke 
@@ -11,10 +11,23 @@ static volatile uint32_t ina231_error_count = 0;    // error count variable für
 void KEPLER_UPDATE()
 {
   counter++;  // kepler update counter um stetige messungen wie powersens zu ermöglichen 
+  if (counter > 10000) //counter reset alle 10k runs um overflow zu vermeiden 
+  {
+    counter = 0;
+    counter_now_power = 0; //reset power counter damit auch alle 100 runs im ersten teil des programms gemessen wird 
+    _log("KEPLER_UPDATE", "Counter reset to avoid overflow");
+  }
 
+  //brake button to enter menu mode
+  if (READ_BUTTON_CLOSED(B2) == 1)
+  {
+    run = false; // stoppt den Hauptloop, damit
+    _log("MAIN" , "Run set to false by button press, entering menu mode");
+    delay(300); // debounce delay 
+  }
 
-  // power redaing und led writing alle 1000 mal 
-  if (counter = counter_now_power + 1000) 
+  // power redaing und led writing alle 100 mal und jedes mal in den ersten 100 runs
+  if (counter >= counter_now_power + 100 || counter < 100) 
   {
     #ifdef INA231_DEBUG
     Serial.println("Updating INA231 measurements...");
@@ -123,7 +136,6 @@ void KEPLER_UPDATE()
     Serial.print(ina231_error_count);
     Serial.println(); //nur für neue zeile so , dass der code gut ausschaut
     #endif
-    SLEEP(100);
 
     //led steuerung
     if (ina231_bus_voltage > 12000)
@@ -143,17 +155,26 @@ void KEPLER_UPDATE()
       WRITE_LED(L2, 1);
       WRITE_LED(L3, 0);
     }
-    while (ina231_bus_voltage < 9000)
+    while (500 > ina231_bus_voltage && ina231_bus_voltage < 9000)
     {
       WRITE_LED(L1,1);
       SLEEP(300);      //Fick alles wenn die baterie zu leer ist
       WRITE_LED(L1,0);
       SLEEP(399);
     }
-
+    if (ina231_bus_voltage < 500) //zeige das der ina ein problem hat un keine spannung lesen kann
+    {
+      WRITE_LED(L1,1);
+      WRITE_LED(L2,1);
+      WRITE_LED(L3,1);
+    }
     //POWER READ END
-
-    
+    if (ina231_bus_voltage > 500)
+    {
+      _log("KEPLER_UPDATE", "Power readings updated: " + String(ina231_bus_voltage) + " V, " + String(ina231_current) + " A, " + String(ina231_power) + " W, errors: " + String(ina231_error_count));
+    } else {
+      _log("KEPLER_UPDATE", "Unable to get Power data... INA231 Errors: " + String(ina231_error_count));
+    }
 
     counter_now_power = counter;  //counter schaltung 
   }

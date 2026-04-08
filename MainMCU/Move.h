@@ -45,15 +45,14 @@ void rotate_to(int target, int precision, int precision_switch,  float speed, fl
     return;
   }
 
+  out = error * error * error;
   if (abs(error) < precision_switch)
   {
     //use precise speed
-    out = error * error * error;
     out *= speed_precise;
   }else
   {
     //use general speed
-    out = error * error * error;
     out *= speed;
     out += base_speed;
   }
@@ -61,6 +60,50 @@ void rotate_to(int target, int precision, int precision_switch,  float speed, fl
 
   set_motors(out, out, out, out);
 }
+
+void rotate_to_quadratic(int target, int precision, int precision_switch,  float speed, float speed_precise, int base_speed)
+{
+//  _imu_read();
+  int out;
+  error = yaw - target;
+
+  if (error >= 180) {
+    error = -(360 - error);
+    base_speed = -base_speed;
+  //  _log("rotate to 2", String(error));
+  }
+
+  _log("rotate to", String(error) + " " + String(precision));
+
+  if (abs(error) < precision)
+  {
+    return;
+  }
+
+  out = error * error;
+  if (abs(error) < precision_switch)
+  {
+    //use precise speed
+    out *= speed_precise;
+  }else
+  {
+    //use general speed
+    out *= speed;
+    out += base_speed;
+  }
+
+  if ( error < 0) out = -out;
+  
+
+  set_motors(out, out, out, out);
+}
+
+void rotate(int speed)
+{
+  set_motors(speed, speed, speed, speed);
+}
+
+
 
 void move_angle(int target, int Speed)
 {
@@ -78,8 +121,8 @@ void move_angle_correction(int target, int Speed, int angle_precision)
   //  _imu_read();
 
   error = yaw - target;
-  if (! error < angle_precision)
-  {
+  if ( !(abs(error) < angle_precision) )
+  { 
 
     _log("move angle correction", String(error));
 
@@ -99,4 +142,25 @@ void move_angle_correction(int target, int Speed, int angle_precision)
   int XMotors = sin( (target + 45) * (M_PI / 180.0) ) * Speed ;
 
   set_motors(YMotors, -XMotors, -YMotors, XMotors);
+}
+
+void orbit_to_zero (int target, int Speed, int orbit_radius,)
+{
+    //_imu_read();
+
+  error = yaw - target;
+  if (error >= 180) {
+    error = -(360 - error);
+  }
+
+  // Y 1,3; cos(target - 45)
+  int YMotors= cos( (target - 45) * (M_PI / 180.0) ) * Speed ;
+
+  // X 2,4; sin(target - 45)
+  int XMotors = sin( (target - 45) * (M_PI / 180.0) ) * Speed ;
+
+  // Orbit correction
+  int orbit_correction = error * orbit_radius;
+  
+  set_motors(YMotors + orbit_correction, -XMotors + orbit_correction, -YMotors + orbit_correction, XMotors + orbit_correction);
 }
