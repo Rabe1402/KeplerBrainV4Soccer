@@ -68,7 +68,7 @@ void setup()
 void loop()
 {
   KEPLER_UPDATE(); //um hintergrund aktionen automatisch auszuführen 
-  _log("void loop", "run is " + String(run));
+  _log("VOID LOOP", "run is " + String(run));
   if (!run)
   {
     if (READ_BUTTON_CLOSED(B1) == 1 && selection_cursor > 0){selection_cursor--;WRITE_LCD_TEXT(1, 2, "o");}
@@ -88,19 +88,20 @@ void loop()
 
       selection = selection_cursor;
 
-      _log("main loop", "Selected Program" + String(selection));
+      _log("MAIN LOOP", "Selected Program" + String(selection));
 
       run = true;
       WRITE_LCD_CLEAR(); // to clean up dislplay. And hopefully find wehre it hangs 
     }
   }else
   {
-    _log("void loop", "run is true");
+    _log("VOID LOOP", "run is true");
     switch ( selection )
     {
       case 0:
         WRITE_LCD_TEXT(1, 2, "Default Code");
         delay(700);
+        _log("CASE SWITCH", "Starting default code");
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
         // run here the first time to get two set of data 
@@ -112,6 +113,7 @@ void loop()
           WRITE_LCD_CLEAR();
           KEPLER_UPDATE();
           _default_statemachiene();
+         
         }
 
       break;;
@@ -120,6 +122,7 @@ void loop()
         KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "Motor Test");
         delay(700);
+        _log("CASE SWITCH", "Starting motor test");
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
         _motor_test();
@@ -132,6 +135,7 @@ void loop()
         KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "IMU Test");
         delay(700);
+        _log("CASE SWITCH", "Starting IMU test");
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
         _imu_test();
@@ -144,6 +148,7 @@ void loop()
         KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "Ground Test");
         delay(700);
+        _log("CASE SWITCH", "Starting ground sensor test");
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
         _ground_test();
@@ -156,6 +161,7 @@ void loop()
         KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "Show BATT info");
         delay(700);
+        _log("CASE SWITCH", "Starting battery test");
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
         _batt_test();
@@ -184,7 +190,7 @@ void loop()
       case 7:
         KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "DUMP LOG"); 
-        _log("case 7", "dumped log with size " + String(debug_log.size()) + " on time; " + String(millis()));
+        _log("CASE SWITCH", "dumped log with size " + String(debug_log.size()) + " on time; " + String(millis()));
         _log_Dump();
         
       break;;
@@ -193,6 +199,7 @@ void loop()
       case 8:
         KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "Camera Test");
+        _log("CASE SWITCH", "Starting camera test");
         delay(700);
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
         _camera_test();
@@ -200,6 +207,7 @@ void loop()
 
       case 9:
         WRITE_LCD_TEXT(1, 2, "Camera Test direct SPI read");
+        _log("CASE SWITCH", "Starting direct SPI read test");
         delay(700);
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
         while(true)
@@ -240,56 +248,11 @@ void loop()
 }
 
 
-void _default(){
-  _imu_read();
-  _SPIs();
-
-  ground_avg = (fc + fr + rc + br + bc + bl + lc + fl) / 8;
-  ground_sens_id = smallest_ground_sensor_id(ground_avg);
-
-  if (ground_smallest < -2)
-  {
-    //ground_millis = millis() + 200;
-    move_angle(ground_sens_id * 45, target_speed);
-    
-    motors(drive_m1, drive_m2, drive_m3, drive_m4, true);
-    delay(200);
-    return;;
-  }
-  
-  motors(drive_m1, drive_m2, drive_m3, drive_m4, true);
-
-  if(SPICAM_Data1 == 0)
-  {
-    ball_target_locked = false;  // Lock zurücksetzen wenn Ball weg
-    rotate(8);
-    WRITE_LCD_TEXT(1, 1, "NO BALL    ");
-  }
-  else
-  {
-    int cam_angle = _cam_data_calculation();
-
-    // Target nur neu setzen wenn noch nicht eingerastet
-    // oder Ball fast zentriert ist (< 2°)
-    if (!ball_target_locked || abs(cam_angle) < 2 || last_ball_locked_time + 250 < millis())
-    {
-      last_ball_locked_time = millis();
-      ball_target = yaw + cam_angle;
-      ball_target_locked = true;
-    }
-
-    WRITE_LCD_TEXT(1, 1, String(ball_target) + " " + String(cam_angle) + "   ");
-    //rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
-    move_angle(cam_angle, 40);
-  }
-  WRITE_LCD_TEXT(1, 2, String(counter));
-}
-
 void _default_statemachiene()
 {
   _SPIs();
   _imu_read();
-  _log("default statemachine", "running statemachine with state " + String(current_state));
+  _log("MAIN", "running statemachine with state " + String(current_state));
   WRITE_LCD_TEXT(1, 1, String(current_state) );
 
   //WRITE_LCD_TEXT(1, 2, String(counter) ); //debug
@@ -305,7 +268,7 @@ void _default_statemachiene()
       }else{
         rotate(-10); //should be (-target_speed /2 ) but for testing only -10
       }
-      _log("case 0", "ball last seen angle: " + String(ball_last_seen_ang));
+      _log("MAIN SWITCH", " [" + "STATE: " + String(current_state) + "] ""ball last seen angle: " + String(ball_last_seen_ang));
     }
     break;; //exit here
     
@@ -327,7 +290,7 @@ void _default_statemachiene()
       }
 
       //WRITE_LCD_TEXT(1, 1, String(ball_target) + " " + String(cam_angle) + "   ");
-      _log("case 1", "ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
+      _log("MAIN", " [" + "STATE: " + String(current_state) + "] ""ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
       //rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
       //move_angle(cam_angle, 40);
     }
@@ -353,7 +316,7 @@ void _default_statemachiene()
       {        
         move_angle(error, target_speed); //move to ball if in target area
       }  
-      _log("case 2", "ball target: " + String(ball_target) + " cam angle: " + String(cam_angle) + " goal-angle: " + String(yaw_orbit_target) );
+      _log("MAIN", " [" + "STATE: " + String(current_state) + "] ""ball target: " + String(ball_target) + " cam angle: " + String(cam_angle) + " goal-angle: " + String(yaw_orbit_target) );
     }
     break;; //exit here
     
@@ -378,7 +341,7 @@ void _default_statemachiene()
         sens_allowed = true; // Sensoren wieder erlauben
       }      
 
-      _log("case 3", "line sensor: " + String(line_sens_id) + " line smallest: " + String(line_smallest) + " escape timer: " + String(millis() - line_escape_start_time) );
+      _log("MAIN", " [" + "STATE: " + String(current_state) + "] ""line sensor: " + String(line_sens_id) + " line smallest: " + String(line_smallest) + " escape timer: " + String(millis() - line_escape_start_time) );
     }
     break;; //exit here (last one not needed ig)
   }

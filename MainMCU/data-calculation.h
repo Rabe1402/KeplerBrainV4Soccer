@@ -114,5 +114,5 @@ void _imu_read()
   yaw = READ_I2C_BNO055_YAW();
   pitch = READ_I2C_BNO055_PITCH();
   roll = READ_I2C_BNO055_ROLL();
-  _log("imu_read", "Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll));
+  _log("SENSOR DATA",  " [" + "IMU" + "] " "Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll));
 }

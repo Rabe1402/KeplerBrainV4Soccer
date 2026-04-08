@@ -169,8 +169,12 @@ void KEPLER_UPDATE()
       WRITE_LED(L3,1);
     }
     //POWER READ END
-
-    _log("KEPLER_UPDATE", "Power readings updated: " + String(ina231_bus_voltage) + " mV, " + String(ina231_current) + " mA, " + String(ina231_power) + " W, errors: " + String(ina231_error_count));
+    if (ina231_bus_voltage > 500)
+    {
+      _log("KEPLER_UPDATE", "Power readings updated: " + String(ina231_bus_voltage) + " V, " + String(ina231_current) + " A, " + String(ina231_power) + " W, errors: " + String(ina231_error_count));
+    } else {
+      _log("KEPLER_UPDATE", "Unable to get Power data... INA231 Errors: " + String(ina231_error_count));
+    }
 
     counter_now_power = counter;  //counter schaltung 
   }
