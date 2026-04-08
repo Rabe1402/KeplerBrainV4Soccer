@@ -284,9 +284,9 @@ void _default_statemachiene(){
       ball_last_seen_ang = _cam_data_calculation();
       if(ball_last_seen_ang > -90) //MUSS ANGEPASST WERDEN IDK OB SO RICHTIG 
       {
-        rotate( 10);
+        rotate( 10); //should be ( target_speed /2 ) but for testing only 10
       }else{
-        rotate(-10);
+        rotate(-10); //should be (-target_speed /2 ) but for testing only -10
       }
 
     break;; //exit here
@@ -296,9 +296,9 @@ void _default_statemachiene(){
     case 1: // rotate to ball
     {
       int cam_angle = _cam_data_calculation();
-      rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
+      rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0); //why so low speed??
 
-      // Target nur neu setzen wenn noch nicht
+      // Target nur neu setzen wenn noch nicht to avoid over steer 
       // oder Ball fast zentriert ist (< 2°)
       // und fix alle 250ms
       if (!ball_target_locked || abs(cam_angle) < 2 || last_ball_locked_time + 250 < millis())
@@ -316,12 +316,12 @@ void _default_statemachiene(){
     
     //--------------
     
-    case 2: // shooth
+    case 2: // orbit around ball till yaw is 0 
     {
       int cam_angle = _cam_data_calculation();
       ball_target = yaw + cam_angle;
 
-      orbit_to_zero(ball_target, target_speed/2, 30);
+      orbit_to_zero(ball_target, (target_speed/2), 30); //not working right idk why 
     }
     break;; //exit here
     
@@ -340,18 +340,9 @@ void _default_statemachiene(){
       {
         line_first_sensor_id = -1;  // Reset für nächste Erkennung
 
-        // Wechsle zurück zu search oder move_to_ball je nach Ball-Status
-        /*if (SPICAM_Data1 == 0) 
-        {
-          current_state = 0; // search
-          sens_allowed = true;
-          return;;
-        } else 
-        {
-          current_state = 1; // move to ball
-          sens_allowed = true;
-          return;; 
-        }*/
+        current_state = last_state; // Rückkehr zum vorherigen Zustand
+        line_escape_start_time = 0; // Reset Timer
+        sens_allowed = true; // Sensoren wieder erlauben
       }      
 
       
@@ -370,6 +361,10 @@ void _default_statemachiene(){
   //Linie (muss ganz oben bleiben) 
   if (millis() - line_escape_start_time > line_escape_duration && line_escape_start_time != 0) 
   {
+    if (last_state != 3) //set last_state for code exit block
+    {
+      last_state = current_state;
+    }
     current_state = 3;
     return;;
   }
@@ -386,7 +381,10 @@ void _default_statemachiene(){
       sens_allowed = false;
       line_escape_start_time = millis();
     }
-    
+    if (last_state != 3) //set last_state for code exit block
+    {
+      last_state = current_state;
+    }
     current_state = 3; //line
     return;;
   }
@@ -394,12 +392,22 @@ void _default_statemachiene(){
   // search
   if (SPICAM_Data1 == 0)
   {
+
+    if (last_state != 0) //set last_state for code exit block
+    {
+      last_state = current_state;
+    }
     current_state = 0; //search
+
     return;;
   }
   // move to ball
   if (SPICAM_Data1 == 1 && SPICAM_Data2 < 85 && SPICAM_Data2 > 95 && current_state != 2) //rotate to ball if angle is bigger than 5° and smaller than 175° (also ignore if ball is behind us)
   {
+    if (last_state != 1) //set last_state for code exit block
+    {
+      last_state = current_state;
+    }
     current_state = 1; //rotate to ball
 
     return;;
@@ -407,6 +415,10 @@ void _default_statemachiene(){
 
   if (SPICAM_Data1 == 1 && (SPICAM_Data2 >= 85 || SPICAM_Data2 <= 95)) //shoot if ball is in front of us (also ignore if ball is behind us)
   {
+    if (last_state != 2) //set last_state for code exit block
+    {
+      last_state = current_state;
+    }
     current_state = 2; //orbit to zero and "shoot"
 
     return;;

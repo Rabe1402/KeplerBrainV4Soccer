@@ -11,6 +11,7 @@ int serial_baud = 115200;
 // STATE MACHINE
 //-----------------------------------------------------------------------------
 int current_state = 0;  // 0=Search, 1=Move to ball, 2=Shoot, 3=Line
+int last_state = 0;     // Letzter Zustand, für Rückkehr nach Liniencode
 bool run = false;       // Hauptprogramm läuft
 int error = 0;          // Fehler für rotate_to Funktionen
 
