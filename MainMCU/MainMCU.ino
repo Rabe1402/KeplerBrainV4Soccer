@@ -281,7 +281,8 @@ void _default_statemachiene(){
   {
     case 0: // search
     //rotate (preferabbly in last seen dir) till found
-      if(ball_last_seen_ang > 180)
+      ball_last_seen_ang = _cam_data_calculation();
+      if(ball_last_seen_ang > -90) //MUSS ANGEPASST WERDEN IDK OB SO RICHTIG 
       {
         rotate( 10);
       }else{
@@ -315,7 +316,7 @@ void _default_statemachiene(){
     
     //--------------
     
-    case 2: // shoot
+    case 2: // shooth
     {
       int cam_angle = _cam_data_calculation();
       ball_target = yaw + cam_angle;

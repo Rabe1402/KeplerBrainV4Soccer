@@ -114,9 +114,11 @@ while True:
 
         if DEBUG_DRAW:
             print("Ball: angle={}° dist={}mm".format(angle_h, dist_mm))
+            
+        ball_last_seen_angle = max(0, min(255, angle_h + 90))
     else:
         spi_list[1] = 0
-        spi_list[2] = 90
+        spi_list[2] = ball_last_seen_angle #sende den letzen winkel wenn kein ball insicht ist, damit dder Roboter sich dort hin drehen kann
         spi_list[3] = 0
         spi_list[4] = 0
         spi_list[5] = 0
