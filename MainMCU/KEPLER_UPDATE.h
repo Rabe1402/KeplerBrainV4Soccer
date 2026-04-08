@@ -17,7 +17,15 @@ void KEPLER_UPDATE()
     counter_now_power = 0; //reset power counter damit auch alle 100 runs im ersten teil des programms gemessen wird 
     _log("KEPLER_UPDATE", "Counter reset to avoid overflow");
   }
-  
+
+  //brake button to enter menu mode
+  if (READ_BUTTON_CLOSED(B2) == 1)
+  {
+    run = false; // stoppt den Hauptloop, damit
+    _log("MAIN" , "Run set to false by button press, entering menu mode");
+    delay(300); // debounce delay 
+  }
+
   // power redaing und led writing alle 100 mal und jedes mal in den ersten 100 runs
   if (counter >= counter_now_power + 100 || counter < 100) 
   {
