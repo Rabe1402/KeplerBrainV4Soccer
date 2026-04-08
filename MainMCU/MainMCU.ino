@@ -268,7 +268,7 @@ void _default_statemachiene()
       }else{
         rotate(-10); //should be (-target_speed /2 ) but for testing only -10
       }
-      _log("MAIN SWITCH", " [" + "STATE: " + String(current_state) + "] ""ball last seen angle: " + String(ball_last_seen_ang));
+      _log("MAIN SWITCH", "[STATE: " + String(current_state) + "] ball last seen angle: " + String(ball_last_seen_ang));
     }
     break;; //exit here
     
@@ -290,7 +290,7 @@ void _default_statemachiene()
       }
 
       //WRITE_LCD_TEXT(1, 1, String(ball_target) + " " + String(cam_angle) + "   ");
-      _log("MAIN", " [" + "STATE: " + String(current_state) + "] ""ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
+      _log("MAIN", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
       //rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
       //move_angle(cam_angle, 40);
     }
@@ -316,7 +316,7 @@ void _default_statemachiene()
       {        
         move_angle(error, target_speed); //move to ball if in target area
       }  
-      _log("MAIN", " [" + "STATE: " + String(current_state) + "] ""ball target: " + String(ball_target) + " cam angle: " + String(cam_angle) + " goal-angle: " + String(yaw_orbit_target) );
+      _log("MAIN", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle) + " goal-angle: " + String(yaw_orbit_target));
     }
     break;; //exit here
     
@@ -341,7 +341,7 @@ void _default_statemachiene()
         sens_allowed = true; // Sensoren wieder erlauben
       }      
 
-      _log("MAIN", " [" + "STATE: " + String(current_state) + "] ""line sensor: " + String(line_sens_id) + " line smallest: " + String(line_smallest) + " escape timer: " + String(millis() - line_escape_start_time) );
+      _log("MAIN", "[STATE: " + String(current_state) + "] line sensor: " + String(line_first_sensor_id) + " line smallest: " + String(ground_smallest) + " escape timer: " + String(millis() - line_escape_start_time));
     }
     break;; //exit here (last one not needed ig)
   }

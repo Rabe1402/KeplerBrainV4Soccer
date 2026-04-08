@@ -34,7 +34,7 @@ void _motor_test()
   WRITE_MOTOR(M4,00);
   WRITE_LCD_CLEAR();
   WRITE_LCD_TEXT(1, 1, "Test Complete :)");
-  _log("TEST", " [" + "MOTOR" + "] " + "Test Complete :) going back to menu in 1s");
+  _log("TEST", "[MOTOR] Test Complete :) going back to menu in 1s");
   SLEEP(1000);
 }
 
@@ -53,7 +53,7 @@ void _imu_test()
     yaw = READ_I2C_BNO055_YAW();
     pitch = READ_I2C_BNO055_PITCH();
     roll = READ_I2C_BNO055_ROLL();
-    _log("TEST"," [" + "IMU" + "] " + "Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll)+" DT: " + String(millis() - old_time) + "ms"+ "to get out press B2");
+    _log("TEST", "[IMU] Y" + String(yaw) + " P" + String(pitch) + " R" + String(roll) + " DT: " + String(millis() - old_time) + "ms to get out press B2");
 
     WRITE_LCD_TEXT(1, 2, "Y"   + String(yaw)   );
     WRITE_LCD_TEXT(5, 2, " |P" + String(pitch) );
@@ -91,8 +91,8 @@ void _ground_test()
   bool full_speed = false;
   int mode = 0;
   
-  _log("TEST", " [" + "GROUND" + "] " + "Starting ground sensor test, press B2 to switch mode, B3 to toggle full speed, B1 to exit");
-  _log("TEST", " [" + "GROUND" + "] " + "SENSORS: fc: " + String(fc) + " fr: " + String(fr) + " rc: " + String(rc) + " br: " + String(br) + " bc: " + String(bc) + " bl: " + String(bl) + " lc: " + String(lc) + " fl: " + String(fl));
+  _log("TEST", "[GROUND] Starting ground sensor test, press B2 to switch mode, B3 to toggle full speed, B1 to exit");
+  _log("TEST", "[GROUND] SENSORS: fc: " + String(fc) + " fr: " + String(fr) + " rc: " + String(rc) + " br: " + String(br) + " bc: " + String(bc) + " bl: " + String(bl) + " lc: " + String(lc) + " fl: " + String(fl));
 
   WRITE_LCD_TEXT(1, 2, "fc fl fr ll rr");
 
@@ -175,7 +175,7 @@ void _ground_test()
 
 void _batt_test()
 {
-  _log("TEST", " [" + "BAT" + "] " + "please reffer to the KEPLERUPDATE log messages for bat info! Pres B2 to exit")
+  _log("TEST", "[BAT] please reffer to the KEPLERUPDATE log messages for bat info! Press B2 to exit");
   WRITE_LCD_TEXT(1, 2, "x       ");
   int  old_time;
   bool full_speed = false;
@@ -247,8 +247,8 @@ void _batt_test()
 void _camera_test()
 {
   WRITE_LCD_TEXT(1, 2, "x       ");
-  _log("TEST", " [" + "CAM" + "] " + "Starting camera test, press B2 to switch mode, B3 to toggle full speed, B1 to exit");
-  _log("TEST", " [" + "CAM" + "] " + "SENSORS: Data0: " + String(SPICAM_Data0) + " Data1: " + String(SPICAM_Data1) + " Data2: " + String(SPICAM_Data2) + " Data3: " + String(SPICAM_Data3) + " Data4: " + String(SPICAM_Data4) + " Data5: " + String(SPICAM_Data5) + " Data6: " + String(SPICAM_Data6) + " Data7: " + String(SPICAM_Data7));
+  _log("TEST", "[CAM] Starting camera test, press B2 to switch mode, B3 to toggle full speed, B1 to exit");
+  _log("TEST", "[CAM] SENSORS: Data0: " + String(SPICAM_Data0) + " Data1: " + String(SPICAM_Data1) + " Data2: " + String(SPICAM_Data2) + " Data3: " + String(SPICAM_Data3) + " Data4: " + String(SPICAM_Data4) + " Data5: " + String(SPICAM_Data5) + " Data6: " + String(SPICAM_Data6) + " Data7: " + String(SPICAM_Data7));
   int old_time;
   bool full_speed = false;
   int mode = 0;
