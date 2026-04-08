@@ -63,7 +63,6 @@ int selection = 0;
 bool debug = true;
 bool debug_over_serial = true;
 std::vector<String> debug_log = {"Log initialized!"};
-String log_message = "";
 
 //-----------------------------------------------------------------------------
 // IMU SENSOR

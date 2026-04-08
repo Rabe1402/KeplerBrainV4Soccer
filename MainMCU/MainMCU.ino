@@ -7,14 +7,27 @@ void _log(String name, String message)
 {
   if (debug)
   {
-    log_message = "\n## Got log from " + String(name) + " at " + String(millis()) + "ms:\n " + message;
+    // Timestamp + Name + Message als kompakten String
+    String log_entry = String(millis()) + " [" + name + "] " + message;
+    
     if (debug_over_serial)
     {
-      Serial.println(log_message);
-    }else
-    {
-      debug_log.push_back(log_message);
+      Serial.println(log_entry);
     }
+    else
+    {
+      debug_log.push_back(log_entry);
+    }
+  }
+}
+
+void _log_Dump()
+{
+  Serial.println("--- Log Dump Start ---");
+  
+  for(int i = 0; i < debug_log.size(); i++)
+  {
+    Serial.println(debug_log[i]);
   }
 }
 
@@ -171,7 +184,9 @@ void loop()
       case 7:
         KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "DUMP LOG"); 
-
+        _log("case 7", "dumped log with size " + String(debug_log.size()) + " on time; " + String(millis()));
+        _log_Dump();
+        
       break;;
 
 
@@ -270,10 +285,11 @@ void _default(){
   WRITE_LCD_TEXT(1, 2, String(counter));
 }
 
-void _default_statemachiene(){
+void _default_statemachiene()
+{
   _SPIs();
   _imu_read();
-
+  _log("default statemachine", "running statemachine with state " + String(current_state));
   WRITE_LCD_TEXT(1, 1, String(current_state) );
 
   //WRITE_LCD_TEXT(1, 2, String(counter) ); //debug
@@ -281,6 +297,7 @@ void _default_statemachiene(){
   {
     case 0: // search
     //rotate (preferabbly in last seen dir) till found
+    {
       ball_last_seen_ang = _cam_data_calculation();
       if(ball_last_seen_ang > -90) //MUSS ANGEPASST WERDEN IDK OB SO RICHTIG 
       {
@@ -288,7 +305,8 @@ void _default_statemachiene(){
       }else{
         rotate(-10); //should be (-target_speed /2 ) but for testing only -10
       }
-
+      _log("case 0", "ball last seen angle: " + String(ball_last_seen_ang));
+    }
     break;; //exit here
     
     //--------------
@@ -309,6 +327,7 @@ void _default_statemachiene(){
       }
 
       //WRITE_LCD_TEXT(1, 1, String(ball_target) + " " + String(cam_angle) + "   ");
+      _log("case 1", "ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
       //rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
       //move_angle(cam_angle, 40);
     }
@@ -334,12 +353,14 @@ void _default_statemachiene(){
       {        
         move_angle(error, target_speed); //move to ball if in target area
       }  
+      _log("case 2", "ball target: " + String(ball_target) + " cam angle: " + String(cam_angle) + " goal-angle: " + String(yaw_orbit_target) );
     }
     break;; //exit here
     
     //--------------
     
     case 3: // line
+    {
       // Verwende den gespeicherten Sensor für konsistente Ausweichrichtung
       move_angle((line_first_sensor_id * 45 + 180) % 360, target_speed/2);
 
@@ -357,8 +378,8 @@ void _default_statemachiene(){
         sens_allowed = true; // Sensoren wieder erlauben
       }      
 
-      
-
+      _log("case 3", "line sensor: " + String(line_sens_id) + " line smallest: " + String(line_smallest) + " escape timer: " + String(millis() - line_escape_start_time) );
+    }
     break;; //exit here (last one not needed ig)
   }
 
