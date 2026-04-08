@@ -170,7 +170,7 @@ void KEPLER_UPDATE()
     }
     //POWER READ END
 
-    
+    _log("KEPLER_UPDATE", "Power readings updated: " + String(ina231_bus_voltage) + " mV, " + String(ina231_current) + " mA, " + String(ina231_power) + " W, errors: " + String(ina231_error_count));
 
     counter_now_power = counter;  //counter schaltung 
   }
