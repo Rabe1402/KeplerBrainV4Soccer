@@ -171,15 +171,33 @@ void loop()
 
 
       case 5:
-        WRITE_LCD_TEXT(1, 2, "NOTHING HERE ");
+        WRITE_LCD_TEXT(1, 2, "YAW OFFSET CALIB ");
+        delay(200);
+        _imu_read();
+        yaw_offset = 0 - yaw_raw;
+        pitch_offset = 0 - pitch_raw;
+        roll_offset = 0 - roll_raw;
+        WRITE_LCD_CLEAR();
+        WRITE_LCD_TEXT(1, 1, "DONE");
+        delay(100);
+        WRITE_LCD_CLEAR();
+        _imu_read();
+        WRITE_LCD_TEXT(1, 1, String(yaw) + " " + String(pitch) + " " + String(roll));
+        WRITE_LCD_TEXT(1, 2, String(yaw_offset) + " " + String(pitch_offset) + " " + String(roll_offset));
         delay(1000);
-        exit;
+        WRITE_LCD_CLEAR();
+        run = false;
 
       break;;      
 
 
       case 6:
-        WRITE_LCD_TEXT(1, 2, "NOTHING HERE");
+        WRITE_LCD_TEXT(1, 2, "Move 0");
+        while(true)
+        {
+        rotate_to(0, 3, 3, 10, 10, 0 );
+        motors(drive_m1, drive_m2, drive_m3, drive_m4, true);
+        }
         delay(1000);
         exit;
 
@@ -243,15 +261,15 @@ void loop()
   }
 
   if (selection_cursor <= 0){WRITE_LCD_TEXT(1, 2, "   ()   +");}  
-  else if (selection_cursor >= 5){WRITE_LCD_TEXT(1, 2, "-  ()    ");}  
   else{WRITE_LCD_TEXT(1, 2, "-  ()   +");}  
 }
 
 
 void _default_statemachiene()
 {
-  _SPIs();
+  int cam_angle = _cam_data_calculation();
   _imu_read();
+  _SPIs();
   _log("MAIN", "running statemachine with state " + String(current_state));
   WRITE_LCD_TEXT(1, 1, String(current_state) );
 
@@ -262,7 +280,7 @@ void _default_statemachiene()
     //rotate (preferabbly in last seen dir) till found
     {
       ball_last_seen_ang = _cam_data_calculation();
-      if(ball_last_seen_ang > -90) //MUSS ANGEPASST WERDEN IDK OB SO RICHTIG 
+      if(ball_last_seen_ang > 0) //MUSS ANGEPASST WERDEN IDK OB SO RICHTIG 
       {
         rotate( 8); //should be ( target_speed /2 ) but for testing only 10
       }else{
@@ -276,20 +294,20 @@ void _default_statemachiene()
     
     case 1: // rotate to ball
     {
-      int cam_angle = _cam_data_calculation();
       
       // Target nur neu setzen wenn noch nicht to avoid over steer 
       // oder Ball fast zentriert ist (< 2°)
       // und fix alle 250ms
       if (!ball_target_locked || abs(cam_angle) < 2 || last_ball_locked_time + 250 < millis())
       {
+        
         last_ball_locked_time = millis();
-        ball_target = yaw + cam_angle;
         ball_target_locked = true;  
       }
-      //rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0); 
-      rotate(ball_target * 0.3);
-      WRITE_LCD_TEXT(1, 2, String(ball_target) + " " + String(cam_angle) + "   ");
+      //ball_target = yaw + cam_angle;
+      //rotate_quadratic(cam_angle, 2, 2, 11, 10, 0, 15); 
+      rotate(cam_angle * 0.3);
+      WRITE_LCD_TEXT(1, 2, String(cam_angle) + "   ");
       _log("MAIN", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
       //rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
       //move_angle(cam_angle, 40);
@@ -300,22 +318,38 @@ void _default_statemachiene()
     
     case 2: // orbit around ball till yaw is 0 
     {
-      int yaw_orbit_target = 0; //needs better mechanic once we do look for goal with cam but for now we just want to orbit to 0
-
-      int cam_angle = _cam_data_calculation();
       ball_target = yaw + cam_angle;
 
       error = yaw - yaw_orbit_target;
       if (error >= 180) {
         error = -(360 - error);
       }
-      if (error > 10 || error < -10) //if not in target area
+      /*if (error > 5 || error < -5) //if not in target area
       {
         orbit_to_zero(ball_target, (target_speed/2), 30); //not working right idk why
       }else
       {        
         move_angle(error, target_speed); //move to ball if in target area
-      }  
+      }  */
+      //orbit_around(ball_target, (target_speed/2), 30); //not working right idk why
+      _imu_read();
+      error = yaw - yaw_orbit_target;
+      if (yaw > 20 || yaw < -20) //if not in target area
+      {
+        if(yaw > 10)
+        {
+          orbit(25, -80, 3);
+        }
+        if(yaw < 10)
+        {
+          orbit(25, 80, -3);
+        }
+      }else 
+      {
+        move_angle(0, target_speed);
+        delay(600);
+      }
+      WRITE_LCD_TEXT(1, 2, String(yaw) + "   ");
       _log("MAIN", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle) + " goal-angle: " + String(yaw_orbit_target));
     }
     break;; //exit here
@@ -349,7 +383,7 @@ void _default_statemachiene()
   motors(drive_m1, drive_m2, drive_m3, drive_m4, true);
 
   // determine state
-  
+  /*
   // run here second time for second set of date and continous readings
   ground_avg = (fc + fr + rc + br + bc + bl + lc + fl) / 8;
   ground_sens_id = smallest_ground_sensor_id(ground_avg);
@@ -365,7 +399,7 @@ void _default_statemachiene()
     return;;
   }
 
-  /*if (ground_smallest < -2)
+  if (ground_smallest < -2)
   {
     line_last_seen_millis = millis();
     
@@ -385,6 +419,34 @@ void _default_statemachiene()
     return;;
   }
     */
+  ground_avg = (fc + fr + rc + br + bc + bl + lc + fl) / 8;
+  ground_sens_id = smallest_ground_sensor_id(ground_avg);
+
+  //Linie (muss ganz oben bleiben) 
+
+  /*if (ground_smallest < -5  )
+  {
+    current_state = 3; //line
+
+    line_last_seen_millis = millis();
+    
+    if (current_state != 3) {
+      if (line_first_seen_millis < millis() - 50){
+        line_first_sensor_id = ground_sens_id;
+      }
+      line_first_seen_millis = line_last_seen_millis;
+    }
+
+    return;
+  }
+
+
+  
+  if ((line_last_seen_millis > millis() - 250))
+  {
+    current_state = 3;
+    return;;
+  }*/
 
   // search
   if (SPICAM_Data1 == 0)
@@ -399,7 +461,7 @@ void _default_statemachiene()
     return;;
   }
   // move to ball
-  if (SPICAM_Data1 == 1 /*&& SPICAM_Data2 < 85 || SPICAM_Data2 > 95 && current_state != 2*/) //rotate to ball if angle is bigger than 5° and smaller than 175° (also ignore if ball is behind us)
+  if (SPICAM_Data1 == 1 && (_cam_data_calculation() > 10 || _cam_data_calculation() < -10)) //rotate to ball if angle is bigger than 5° and smaller than 175° (also ignore if ball is behind us)
   {
     if (last_state != 1) //set last_state for code exit block
     {
@@ -410,7 +472,7 @@ void _default_statemachiene()
     return;;
   }
 
-  /*if (SPICAM_Data1 == 1 && (SPICAM_Data2 >= 85 && SPICAM_Data2 <= 95)) //shoot if ball is in front of us (also ignore if ball is behind us)
+  if (SPICAM_Data1 == 1 && (_cam_data_calculation() <= 10 && _cam_data_calculation() >= -10)) //shoot if ball is in front of us (also ignore if ball is behind us)
   {
     if (last_state != 2) //set last_state for code exit block
     {
@@ -419,5 +481,5 @@ void _default_statemachiene()
     current_state = 2; //orbit to zero and "shoot"
 
     return;;
-  }*/
+  }
 }

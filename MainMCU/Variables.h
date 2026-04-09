@@ -18,13 +18,15 @@ int error = 0;          // Fehler für rotate_to Funktionen
 //-----------------------------------------------------------------------------
 // MOVEMENT
 //-----------------------------------------------------------------------------
-int target_speed = 40;  // ANPASSEN: Grundgeschwindigkeit
+int target_speed = 35;  // ANPASSEN: Grundgeschwindigkeit
 
 // Motor outputs
 int drive_m1;
 int drive_m2;
 int drive_m3;
 int drive_m4;
+
+int yaw_orbit_target = 0;
 
 //-----------------------------------------------------------------------------
 // LINE DETECTION
@@ -43,6 +45,7 @@ int allow_sens_again = 10; //time to wait to realow ground sens
 
 bool sens_allowed = true;
 
+unsigned long line_first_seen_millis = 0;
 //-----------------------------------------------------------------------------
 // BALL TRACKING
 //-----------------------------------------------------------------------------
@@ -50,6 +53,7 @@ int ball_last_seen_ang = 0;     // Letzter Winkel wo Ball gesehen wurde
 int ball_target = 0;            // Ziel-Heading für Ball
 bool ball_target_locked = false;// Ball-Target eingerastet?
 unsigned long last_ball_locked_time = 0;  // Letztes Lock-Update
+
 
 //-----------------------------------------------------------------------------
 // MENU SYSTEM
@@ -67,6 +71,14 @@ std::vector<String> debug_log = {"Log initialized!"};
 //-----------------------------------------------------------------------------
 // IMU SENSOR
 //-----------------------------------------------------------------------------
-uint16_t yaw;
+int16_t yaw;
 int16_t pitch;
 int16_t roll;
+
+int16_t yaw_raw;
+int16_t pitch_raw;
+int16_t roll_raw;
+
+int16_t yaw_offset = 0;
+int16_t pitch_offset = 0;
+int16_t roll_offset = 0;

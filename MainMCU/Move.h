@@ -35,7 +35,7 @@ void rotate_to(int target, int precision, int precision_switch,  float speed, fl
   if (error >= 180) {
     error = -(360 - error);
     base_speed = -base_speed;
-  //  _log("rotate to 2", String(error));
+  //  _log("rotate to", String(error));
   }
 
   _log("rotate to", String(error) + " " + String(precision));
@@ -61,39 +61,68 @@ void rotate_to(int target, int precision, int precision_switch,  float speed, fl
   set_motors(out, out, out, out);
 }
 
-void rotate_to_quadratic(int target, int precision, int precision_switch,  float speed, float speed_precise, int base_speed)
+void rotate_to_quadratic(int target, int precision, int precision_switch, float speed, float speed_precise, int base_speed, int max_out = 10)
 {
-//  _imu_read();
   int out;
   error = yaw - target;
 
   if (error >= 180) {
     error = -(360 - error);
     base_speed = -base_speed;
-  //  _log("rotate to 2", String(error));
   }
 
   _log("rotate to", String(error) + " " + String(precision));
 
-  if (abs(error) < precision)
-  {
-    return;
-  }
+  if (abs(error) < precision) return;
 
   out = error * error;
-  if (abs(error) < precision_switch)
-  {
-    //use precise speed
+
+  if (abs(error) < precision_switch) {
     out *= speed_precise;
-  }else
-  {
-    //use general speed
+    // Normalisieren: bei max error → max_out
+    int max_raw = (int)(precision_switch * precision_switch * speed_precise);
+    out = out * max_out / max(max_raw, 1);
+  } else {
     out *= speed;
     out += base_speed;
+    int max_raw = (int)(180 * 180 * speed) + abs(base_speed);
+    out = out * max_out / max(max_raw, 1);
   }
 
-  if ( error < 0) out = -out;
-  
+  if (error < 0) out = -out;
+
+  set_motors(out, out, out, out);
+}
+
+void rotate_quadratic(int target, int precision, int precision_switch, float speed, float speed_precise, int base_speed, int max_out)
+{
+  int out;
+  error = target;
+
+  if (error >= 180) {
+    error = -(360 - error);
+    base_speed = -base_speed;
+  }
+
+  _log("rotate to", String(error) + " " + String(precision));
+
+  if (abs(error) < precision) return;
+
+  out = error * error;
+
+  if (abs(error) < precision_switch) {
+    out *= speed_precise;
+    // Normalisieren: bei max error → max_out
+    int max_raw = (int)(precision_switch * precision_switch * speed_precise);
+    out = out * max_out / max(max_raw, 1);
+  } else {
+    out *= speed;
+    out += base_speed;
+    int max_raw = (int)(180 * 180 * speed) + abs(base_speed);
+    out = out * max_out / max(max_raw, 1);
+  }
+
+  if (error < 0) out = -out;
 
   set_motors(out, out, out, out);
 }
@@ -144,23 +173,39 @@ void move_angle_correction(int target, int Speed, int angle_precision)
   set_motors(YMotors, -XMotors, -YMotors, XMotors);
 }
 
-void orbit_to_zero (int target, int Speed, int orbit_radius)
+void orbit_around(int target, int Speed, int orbit_radius)
 {
-    //_imu_read();
-
   error = yaw - target;
   if (error >= 180) {
     error = -(360 - error);
   }
 
-  // Y 1,3; cos(target - 45)
-  int YMotors= cos( (target - 45) * (M_PI / 180.0) ) * Speed ;
+  int YMotors = cos((target - 45) * (M_PI / 180.0)) * Speed;
+  int XMotors = sin((target - 45) * (M_PI / 180.0)) * Speed;
 
-  // X 2,4; sin(target - 45)
-  int XMotors = sin( (target - 45) * (M_PI / 180.0) ) * Speed ;
-
-  // Orbit correction
   int orbit_correction = error * orbit_radius;
-  
-  set_motors(YMotors + orbit_correction, -XMotors + orbit_correction, -YMotors + orbit_correction, XMotors + orbit_correction);
+
+  int m1 =  YMotors + orbit_correction;
+  int m2 = -XMotors + orbit_correction;
+  int m3 = -YMotors + orbit_correction;
+  int m4 =  XMotors + orbit_correction;
+
+  // Größten Betrag finden
+  int max_val = max({abs(m1), abs(m2), abs(m3), abs(m4)});
+
+  // Normalisieren auf Speed, nur wenn max_val > 0
+  if (max_val > 0) {
+    m1 = m1 * Speed / max_val;
+    m2 = m2 * Speed / max_val;
+    m3 = m3 * Speed / max_val;
+    m4 = m4 * Speed / max_val;
+  }
+
+  set_motors(m1, m2, m3, m4);
 }
+void orbit(int speed, int ang, int spe)
+{
+  move_angle(ang, speed);
+  rotate(spe);
+}
+
