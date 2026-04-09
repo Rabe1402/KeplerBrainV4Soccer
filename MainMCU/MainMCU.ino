@@ -46,7 +46,7 @@ void _log_Dump()
 
 void setup()
 {
-  Serial.begin(serial_baud); // Hier lassen um debug im setup zuzulassen 
+  Serial.begin(115200); // Hier lassen um debug im setup zuzulassen 
 
   // Initialisierung der Hardwarekomponenten des Controllers
   KEPLERBRAIN_INIT();
@@ -264,9 +264,9 @@ void _default_statemachiene()
       ball_last_seen_ang = _cam_data_calculation();
       if(ball_last_seen_ang > -90) //MUSS ANGEPASST WERDEN IDK OB SO RICHTIG 
       {
-        rotate( 10); //should be ( target_speed /2 ) but for testing only 10
+        rotate( 8); //should be ( target_speed /2 ) but for testing only 10
       }else{
-        rotate(-10); //should be (-target_speed /2 ) but for testing only -10
+        rotate(-8); //should be (-target_speed /2 ) but for testing only -10
       }
       _log("MAIN SWITCH", "[STATE: " + String(current_state) + "] ball last seen angle: " + String(ball_last_seen_ang));
     }
@@ -277,8 +277,7 @@ void _default_statemachiene()
     case 1: // rotate to ball
     {
       int cam_angle = _cam_data_calculation();
-      rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0); //why so low speed??
-
+      
       // Target nur neu setzen wenn noch nicht to avoid over steer 
       // oder Ball fast zentriert ist (< 2°)
       // und fix alle 250ms
@@ -288,8 +287,9 @@ void _default_statemachiene()
         ball_target = yaw + cam_angle;
         ball_target_locked = true;  
       }
-
-      //WRITE_LCD_TEXT(1, 1, String(ball_target) + " " + String(cam_angle) + "   ");
+      //rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0); 
+      rotate(ball_target * 0.3);
+      WRITE_LCD_TEXT(1, 2, String(ball_target) + " " + String(cam_angle) + "   ");
       _log("MAIN", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
       //rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
       //move_angle(cam_angle, 40);
@@ -365,7 +365,7 @@ void _default_statemachiene()
     return;;
   }
 
-  if (ground_smallest < -2)
+  /*if (ground_smallest < -2)
   {
     line_last_seen_millis = millis();
     
@@ -384,6 +384,7 @@ void _default_statemachiene()
     current_state = 3; //line
     return;;
   }
+    */
 
   // search
   if (SPICAM_Data1 == 0)
@@ -398,7 +399,7 @@ void _default_statemachiene()
     return;;
   }
   // move to ball
-  if (SPICAM_Data1 == 1 && SPICAM_Data2 < 85 || SPICAM_Data2 > 95 && current_state != 2) //rotate to ball if angle is bigger than 5° and smaller than 175° (also ignore if ball is behind us)
+  if (SPICAM_Data1 == 1 /*&& SPICAM_Data2 < 85 || SPICAM_Data2 > 95 && current_state != 2*/) //rotate to ball if angle is bigger than 5° and smaller than 175° (also ignore if ball is behind us)
   {
     if (last_state != 1) //set last_state for code exit block
     {
@@ -409,7 +410,7 @@ void _default_statemachiene()
     return;;
   }
 
-  if (SPICAM_Data1 == 1 && (SPICAM_Data2 >= 85 && SPICAM_Data2 <= 95)) //shoot if ball is in front of us (also ignore if ball is behind us)
+  /*if (SPICAM_Data1 == 1 && (SPICAM_Data2 >= 85 && SPICAM_Data2 <= 95)) //shoot if ball is in front of us (also ignore if ball is behind us)
   {
     if (last_state != 2) //set last_state for code exit block
     {
@@ -418,5 +419,5 @@ void _default_statemachiene()
     current_state = 2; //orbit to zero and "shoot"
 
     return;;
-  }
+  }*/
 }
