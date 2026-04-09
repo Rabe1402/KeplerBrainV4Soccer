@@ -195,6 +195,7 @@ void loop()
         WRITE_LCD_TEXT(1, 2, "Move 0");
         while(true)
         {
+        _imu_read();
         rotate_to(0, 3, 3, 10, 10, 0 );
         motors(drive_m1, drive_m2, drive_m3, drive_m4, true);
         }
@@ -334,21 +335,21 @@ void _default_statemachiene()
       //orbit_around(ball_target, (target_speed/2), 30); //not working right idk why
       _imu_read();
       error = yaw - yaw_orbit_target;
-      if (yaw > 20 || yaw < -20) //if not in target area
+      if (yaw > 15 || yaw < -15) //if not in target area
       {
-        if(yaw > 10)
+        if(yaw > 0)
         {
           orbit(25, -80, 3);
         }
-        if(yaw < 10)
+        if(yaw < 0)
         {
           orbit(25, 80, -3);
         }
       }else 
       {
         move_angle(0, target_speed);
-        delay(600);
       }
+
       WRITE_LCD_TEXT(1, 2, String(yaw) + "   ");
       _log("MAIN", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle) + " goal-angle: " + String(yaw_orbit_target));
     }
@@ -361,12 +362,12 @@ void _default_statemachiene()
       // Verwende den gespeicherten Sensor für konsistente Ausweichrichtung
       move_angle((line_first_sensor_id * 45 + 180) % 360, target_speed/2);
 
-      if (millis() - line_last_seen_millis > allow_sens_again)
+      if ((millis() - line_last_seen_millis) > allow_sens_again)
       {
         sens_allowed = true;
       }
 
-      if ((millis() - line_escape_start_time > line_escape_duration) && ground_smallest > -2) 
+      if (((millis() - line_escape_start_time) > line_escape_duration) && ground_smallest > -7) 
       {
         line_first_sensor_id = -1;  // Reset für nächste Erkennung
 
@@ -424,7 +425,7 @@ void _default_statemachiene()
 
   //Linie (muss ganz oben bleiben) 
 
-  /*if (ground_smallest < -5  )
+  if (ground_smallest < -7  )
   {
     current_state = 3; //line
 
@@ -440,13 +441,11 @@ void _default_statemachiene()
     return;
   }
 
-
-  
-  if ((line_last_seen_millis > millis() - 250))
+  if ((line_last_seen_millis > (millis() - 250)))
   {
     current_state = 3;
     return;;
-  }*/
+  }
 
   // search
   if (SPICAM_Data1 == 0)

@@ -50,9 +50,13 @@ void _imu_test()
     KEPLER_UPDATE();
     old_time = millis();
     
-    yaw = READ_I2C_BNO055_YAW();
-    pitch = READ_I2C_BNO055_PITCH();
-    roll = READ_I2C_BNO055_ROLL();
+    yaw_raw = READ_I2C_BNO055_YAW();
+    pitch_raw = READ_I2C_BNO055_PITCH();
+    roll_raw = READ_I2C_BNO055_ROLL();
+
+    yaw = (yaw_raw - yaw_offset ) % 360;
+    pitch = (pitch_raw - pitch_offset ) %360;
+    roll = (roll_raw - roll_offset ) %360;
     _log("TEST", "[IMU] Y" + String(yaw) + " P" + String(pitch) + " R" + String(roll) + " DT: " + String(millis() - old_time) + "ms to get out press B2");
 
     WRITE_LCD_TEXT(1, 2, "Y"   + String(yaw)   );
