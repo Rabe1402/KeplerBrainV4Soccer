@@ -46,6 +46,7 @@ int allow_sens_again = 10; //time to wait to realow ground sens
 bool sens_allowed = true;
 
 unsigned long line_first_seen_millis = 0;
+int16_t orbit_ang = 0;
 //-----------------------------------------------------------------------------
 // BALL TRACKING
 //-----------------------------------------------------------------------------

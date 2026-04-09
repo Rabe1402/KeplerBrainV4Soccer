@@ -47,6 +47,7 @@ void _imu_test()
 
   while(READ_BUTTON_CLOSED(B1) != 1)
   {
+    WRITE_LCD_CLEAR();
     KEPLER_UPDATE();
     old_time = millis();
     

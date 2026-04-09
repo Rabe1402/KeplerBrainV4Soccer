@@ -115,9 +115,9 @@ void _imu_read()
   pitch_raw = READ_I2C_BNO055_PITCH();
   roll_raw = READ_I2C_BNO055_ROLL();
 
-  yaw = (yaw_raw - yaw_offset ) % 360;
-  pitch = (pitch_raw - pitch_offset ) %360;
-  roll = (roll_raw - roll_offset ) %360;
+  yaw = (yaw_raw + yaw_offset ) % 360;
+  pitch = (pitch_raw + pitch_offset ) % 360;
+  roll = (roll_raw + roll_offset ) % 360;
   
   _log("SENSOR DATA",  "[IMU] Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll));
 }

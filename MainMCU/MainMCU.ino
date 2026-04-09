@@ -50,16 +50,32 @@ void setup()
 
   // Initialisierung der Hardwarekomponenten des Controllers
   KEPLERBRAIN_INIT();
-  Serial.println("KeplerBrainINIT succses -> Moving Forward in Setup");
+  _log("SETUP", "Hardware initialization complete, starting sensor initialization...");
   SLEEP(100); //um jegliche blockierungen zu vermeiden 
+  WRITE_LCD_CLEAR();
+  WRITE_LCD_TEXT(1, 1, "Imu calib in 1s!!");
+  WRITE_LCD_TEXT(1, 2, "please put robot on flat surface");
+  _log("SETUP", "Starting Imu calibration in 1s, please place robot on flat surface and wait a few seconds");
+  SLEEP(1000);
   WRITE_I2C_BNO055_INIT();
-  Serial.println("BNO055_INIT succses -> Moving Forward in Setup");
-  SLEEP(100); // --"--
+  delay(3000);
+  WRITE_LCD_TEXT(1, 1, "Imu calib done!"),
+  WRITE_LCD_TEXT(1, 2, "check with IS_BNO055_READY()");
+  _log("SETUP", "BNO055_INIT calib is finsihed, check with IS_BNO055_READY()");
+  if (IS_BNO055_READY()) {
+    _log("SETUP", "BNO055 is ready!");
+    WRITE_LCD_TEXT(1, 2, "IMU Ready!");
+  } else {
+    _log("SETUP", "BNO055 is NOT ready! Check wiring and connections.");
+    WRITE_LCD_TEXT(1, 2, "IMU NOT Ready!");
+    delay(7000);
+  }
+  SLEEP(100);
   WRITE_I2C_INA231_INIT();
-  Serial.println("INA231_INIT succses -> Moving Forward in Setup");
+  _log("SETUP", "INA231_INIT successful");
   SLEEP(100); // --"--
   WRITE_LCD_CLEAR();
-  Serial.println("Setup finished now jumping in loop(). HAVE FUN!!!");
+  _log("SETUP", "Setup finished, jumping to loop(). HAVE FUN!!!");
   KEPLER_UPDATE(); //einmal update
 }
  
@@ -334,16 +350,21 @@ void _default_statemachiene()
       }  */
       //orbit_around(ball_target, (target_speed/2), 30); //not working right idk why
       _imu_read();
-      error = yaw - yaw_orbit_target;
-      if (yaw > 15 || yaw < -15) //if not in target area
+      orbit_ang = (yaw - 180);
+      if (orbit_ang >= 180) {
+      orbit_ang = -(360 - orbit_ang);
+      }
+      if (!(orbit_ang > -20 && orbit_ang < 20)) //if not in target area
+      //if (yaw < 20 && yaw > -20)
       {
-        if(yaw > 0)
+        if(orbit_ang > 0)
         {
           orbit(25, -80, 3);
         }
-        if(yaw < 0)
+        else
         {
           orbit(25, 80, -3);
+          //25, 80, -3 geht gut wenn er nah ist, 60 damit er rein spiraliert wenn er weit weg ist.
         }
       }else 
       {
@@ -425,7 +446,7 @@ void _default_statemachiene()
 
   //Linie (muss ganz oben bleiben) 
 
-  if (ground_smallest < -7  )
+  if (ground_smallest < -10  )
   {
     current_state = 3; //line
 
