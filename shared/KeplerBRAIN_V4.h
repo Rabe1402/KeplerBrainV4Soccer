@@ -205,28 +205,28 @@ uint8_t READ_BUTTON_PRESSED(uint8_t port)
   int value3 = 0;
   if (port==B1)
   {
-        if (!digitalRead(PA10))
+    if (!digitalRead(PA10))
+    {
+      if (button1_closed==false)
+      {
+        value1 = 1;
+      }
+        button1_closed = true;
+      }
+      else
+      {
+        button1_closed = false;
+      } 
+      value=value1;
+    }
+    if (port==B2)
+    {      
+      if (!digitalRead(PB5))
+      {
+        if (button2_closed==false)
         {
-          if (button1_closed==false)
-          {
-            value1 = 1;
-          }
-          button1_closed = true;
+          value2 = 1;
         }
-        else
-        {
-          button1_closed = false;
-        } 
-        value=value1;
-  }
-  if (port==B2)
-  {      
-        if (!digitalRead(PB5))
-        {
-          if (button2_closed==false)
-          {
-            value2 = 1;
-          }
           button2_closed = true;
         }
         else
@@ -234,15 +234,15 @@ uint8_t READ_BUTTON_PRESSED(uint8_t port)
           button2_closed = false;
         } 
         value=value2;
-   }
-   if (port==B3)
-   {
-        if (!digitalRead(PB4))
+    } 
+    if (port==B3)
+    {
+      if (!digitalRead(PB4))
+      {
+        if (button3_closed==false)
         {
-          if (button3_closed==false)
-          {
-            value3 = 1;
-          }
+          value3 = 1;
+        }
           button3_closed = true;
         }
         else
@@ -698,7 +698,7 @@ uint16_t READ_IO_ANALOG(uint8_t sensor)
   delay(1);
   data2=spi.transfer(0x00);
   delay(1);
-   digitalWrite(PB1, HIGH);
+  digitalWrite(PB1, HIGH);
  
   value =(data1<<8) | data2;
   value = value & 0x03FF; 
@@ -750,7 +750,6 @@ uint16_t READ_SPI_LINE(uint8_t port, uint8_t sensor)
 // PC_6 SPI Pixy CS
 
 SPIClass spi_cam(PB15,PB14,PB13);
-
 
 
 // *** Initialisierung ***
@@ -878,7 +877,7 @@ void KEPLERBRAIN_INIT()
   TIM2->CR1 |= TIM_CR1_CEN;
 
   // IN1 und IN2 konfigurieren
-    pinMode(PC4,OUTPUT);
+  pinMode(PC4,OUTPUT);
   pinMode(PB2,OUTPUT);
   digitalWrite(PC4,LOW);
   digitalWrite(PB2,LOW);
@@ -930,11 +929,6 @@ void KEPLERBRAIN_INIT()
   spi.setClockDivider(SPI_CLOCK_DIV16); // Adjust the clock divider as needed
 
 //spi.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0)); 
-    
-
-
- 
-
 
   // *** SPI CAM Pixy ***
 
@@ -950,7 +944,7 @@ void KEPLERBRAIN_INIT()
    // spi_cam.setDataMode(SPI_MODE0);
    // spi_cam.setBitOrder(MSBFIRST);
    // spi_cam.setClockDivider(SPI_CLOCK_DIV16); // Adjust the clock divider as needed
-spi_cam.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
+  spi_cam.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
  
   /* 
   // Counter
