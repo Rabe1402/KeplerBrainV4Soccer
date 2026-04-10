@@ -3,6 +3,8 @@ import image
 import pyb
 import time
 import math
+import machine
+import utime
 
 DEBUG_DRAW = False
 
@@ -15,17 +17,14 @@ spi = pyb.SPI(2, pyb.SPI.SLAVE, polarity=0, phase=0)
 spi_list = [250, 0, 90, 0, 0, 0, 0, 0]
 spi_data = bytearray(spi_list)
 threshold_index = 0
-ball_last_seen_angle = 0 #zero before first ball is seen, so the robot will look straight forward
+ball_last_seen_angle = 0
 
-# Kamera & Objekt Konstanten
 FRAME_W          = 320
 FRAME_H          = 240
 HFOV_DEG         = 71.8
 H_FOV_HALF       = HFOV_DEG / 2.0
 BALL_DIAMETER_MM = 43
-
 FOCAL_LEN_PX = (FRAME_W / 2.0) / math.tan(math.radians(H_FOV_HALF))
-
 MAX_DIST_MM  = 1500
 FRAME_W_HALF = FRAME_W / 2.0
 
@@ -56,7 +55,14 @@ sensor.set_hmirror(False)
 sensor.set_vflip(True)
 clock = time.clock()
 
+# ── WDT: 5 Sekunden Timeout ──────────────────────────────────────────────────
+# Wenn der Loop hängt (z.B. nach SPI-Absturz), wird die Cam automatisch resettet
+wdt = machine.WDT(timeout=5000)
+# ─────────────────────────────────────────────────────────────────────────────
+
 while True:
+    wdt.feed()  # Loop läuft → alles OK, WDT zurücksetzen
+    
     clock.tick()
     img = sensor.snapshot()
     blobs = img.find_blobs(
@@ -81,23 +87,18 @@ while True:
                     [(blob.cx(), blob.cy(), int(math.degrees(blob.rotation())))], size=20
                 )
 
-        # Echter Mittelpunkt – korrigiert wenn Ball am Rand abgeschnitten
         blob_x     = biggestblob.x()
         blob_w     = biggestblob.w()
         blob_right = blob_x + blob_w
         est_radius = biggestblob.h() / 2.0
 
         if blob_x <= 0:
-            # Linker Rand abgeschnitten
             true_cx = blob_right - est_radius
         elif blob_right >= FRAME_W:
-            # Rechter Rand abgeschnitten
             true_cx = blob_x + est_radius
         else:
-            # Ball vollständig sichtbar
             true_cx = biggestblob.cx()
 
-        # atan2 → korrekt auch bei großen Winkeln / nah am Rand
         dx      = true_cx - FRAME_W_HALF
         angle_h = int(math.degrees(math.atan2(dx, FOCAL_LEN_PX)))
 
@@ -119,7 +120,7 @@ while True:
         ball_last_seen_angle = max(0, min(255, angle_h + 90))
     else:
         spi_list[1] = 0
-        spi_list[2] = ball_last_seen_angle #sende den letzen winkel wenn kein ball insicht ist, damit dder Roboter sich dort hin drehen kann
+        spi_list[2] = ball_last_seen_angle
         spi_list[3] = 0
         spi_list[4] = 0
         spi_list[5] = 0

@@ -286,6 +286,7 @@ void _default_statemachiene()
 {
   int cam_angle = _cam_data_calculation();
   _imu_read();
+  orbit_ang = yaw - 180; //target is 0, so error is 0 - yaw
   _SPIs();
   _log("MAIN", "running statemachine with state " + String(current_state));
   WRITE_LCD_TEXT(1, 1, String(current_state) );
@@ -299,9 +300,9 @@ void _default_statemachiene()
       ball_last_seen_ang = _cam_data_calculation();
       if(ball_last_seen_ang > 0) //MUSS ANGEPASST WERDEN IDK OB SO RICHTIG 
       {
-        rotate( 8); //should be ( target_speed /2 ) but for testing only 10
+        rotate( 9); //should be ( target_speed /2 ) but for testing only 10
       }else{
-        rotate(-8); //should be (-target_speed /2 ) but for testing only -10
+        rotate(-9); //should be (-target_speed /2 ) but for testing only -10
       }
       _log("MAIN SWITCH", "[STATE: " + String(current_state) + "] ball last seen angle: " + String(ball_last_seen_ang));
     }
@@ -323,7 +324,7 @@ void _default_statemachiene()
       }
       //ball_target = yaw + cam_angle;
       //rotate_quadratic(cam_angle, 2, 2, 11, 10, 0, 15); 
-      rotate(cam_angle * 0.3);
+      rotate((cam_angle * 0.3) + 3 );
       WRITE_LCD_TEXT(1, 2, String(cam_angle) + "   ");
       _log("MAIN", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
       //rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
@@ -344,27 +345,25 @@ void _default_statemachiene()
         move_angle(error, target_speed); //move to ball if in target area
       }  */
       //orbit_around(ball_target, (target_speed/2), 30); //not working right idk why
-      _imu_read();
-      orbit_ang = (yaw - 180);
-      }
+      
       if (!(orbit_ang > -20 && orbit_ang < 20) && (SPICAM_Data2 > 85 && SPICAM_Data2 < 95)) //if not in target area
       {
         if(orbit_ang > 0)
         {
-          orbit(25, -80, 3);
+          orbit(25, -80, 3); 
+          
         }
         else
         {
           orbit(25, 80, -3);
           //25, 80, -3 geht gut wenn er nah ist, 60 damit er rein spiraliert wenn er weit weg ist.
         }
-      }else 
-      {
-        move_angle(0, target_speed);
+        
       }
 
-      WRITE_LCD_TEXT(1, 2, String(yaw) + "   ");
+      WRITE_LCD_TEXT(1, 2, String(orbit_ang) + "   ");
       _log("MAIN", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle) + " goal-angle: " + String(yaw_orbit_target));
+    
     }
     break;; //exit here
     
@@ -392,52 +391,34 @@ void _default_statemachiene()
       _log("MAIN", "[STATE: " + String(current_state) + "] line sensor: " + String(line_first_sensor_id) + " line smallest: " + String(ground_smallest) + " escape timer: " + String(millis() - line_escape_start_time));
     }
     break;; //exit here (last one not needed ig)
+
+    case 4: // move to ball
+    {
+      ball_target = (_cam_data_calculation() + yaw);
+
+      move_angle(ball_target, 20);
+      _log("MAIN", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
+    }
+    break;;
+
+    case 5: // shoot
+    {
+      move_angle(0, target_speed);
+      _log("MAIN", "[STATE: " + String(current_state) + "] SHOOTING! ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
+    }
+    break;;
   }
 
   motors(drive_m1, drive_m2, drive_m3, drive_m4, true);
 
   // determine state
+
+
+  ground_avg = (fc + fr + rc + br + bc + bl + lc + fl) / 8;
+  ground_sens_id = smallest_ground_sensor_id(ground_avg);
+
+  //Linie (muss ganz oben bleiben) 
   /*
-  // run here second time for second set of date and continous readings
-  ground_avg = (fc + fr + rc + br + bc + bl + lc + fl) / 8;
-  ground_sens_id = smallest_ground_sensor_id(ground_avg);
-
-  //Linie (muss ganz oben bleiben) 
-  if (millis() - line_escape_start_time > line_escape_duration && line_escape_start_time != 0) 
-  {
-    if (last_state != 3) //set last_state for code exit block
-    {
-      last_state = current_state;
-    }
-    current_state = 3;
-    return;;
-  }
-
-  if (ground_smallest < -2)
-  {
-    line_last_seen_millis = millis();
-    
-    // Speichere den ersten Sensor, der die Linie erkannt hat
-    if (current_state != 3 || (line_first_sensor_id != -1 && line_first_sensor_id != ground_sens_id) && sens_allowed) 
-    {
-      line_first_sensor_id = ground_sens_id;
-      WRITE_LCD_TEXT(2, 1, String(line_first_sensor_id) );
-      sens_allowed = false;
-      line_escape_start_time = millis();
-    }
-    if (last_state != 3) //set last_state for code exit block
-    {
-      last_state = current_state;
-    }
-    current_state = 3; //line
-    return;;
-  }
-    */
-  ground_avg = (fc + fr + rc + br + bc + bl + lc + fl) / 8;
-  ground_sens_id = smallest_ground_sensor_id(ground_avg);
-
-  //Linie (muss ganz oben bleiben) 
-
   if (ground_smallest < line_threshold)  
   {
     current_state = 3; //line
@@ -459,7 +440,7 @@ void _default_statemachiene()
     current_state = 3;
     return;;
   }
-
+  */
   // search
   if (SPICAM_Data1 == 0)
   {
@@ -473,6 +454,23 @@ void _default_statemachiene()
     return;;
   }
   // move to ball
+
+  if(SPICAM_Data1 == 1 && (_cam_data_calculation() > 220) && (_cam_data_calculation() < 13) && (-_cam_data_calculation() >= 13))
+  {
+    if(_cam_data_calculation() < 220)
+    {
+      current_state = 2;
+      return;;
+    }
+    if (last_state != 4)
+    {
+      last_state = current_state;
+    }
+    current_state = 4;
+
+    return;;
+  }
+
   if (SPICAM_Data1 == 1 && (_cam_data_calculation() > 10 || _cam_data_calculation() < -10)) 
   {
     if (last_state != 1) //set last_state for code exit block
@@ -484,7 +482,18 @@ void _default_statemachiene()
     return;;
   }
 
-  if (SPICAM_Data1 == 1 && (_cam_data_calculation() <= 10 && _cam_data_calculation() >= -10)) //shoot if ball is in front of us (also ignore if ball is behind us)
+  if (SPICAM_Data1 == 1 && (orbit_ang > -20 && orbit_ang < 20) && (SPICAM_Data2 > 85 && SPICAM_Data2 < 95))
+  {
+    if (last_state != 5) //set last_state for code exit block
+    {
+      last_state = current_state;
+    }
+    current_state = 5; //shoot"
+
+    return;;
+  }
+
+  if (SPICAM_Data1 == 1 && (_cam_data_calculation() <= 10 && _cam_data_calculation() >= -10) && (_cam_data_calculation() <= 220)) //shoot if ball is in front of us (also ignore if ball is behind us)
   {
     if (last_state != 2) //set last_state for code exit block
     {
