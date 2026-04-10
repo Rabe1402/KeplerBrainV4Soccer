@@ -346,8 +346,6 @@ void _default_statemachiene()
       }  */
       //orbit_around(ball_target, (target_speed/2), 30); //not working right idk why
       
-      if (!(orbit_ang > -20 && orbit_ang < 20) && (SPICAM_Data2 > 85 && SPICAM_Data2 < 95)) //if not in target area
-      {
         if(orbit_ang > 0)
         {
           orbit(25, -80, 3); 
@@ -358,8 +356,6 @@ void _default_statemachiene()
           orbit(25, 80, -3);
           //25, 80, -3 geht gut wenn er nah ist, 60 damit er rein spiraliert wenn er weit weg ist.
         }
-        
-      }
 
       WRITE_LCD_TEXT(1, 2, String(orbit_ang) + "   ");
       _log("MAIN", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle) + " goal-angle: " + String(yaw_orbit_target));
@@ -455,7 +451,7 @@ void _default_statemachiene()
   }
   // move to ball
 
-  if(SPICAM_Data1 == 1 && (_cam_data_calculation() > 220) && (_cam_data_calculation() < 13) && (-_cam_data_calculation() >= 13))
+  if(SPICAM_Data1 == 1 && (_cam_distance_calculation() > 220) && (_cam_data_calculation() < 13) && (-_cam_data_calculation() >= 13))
   {
     if(_cam_data_calculation() < 220)
     {
@@ -493,7 +489,7 @@ void _default_statemachiene()
     return;;
   }
 
-  if (SPICAM_Data1 == 1 && (_cam_data_calculation() <= 10 && _cam_data_calculation() >= -10) && (_cam_data_calculation() <= 220)) //shoot if ball is in front of us (also ignore if ball is behind us)
+  if (SPICAM_Data1 == 1 && (_cam_data_calculation() <= 10 && _cam_data_calculation() >= -10) && (_cam_distance_calculation() <= 220)) //shoot if ball is in front of us (also ignore if ball is behind us)
   {
     if (last_state != 2) //set last_state for code exit block
     {
