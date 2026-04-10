@@ -602,7 +602,7 @@ void WRITE_I2C_BNO055_INIT()
 }
 
 // Gyro-Kalibrierung checken
-bool IS_BNO055_READY()
+bool READ_I2C_IS_BNO055_READY()
 {
   i2c.beginTransmission(0x28);
   i2c.write(0x35);

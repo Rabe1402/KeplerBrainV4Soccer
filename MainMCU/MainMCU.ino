@@ -62,7 +62,7 @@ void setup()
   WRITE_LCD_TEXT(1, 1, "Imu calib done!"),
   WRITE_LCD_TEXT(1, 2, "check with IS_BNO055_READY()");
   _log("SETUP", "BNO055_INIT calib is finsihed, check with IS_BNO055_READY()");
-  if (IS_BNO055_READY()) {
+  if (READ_I2C_IS_BNO055_READY()) {
     _log("SETUP", "BNO055 is ready!");
     WRITE_LCD_TEXT(1, 2, "IMU Ready!");
   } else {
