@@ -3,12 +3,12 @@
 #include <math.h>
 #include "Variables.h" //alle variablen usw. sind in dieser datei, um diese ein wenig aufzuräumen 
 
-void _log(String name, String message)
+void _log(String name, String component, String message, bool error = false)
 {
   if (debug)
   {
     // Timestamp + Name + Message als kompakten String
-    String log_entry = String(millis()) + " [" + name + "] " + message;
+    String log_entry = String(millis()) + " [" + name + "] " + " [" + component + "] " + ":  " + message;
     
     if (debug_over_serial)
     {
@@ -50,32 +50,32 @@ void setup()
 
   // Initialisierung der Hardwarekomponenten des Controllers
   KEPLERBRAIN_INIT();
-  _log("SETUP", "Hardware initialization complete, starting sensor initialization...");
+  _log("SETUP", "KeplerBRAIN", "Hardware initialization complete, starting sensor initialization...");
   SLEEP(100); //um jegliche blockierungen zu vermeiden 
   WRITE_LCD_CLEAR();
   WRITE_LCD_TEXT(1, 1, "Imu calib in 1s!!");
   WRITE_LCD_TEXT(1, 2, "please put robot on flat surface");
-  _log("SETUP", "Starting Imu calibration in 1s, please place robot on flat surface and wait a few seconds");
+  _log("SETUP", "IMU", "Starting Imu calibration in 1s, please place robot on flat surface and wait a few seconds");
   SLEEP(1000);
   WRITE_I2C_BNO055_INIT();
   delay(3000);
   WRITE_LCD_TEXT(1, 1, "Imu calib done!"),
   WRITE_LCD_TEXT(1, 2, "check with READ_I2C_IS_BNO055_READY()");
-  _log("SETUP", "BNO055_INIT calib is finsihed, check with IS_BNO055_READY()");
+  _log("SETUP", "IMU","BNO055_INIT calib is finsihed, check with IS_BNO055_READY()");
   if (READ_I2C_IS_BNO055_READY()) {
     _log("SETUP", "BNO055 is ready!");
     WRITE_LCD_TEXT(1, 2, "IMU Ready!");
   } else {
-    _log("SETUP", "BNO055 is NOT ready! Check wiring and connections.");
+    _log("SETUP", "IMU", "BNO055 is NOT ready! Check wiring and connections.", true);
     WRITE_LCD_TEXT(1, 2, "IMU NOT Ready!");
     delay(7000);
   }
   SLEEP(100);
   WRITE_I2C_INA231_INIT();
-  _log("SETUP", "INA231_INIT successful");
+  _log("SETUP", "POWER","INA231_INIT successful");
   SLEEP(100); // --"--
   WRITE_LCD_CLEAR();
-  _log("SETUP", "Setup finished, jumping to loop(). HAVE FUN!!!");
+  _log("SETUP", "KeplerBRAIN", "Setup finished, jumping to loop(). HAVE FUN!!!");
   KEPLER_UPDATE(); //einmal update
 }
  
@@ -84,7 +84,7 @@ void setup()
 void loop()
 {
   KEPLER_UPDATE(); //um hintergrund aktionen automatisch auszuführen 
-  _log("VOID LOOP", "run is " + String(run));
+  _log("VOID LOOP", "KeplerBRAIN", "run is " + String(run));
   if (!run)
   {
     if (READ_BUTTON_CLOSED(B1) == 1 && selection_cursor > 0){selection_cursor--;WRITE_LCD_TEXT(1, 2, "o");}
@@ -104,20 +104,20 @@ void loop()
 
       selection = selection_cursor;
 
-      _log("MAIN LOOP", "Selected Program" + String(selection));
+      _log("VOID LOOP", "MENU", "Selected Program" + String(selection));
 
       run = true;
       WRITE_LCD_CLEAR(); // to clean up dislplay. And hopefully find wehre it hangs 
     }
   }else
   {
-    _log("VOID LOOP", "run is true");
+    _log("VOID LOOP", "KeplerBRAIN", "run is true");
     switch ( selection )
     {
       case 0:
         WRITE_LCD_TEXT(1, 2, "Default Code");
         delay(700);
-        _log("CASE SWITCH", "Starting default code");
+        _log("VOID LOOP", "MENU", "Starting default code");
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
         // run here the first time to get two set of data 
@@ -138,7 +138,7 @@ void loop()
         KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "Motor Test");
         delay(700);
-        _log("CASE SWITCH", "Starting motor test");
+        _log("VOID LOOP", "MENU", "Starting motor test");
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
         _motor_test();
@@ -151,7 +151,7 @@ void loop()
         KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "IMU Test");
         delay(700);
-        _log("CASE SWITCH", "Starting IMU test");
+        _log("VOID LOOP", "MENU", "Starting IMU test");
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
         _imu_test();
@@ -164,7 +164,7 @@ void loop()
         KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "Ground Test");
         delay(700);
-        _log("CASE SWITCH", "Starting ground sensor test");
+        _log("VOID LOOP", "MENU", "Starting ground sensor test");
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
         _ground_test();
@@ -177,7 +177,7 @@ void loop()
         KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "Show BATT info");
         delay(700);
-        _log("CASE SWITCH", "Starting battery test");
+        _log("VOID LOOP", "MENU", "Starting battery test");
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
 
         _batt_test();
@@ -187,21 +187,9 @@ void loop()
 
 
       case 5:
-        WRITE_LCD_TEXT(1, 2, "YAW OFFSET CALIB ");
+        WRITE_LCD_TEXT(1, 2, "NOTHING HERE ");
+        _log("VOID LOOP", "MENU", "Nothing here, going back to menu in .2s");
         delay(200);
-        _imu_read();
-        yaw_offset = 0 - yaw_raw;
-        pitch_offset = 0 - pitch_raw;
-        roll_offset = 0 - roll_raw;
-        WRITE_LCD_CLEAR();
-        WRITE_LCD_TEXT(1, 1, "DONE");
-        delay(100);
-        WRITE_LCD_CLEAR();
-        _imu_read();
-        WRITE_LCD_TEXT(1, 1, String(yaw) + " " + String(pitch) + " " + String(roll));
-        WRITE_LCD_TEXT(1, 2, String(yaw_offset) + " " + String(pitch_offset) + " " + String(roll_offset));
-        delay(1000);
-        WRITE_LCD_CLEAR();
         run = false;
 
       break;;      
@@ -209,15 +197,14 @@ void loop()
 
       case 6:
         WRITE_LCD_TEXT(1, 2, "Move 0");
-        while(true)
+        _log("VOID LOOP", "MENU", "Starting move test, press B1 to exit");
+        while(READ_BUTTON_CLOSED(B1) !== 1)
         {
         _imu_read();
         rotate_to(0, 3, 3, 10, 10, 0 );
         motors(drive_m1, drive_m2, drive_m3, drive_m4, true);
         }
-        delay(1000);
         exit;
-
 
       break;;
 
@@ -225,7 +212,7 @@ void loop()
       case 7:
         KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "DUMP LOG"); 
-        _log("CASE SWITCH", "dumped log with size " + String(debug_log.size()) + " on time; " + String(millis()));
+        _log("VOID LOOP", "MENU", "dumped log with size " + String(debug_log.size()) + " on time; " + String(millis()));
         _log_Dump();
         
       break;;
@@ -234,7 +221,7 @@ void loop()
       case 8:
         KEPLER_UPDATE();
         WRITE_LCD_TEXT(1, 2, "Camera Test");
-        _log("CASE SWITCH", "Starting camera test");
+        _log("VOID LOOP", "MENU", "Starting camera test");
         delay(700);
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
         _camera_test();
@@ -242,7 +229,7 @@ void loop()
 
       case 9:
         WRITE_LCD_TEXT(1, 2, "Camera Test direct SPI read");
-        _log("CASE SWITCH", "Starting direct SPI read test");
+        _log("VOID LOOP", "MENU", "Starting direct SPI read test, press B1 to exit");
         delay(700);
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
         while(true)
@@ -268,7 +255,7 @@ void loop()
 
           WRITE_LCD_TEXT(1, 1, String(SPICAM_Data1)+" "+String(SPICAM_Data2)+" "+String(SPICAM_Data3)+" "+String(SPICAM_Data4));
           WRITE_LCD_TEXT(1, 2, String(SPICAM_Data5)+" "+String(SPICAM_Data6)+" "+String(SPICAM_Data7));
-      
+          _log("TEST", "SPI_CAM", "SPICAM Raw Data: " + String(SPICAM_Data1) + " " + String(SPICAM_Data2) + " " + String(SPICAM_Data3) + " " + String(SPICAM_Data4) + " " + String(SPICAM_Data5) + " " + String(SPICAM_Data6) + " " + String(SPICAM_Data7));
           delay(1000);
           if (READ_BUTTON_CLOSED(B1) == 1){exit;}
         }
@@ -291,7 +278,7 @@ void _default_statemachiene()
     orbit_ang = orbit_ang - 360; // 350° wird zu -10°, 270° wird zu -90° usw.
   }
   _SPIs();
-  _log("MAIN", "running statemachine with state " + String(current_state));
+  _log("MAIN", "STATE MACHINE", "running state: " + String(current_state));
   WRITE_LCD_TEXT(1, 1, String(current_state) );
 
   //WRITE_LCD_TEXT(1, 2, String(counter) ); //debug
@@ -307,7 +294,7 @@ void _default_statemachiene()
       }else{
         rotate(-9); //should be (-target_speed /2 ) but for testing only -10
       }
-      _log("MAIN SWITCH", "[STATE: " + String(current_state) + "] ball last seen angle: " + String(ball_last_seen_ang));
+      _log("MAIN", "STATE MACHINE", "[STATE: " + String(current_state) + "] ball last seen angle: " + String(ball_last_seen_ang));
     }
     break;; //exit here
     
@@ -329,7 +316,7 @@ void _default_statemachiene()
       //rotate_quadratic(cam_angle, 2, 2, 11, 10, 0, 15); 
       rotate_quadratic(cam_angle, 2, 15, 17, 7);
       WRITE_LCD_TEXT(1, 2, String(cam_angle) + "   ");
-      _log("MAIN", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
+      _log("MAIN", "STATE MACHINE", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
       //rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
       //move_angle(cam_angle, 40);
     }
@@ -361,7 +348,7 @@ void _default_statemachiene()
         }
 
       WRITE_LCD_TEXT(1, 2, String(orbit_ang) + "   ");
-      _log("MAIN", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle) + " goal-angle: " + String(yaw_orbit_target));
+      _log("MAIN", "STATE MACHINE", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle) + " goal-angle: " + String(yaw_orbit_target));
     
     }
     break;; //exit here
@@ -387,21 +374,21 @@ void _default_statemachiene()
         sens_allowed = true; // Sensoren wieder erlauben
       }      
 
-      _log("MAIN", "[STATE: " + String(current_state) + "] line sensor: " + String(line_first_sensor_id) + " line smallest: " + String(ground_smallest) + " escape timer: " + String(millis() - line_escape_start_time));
+      _log("MAIN", "STATE MACHINE", "[STATE: " + String(current_state) + "] line sensor: " + String(line_first_sensor_id) + " line smallest: " + String(ground_smallest) + " escape timer: " + String(millis() - line_escape_start_time));
     }
     break;; //exit here (last one not needed ig)
 
     case 4: // move to ball
     {
       move_angle(_cam_data_calculation(), 30);
-      _log("MAIN", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
+      _log("MAIN", "STATE MACHINE", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
     }
     break;;
 
     case 5: // shoot
     {
       move_angle(0, 45);
-      _log("MAIN", "[STATE: " + String(current_state) + "] SHOOTING! ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
+      _log("MAIN", "STATE MACHINE", "[STATE: " + String(current_state) + "] SHOOTING! ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
     }
     break;;
   }

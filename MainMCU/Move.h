@@ -1,6 +1,6 @@
 void motors(int Motor1, int Motor2, int Motor3, int Motor4, bool reset)
 {
-  _log("move", String(Motor1) + String(Motor2) + String(Motor3) + String(Motor4));
+  _log("MOVE", "MOTORS", String(Motor1) + ", " + String(Motor2) + ", " + String(Motor3) + ", " + String(Motor4));
   WRITE_MOTOR(M1, Motor1);
   WRITE_MOTOR(M2, Motor2);
   WRITE_MOTOR(M3, Motor3);
@@ -18,7 +18,7 @@ void motors(int Motor1, int Motor2, int Motor3, int Motor4, bool reset)
 
 void set_motors(int Motor1, int Motor2, int Motor3, int Motor4)
 {
-  _log("set_move", String(Motor1) + String(Motor2) + String(Motor3) + String(Motor4));
+  _log("MOVE", "SET_MOTORS", String(Motor1) + ", " + String(Motor2) + ", " + String(Motor3) + ", " + String(Motor4));
   drive_m1 += Motor1;
   drive_m2 += Motor2;
   drive_m3 += Motor3;
@@ -38,8 +38,7 @@ void rotate_to(int target, int precision, int precision_switch,  float speed, fl
   //  _log("rotate to", String(error));
   }
 
-  _log("rotate to", String(error) + " " + String(precision));
-
+  _log("MOVE", "ROTATE_TO", String(error) + " " + String(precision));
   if (abs(error) < precision)
   {
     return;
@@ -71,7 +70,7 @@ void rotate_to_quadratic(int target, int precision, int precision_switch, float 
     base_speed = -base_speed;
   }
 
-  _log("rotate to", String(error) + " " + String(precision));
+  _log("MOVE", "ROTATE_TO_QUADRATIC", String(error) + " " + String(precision));
 
   if (abs(error) < precision) return;
 
@@ -142,7 +141,7 @@ void move_angle_correction(int target, int Speed, int angle_precision)
   if ( !(abs(error) < angle_precision) )
   { 
 
-    _log("move angle correction", String(error));
+    _log("MOVE", "MOVE_ANGLE_CORRECTION", String(error));
 
     if (error >= 180) {
 

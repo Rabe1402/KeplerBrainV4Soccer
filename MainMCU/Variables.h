@@ -3,11 +3,6 @@
 //=============================================================================
 
 //-----------------------------------------------------------------------------
-// SYSTEM
-//-----------------------------------------------------------------------------
-int serial_baud = 115200;
-
-//-----------------------------------------------------------------------------
 // STATE MACHINE
 //-----------------------------------------------------------------------------
 int current_state = 0;  // 0=Search, 1=Move to ball, 2=Shoot, 3=Line
@@ -46,9 +41,9 @@ int allow_sens_again = 10; //time to wait to realow ground sens
 
 bool sens_allowed = true;
 
-
 unsigned long line_first_seen_millis = 0;
 int16_t orbit_ang = 0;
+
 //-----------------------------------------------------------------------------
 // BALL TRACKING
 //-----------------------------------------------------------------------------
@@ -77,11 +72,3 @@ std::vector<String> debug_log = {"Log initialized!"};
 int16_t yaw;
 int16_t pitch;
 int16_t roll;
-
-int16_t yaw_raw;
-int16_t pitch_raw;
-int16_t roll_raw;
-
-int16_t yaw_offset = 0;
-int16_t pitch_offset = 0;
-int16_t roll_offset = 0;

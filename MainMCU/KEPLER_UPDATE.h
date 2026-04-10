@@ -15,14 +15,14 @@ void KEPLER_UPDATE()
   {
     counter = 0;
     counter_now_power = 0; //reset power counter damit auch alle 100 runs im ersten teil des programms gemessen wird 
-    _log("KEPLER_UPDATE", "Counter reset to avoid overflow");
+    _log("KEPLER_UPDATE", "COUNTER", "Counter reset to avoid overflow");
   }
 
   //brake button to enter menu mode
   if (READ_BUTTON_CLOSED(B2) == 1)
   {
     run = false; // stoppt den Hauptloop, damit
-    _log("MAIN" , "Run set to false by button press, entering menu mode");
+    _log("MAIN" , "INTERUPT", "Run set to false by button press, entering menu mode");
     delay(300); // debounce delay 
   }
 
@@ -171,9 +171,9 @@ void KEPLER_UPDATE()
     //POWER READ END
     if (ina231_bus_voltage > 500)
     {
-      _log("KEPLER_UPDATE", String("Power readings updated: ") + String(ina231_bus_voltage/1000) + "V, " + String(ina231_current) + " mA, " + String(ina231_power/10000) + " W,  errors: " + String(ina231_error_count));
+      _log("KEPLER_UPDATE", "POWER", + String(ina231_bus_voltage/1000) + "V, " + String(ina231_current) + " mA, " + String(ina231_power/10000) + " W,  errors: " + String(ina231_error_count));
     } else {
-      _log("KEPLER_UPDATE", "Unable to get Power data... INA231 Errors: " + String(ina231_error_count));
+      _log("KEPLER_UPDATE", "POWER", "Unable to get Power data... INA231 Errors: " + String(ina231_error_count), true);
     }
 
     counter_now_power = counter;  //counter schaltung 

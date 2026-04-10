@@ -117,13 +117,9 @@ int smallest_ground_sensor_id(int base)
 
 void _imu_read()
 {
-  yaw_raw = READ_I2C_BNO055_YAW();
-  pitch_raw = READ_I2C_BNO055_PITCH();
-  roll_raw = READ_I2C_BNO055_ROLL();
-
-  yaw = (yaw_raw + yaw_offset ) % 360;
-  pitch = (pitch_raw + pitch_offset ) % 360;
-  roll = (roll_raw + roll_offset ) % 360;
+  yaw = READ_I2C_BNO055_YAW();
+  pitch = READ_I2C_BNO055_PITCH();
+  roll = READ_I2C_BNO055_ROLL();
   
-  _log("SENSOR DATA",  "[IMU] Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll));
+  _log("SENSOR DATA", "IMU", " Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll));
 }
