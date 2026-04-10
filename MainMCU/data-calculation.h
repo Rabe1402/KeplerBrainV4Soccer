@@ -23,14 +23,14 @@ uint8_t SPICAM_Data6 = 255; // reserved
 uint8_t SPICAM_Data7 = 255; // reserved
 
   //Variablen bodensensor
-uint8_t fc; // front 
-uint8_t fl; // front left 
-uint8_t fr; // front right 
-uint8_t lc; // left
-uint8_t rc; // right 
-uint8_t bl; // back left
-uint8_t br; // back right
-uint8_t bc; // back back 
+uint16_t fc; // front 
+uint16_t fl; // front left 
+uint16_t fr; // front right 
+uint16_t lc; // left
+uint16_t rc; // right 
+uint16_t bl; // back left
+uint16_t br; // back right
+uint16_t bc; // back back 
 
 
 void _SPIs()
@@ -58,23 +58,24 @@ void _SPIs()
   // read 8 Bytes from OpenMV END
  
 
-	digitalWrite(SPI2, LOW);
+  digitalWrite(SPI2, LOW);
   delayMicroseconds(100);
 
- 	if(spi.transfer(0XFF) == 250)
- 	{
-		fc = spi.transfer(0XFF); // front 
-		fl = spi.transfer(0XFF); // front left 
-		fr = spi.transfer(0XFF); // front right 
-		lc = spi.transfer(0XFF); // left
-		rc = spi.transfer(0XFF); // right 
-		bl = spi.transfer(0XFF); // back left
-		br = spi.transfer(0XFF); // back right
-		bc = spi.transfer(0XFF); // back back 
-	}
-	
-	digitalWrite(SPI2, HIGH);
+  if(spi.transfer(0xFF) == 250)
+  {
+    fc  = (spi.transfer(0xFF) << 8) | spi.transfer(0xFF);
+    fl  = (spi.transfer(0xFF) << 8) | spi.transfer(0xFF);
+    fr  = (spi.transfer(0xFF) << 8) | spi.transfer(0xFF);
+    lc  = (spi.transfer(0xFF) << 8) | spi.transfer(0xFF);
+    rc  = (spi.transfer(0xFF) << 8) | spi.transfer(0xFF);
+    bl  = (spi.transfer(0xFF) << 8) | spi.transfer(0xFF);
+    br  = (spi.transfer(0xFF) << 8) | spi.transfer(0xFF);
+    bc  = (spi.transfer(0xFF) << 8) | spi.transfer(0xFF);
+  }
+  //HARDWARE ENTWICKLER: janez@janez.at
 
+
+digitalWrite(SPI2, HIGH);
 }
 
 int _cam_data_calculation() 

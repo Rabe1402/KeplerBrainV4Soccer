@@ -18,7 +18,7 @@ int error = 0;          // Fehler für rotate_to Funktionen
 //-----------------------------------------------------------------------------
 // MOVEMENT
 //-----------------------------------------------------------------------------
-int target_speed = 35;  // ANPASSEN: Grundgeschwindigkeit
+int target_speed = 40;  // ANPASSEN: Grundgeschwindigkeit
 
 // Motor outputs
 int drive_m1;
@@ -31,11 +31,11 @@ int yaw_orbit_target = 0;
 //-----------------------------------------------------------------------------
 // LINE DETECTION
 //-----------------------------------------------------------------------------
-int ground_sensor[8];           // Array für alle 8 Sensoren
-int ground_smallest;            // Kleinster Sensorwert (= dunkelste Linie)
-int ground_avg;                 // Durchschnitt aller Sensoren
+long ground_sensor[8];           // Array für alle 8 Sensoren
+long ground_smallest;            // Kleinster Sensorwert (= dunkelste Linie)
+long ground_avg;                 // Durchschnitt aller Sensoren
 int ground_sens_id;             // ID des aktuell kleinsten Sensors
-int line_threshold = -7;        // ANPASSEN: Schwellenwert für Linienerkennung
+int line_threshold = -17;        // ANPASSEN: Schwellenwert für Linienerkennung
 
 // Line escape logic
 int line_first_sensor_id = -1;  // Erster Sensor der Linie erkannt hat

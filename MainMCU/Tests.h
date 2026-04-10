@@ -103,6 +103,8 @@ void _ground_test()
 
   while(READ_BUTTON_CLOSED(B1) != 1)
   {
+    _log("TEST", "[GROUND] SENSORS: fc: " + String(fc) + " fr: " + String(fr) + " rc: " + String(rc) + " br: " + String(br) + " bc: " + String(bc) + " bl: " + String(bl) + " lc: " + String(lc) + " fl: " + String(fl));
+
     KEPLER_UPDATE();
     old_time = millis();
 

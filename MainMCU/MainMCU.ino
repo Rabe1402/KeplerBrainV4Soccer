@@ -286,7 +286,10 @@ void _default_statemachiene()
 {
   int cam_angle = _cam_data_calculation();
   _imu_read();
-  orbit_ang = yaw - 180; //target is 0, so error is 0 - yaw
+  orbit_ang = yaw;
+  if (orbit_ang > 180) {
+    orbit_ang = orbit_ang - 360; // 350° wird zu -10°, 270° wird zu -90° usw.
+  }
   _SPIs();
   _log("MAIN", "running statemachine with state " + String(current_state));
   WRITE_LCD_TEXT(1, 1, String(current_state) );
@@ -324,7 +327,7 @@ void _default_statemachiene()
       }
       //ball_target = yaw + cam_angle;
       //rotate_quadratic(cam_angle, 2, 2, 11, 10, 0, 15); 
-      rotate((cam_angle * 0.3) + 3 );
+      rotate_quadratic(cam_angle, 2, 15, 17, 7);
       WRITE_LCD_TEXT(1, 2, String(cam_angle) + "   ");
       _log("MAIN", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
       //rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
@@ -348,12 +351,12 @@ void _default_statemachiene()
       
         if(orbit_ang > 0)
         {
-          orbit(25, -80, 3); 
+          orbit(25, -80, 2.5); 
           
         }
         else
         {
-          orbit(25, 80, -3);
+          orbit(25, 80, -2.5);
           //25, 80, -3 geht gut wenn er nah ist, 60 damit er rein spiraliert wenn er weit weg ist.
         }
 
@@ -368,7 +371,7 @@ void _default_statemachiene()
     case 3: // line
     {
       // Verwende den gespeicherten Sensor für konsistente Ausweichrichtung
-      move_angle((line_first_sensor_id * 45 + 180) % 360, target_speed/2);
+      move_angle((line_first_sensor_id * 45 + 180) % 360, target_speed);
 
       if ((millis() - line_last_seen_millis) > allow_sens_again)
       {
@@ -390,16 +393,14 @@ void _default_statemachiene()
 
     case 4: // move to ball
     {
-      ball_target = (_cam_data_calculation() + yaw);
-
-      move_angle(ball_target, 20);
+      move_angle(_cam_data_calculation(), 30);
       _log("MAIN", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
     }
     break;;
 
     case 5: // shoot
     {
-      move_angle(0, target_speed);
+      move_angle(0, 45);
       _log("MAIN", "[STATE: " + String(current_state) + "] SHOOTING! ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
     }
     break;;
@@ -414,29 +415,20 @@ void _default_statemachiene()
   ground_sens_id = smallest_ground_sensor_id(ground_avg);
 
   //Linie (muss ganz oben bleiben) 
-  /*
-  if (ground_smallest < line_threshold)  
+  if (ground_smallest < line_threshold)
   {
-    current_state = 3; //line
-
     line_last_seen_millis = millis();
-    
+
     if (current_state != 3) {
-      if (line_first_seen_millis < millis() - 50){
-        line_first_sensor_id = ground_sens_id;
-      }
-      line_first_seen_millis = line_last_seen_millis;
+        last_state = current_state;          // state retten
+        line_first_sensor_id = ground_sens_id; // sensor speichern
+        line_escape_start_time = millis();   // timer starten
     }
 
+    current_state = 3;
     return;
   }
 
-  if ((line_last_seen_millis > (millis() - 250)))
-  {
-    current_state = 3;
-    return;;
-  }
-  */
   // search
   if (SPICAM_Data1 == 0)
   {
@@ -451,52 +443,36 @@ void _default_statemachiene()
   }
   // move to ball
 
-  if(SPICAM_Data1 == 1 && (_cam_distance_calculation() > 220) && (_cam_data_calculation() < 13) && (-_cam_data_calculation() >= 13))
+  // State 1: drehen bis Ball zentriert
+  if (SPICAM_Data1 == 1 && (_cam_data_calculation() > 15 || _cam_data_calculation() < -15))
   {
-    if(_cam_data_calculation() < 220)
-    {
-      current_state = 2;
-      return;;
-    }
-    if (last_state != 4)
-    {
-      last_state = current_state;
-    }
+    last_state = current_state;
+    current_state = 1;
+    return;
+  }
+
+  // State 4: Ball zentriert aber zu weit weg → hinfahren
+  if (SPICAM_Data1 == 1 && abs(_cam_data_calculation()) <= 15 && _cam_distance_calculation() > 220)
+  {
+    last_state = current_state;
     current_state = 4;
-
-    return;;
+    return;
   }
 
-  if (SPICAM_Data1 == 1 && (_cam_data_calculation() > 10 || _cam_data_calculation() < -10)) 
+  if (SPICAM_Data1 == 1 && abs(_cam_data_calculation()) <= 15 
+    && _cam_distance_calculation() <= 220
+    && (orbit_ang > -20 && orbit_ang < 20))
   {
-    if (last_state != 1) //set last_state for code exit block
-    {
-      last_state = current_state;
-    }
-    current_state = 1; //rotate to ball
-
-    return;;
+    last_state = current_state;
+    current_state = 5;
+    return;
   }
-
-  if (SPICAM_Data1 == 1 && (orbit_ang > -20 && orbit_ang < 20) && (SPICAM_Data2 > 85 && SPICAM_Data2 < 95))
+  // State 2: Ball zentriert und nah genug → orbiten
+  if (SPICAM_Data1 == 1 && abs(_cam_data_calculation()) <= 15 && _cam_distance_calculation() <= 220)
   {
-    if (last_state != 5) //set last_state for code exit block
-    {
-      last_state = current_state;
-    }
-    current_state = 5; //shoot"
-
-    return;;
+    last_state = current_state;
+    current_state = 2;
+    return;
   }
 
-  if (SPICAM_Data1 == 1 && (_cam_data_calculation() <= 10 && _cam_data_calculation() >= -10) && (_cam_distance_calculation() <= 220)) //shoot if ball is in front of us (also ignore if ball is behind us)
-  {
-    if (last_state != 2) //set last_state for code exit block
-    {
-      last_state = current_state;
-    }
-    current_state = 2; //orbit to zero and "shoot"
-
-    return;;
-  }
 }

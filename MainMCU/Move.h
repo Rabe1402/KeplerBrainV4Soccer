@@ -94,34 +94,23 @@ void rotate_to_quadratic(int target, int precision, int precision_switch, float 
   set_motors(out, out, out, out);
 }
 
-void rotate_quadratic(int target, int precision, int precision_switch, float speed, float speed_precise, int base_speed, int max_out)
+void rotate_quadratic(int angle, int precision, int precision_switch, int max_out, int min_out)
 {
-  int out;
-  error = target;
-
-  if (error >= 180) {
-    error = -(360 - error);
-    base_speed = -base_speed;
-  }
-
-  _log("rotate to", String(error) + " " + String(precision));
-
+  error = angle;
+  if (error >= 180) error = -(360 - error);
   if (abs(error) < precision) return;
 
-  out = error * error;
-
+  int out;
   if (abs(error) < precision_switch) {
-    out *= speed_precise;
-    // Normalisieren: bei max error → max_out
-    int max_raw = (int)(precision_switch * precision_switch * speed_precise);
-    out = out * max_out / max(max_raw, 1);
+    // quadratisch normalisiert auf precision_switch
+    out = max_out * ((float)(error * error) / (float)(precision_switch * precision_switch));
   } else {
-    out *= speed;
-    out += base_speed;
-    int max_raw = (int)(180 * 180 * speed) + abs(base_speed);
-    out = out * max_out / max(max_raw, 1);
+    // quadratisch normalisiert auf 90°
+    out = max_out * ((float)(error * error) / (float)(90 * 90));
+    if (out > max_out) out = max_out;
   }
 
+  if (out < min_out) out = min_out; // Mindestgeschwindigkeit damit er sich immer bewegt
   if (error < 0) out = -out;
 
   set_motors(out, out, out, out);
