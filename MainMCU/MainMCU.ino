@@ -60,7 +60,7 @@ void setup()
   WRITE_I2C_BNO055_INIT();
   delay(3000);
   WRITE_LCD_TEXT(1, 1, "Imu calib done!"),
-  WRITE_LCD_TEXT(1, 2, "check with IS_BNO055_READY()");
+  WRITE_LCD_TEXT(1, 2, "check with READ_I2C_IS_BNO055_READY()");
   _log("SETUP", "BNO055_INIT calib is finsihed, check with IS_BNO055_READY()");
   if (READ_I2C_IS_BNO055_READY()) {
     _log("SETUP", "BNO055 is ready!");
@@ -336,11 +336,6 @@ void _default_statemachiene()
     case 2: // orbit around ball till yaw is 0 
     {
       ball_target = yaw + cam_angle;
-
-      error = yaw - yaw_orbit_target;
-      if (error >= 180) {
-        error = -(360 - error);
-      }
       /*if (error > 5 || error < -5) //if not in target area
       {
         orbit_to_zero(ball_target, (target_speed/2), 30); //not working right idk why
@@ -351,11 +346,8 @@ void _default_statemachiene()
       //orbit_around(ball_target, (target_speed/2), 30); //not working right idk why
       _imu_read();
       orbit_ang = (yaw - 180);
-      if (orbit_ang >= 180) {
-      orbit_ang = -(360 - orbit_ang);
       }
-      if (!(orbit_ang > -20 && orbit_ang < 20)) //if not in target area
-      //if (yaw < 20 && yaw > -20)
+      if (!(orbit_ang > -20 && orbit_ang < 20) && (SPICAM_Data2 > 85 && SPICAM_Data2 < 95)) //if not in target area
       {
         if(orbit_ang > 0)
         {
@@ -388,7 +380,7 @@ void _default_statemachiene()
         sens_allowed = true;
       }
 
-      if (((millis() - line_escape_start_time) > line_escape_duration) && ground_smallest > -7) 
+      if (((millis() - line_escape_start_time) > line_escape_duration) && ground_smallest > line_threshold) 
       {
         line_first_sensor_id = -1;  // Reset für nächste Erkennung
 
@@ -446,7 +438,7 @@ void _default_statemachiene()
 
   //Linie (muss ganz oben bleiben) 
 
-  if (ground_smallest < -10  )
+  if (ground_smallest < line_threshold)  
   {
     current_state = 3; //line
 
@@ -481,7 +473,7 @@ void _default_statemachiene()
     return;;
   }
   // move to ball
-  if (SPICAM_Data1 == 1 && (_cam_data_calculation() > 10 || _cam_data_calculation() < -10)) //rotate to ball if angle is bigger than 5° and smaller than 175° (also ignore if ball is behind us)
+  if (SPICAM_Data1 == 1 && (_cam_data_calculation() > 10 || _cam_data_calculation() < -10)) 
   {
     if (last_state != 1) //set last_state for code exit block
     {

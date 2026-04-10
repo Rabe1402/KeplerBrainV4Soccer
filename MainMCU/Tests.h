@@ -287,6 +287,10 @@ void _camera_test()
       case 4:
         WRITE_LCD_TEXT(1,  1, String(SPICAM_Data4) + "        ");
       break;;
+
+      case 5:
+        WRITE_LCD_TEXT(1,  1, String(_cam_distance_calculation() ) + "        ");
+      break;;
       
     }
     
@@ -310,7 +314,7 @@ void _camera_test()
     if (READ_BUTTON_CLOSED(B2) == 1)
     {
       mode++;
-      if (mode > 4)
+      if (mode > 5)
       {
         mode = 0;
       }
@@ -338,7 +342,10 @@ void _camera_test()
         case 4:
           WRITE_LCD_TEXT(1, 2, "4: LSB in mm    ");
         break;;
-
+        
+        case 5:
+          WRITE_LCD_TEXT(1, 2, "5: Dist in mm       ");
+        break;;
         
       }
 

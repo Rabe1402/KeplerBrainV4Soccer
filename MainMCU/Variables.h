@@ -35,6 +35,7 @@ int ground_sensor[8];           // Array für alle 8 Sensoren
 int ground_smallest;            // Kleinster Sensorwert (= dunkelste Linie)
 int ground_avg;                 // Durchschnitt aller Sensoren
 int ground_sens_id;             // ID des aktuell kleinsten Sensors
+int line_threshold = -7;        // ANPASSEN: Schwellenwert für Linienerkennung
 
 // Line escape logic
 int line_first_sensor_id = -1;  // Erster Sensor der Linie erkannt hat
@@ -44,6 +45,7 @@ unsigned long line_last_seen_millis = 0; // Letzter Zeitpunkt, an dem die Linie 
 int allow_sens_again = 10; //time to wait to realow ground sens
 
 bool sens_allowed = true;
+
 
 unsigned long line_first_seen_millis = 0;
 int16_t orbit_ang = 0;

@@ -82,6 +82,11 @@ int _cam_data_calculation()
     return (int8_t)(SPICAM_Data2 - 90);  /* -90..+90°*/ 
 }
 
+int _cam_distance_calculation() 
+{
+    return (SPICAM_Data3 << 8) | SPICAM_Data4; //combine MSB and LSB to get distance in mm
+}
+
 int smallest_ground_sensor_id(int base)
 {
   int id = 255;
