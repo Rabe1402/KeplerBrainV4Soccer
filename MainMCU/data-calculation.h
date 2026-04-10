@@ -75,17 +75,17 @@ void _SPIs()
   //HARDWARE ENTWICKLER: janez@janez.at
 
 
-digitalWrite(SPI2, HIGH);
+  digitalWrite(SPI2, HIGH);
 }
 
 int _cam_data_calculation() 
 {
-    return (int8_t)(SPICAM_Data2 - 90);  /* -90..+90°*/ 
+  return (int8_t)(SPICAM_Data2 - 90);  /* -90..+90°*/ 
 }
 
 int _cam_distance_calculation() 
 {
-    return (SPICAM_Data3 << 8) | SPICAM_Data4; //combine MSB and LSB to get distance in mm
+  return (SPICAM_Data3 << 8) | SPICAM_Data4; //combine MSB and LSB to get distance in mm
 }
 
 int smallest_ground_sensor_id(int base)
@@ -105,13 +105,13 @@ int smallest_ground_sensor_id(int base)
 
   for (int i = 1; i < 8; i++)
   {
-    if ( ground_sensor[i] - base < ground_smallest ) {
-       ground_smallest = ground_sensor[i] - base;
-       id = i; 
+    if ( ground_sensor[i] - base < ground_smallest ) 
+    {
+      ground_smallest = ground_sensor[i] - base;
+      id = i; 
     }
 
   }
-
   return id;
 }
 
