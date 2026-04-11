@@ -338,7 +338,6 @@ void WRITE_MOTOR_PWM(uint32_t frequency)
 
 uint8_t READ_IOS_CLOSED(uint8_t port)
 {
-
   if (port==IOS1)
   {
     pinMode(PB6, INPUT_PULLUP);
@@ -600,15 +599,16 @@ void WRITE_I2C_BNO055_INIT()
   delay(20); //wait till it switch out of config mode 
 
   // ------- do not proceed if IMU is not calibrated. May add funktion to show when it is stuck here...
+  uint8_t status;
   do {
     delay(10);
     i2c.beginTransmission(0x28);
     i2c.write(0x35);
     i2c.endTransmission(false);
     i2c.requestFrom(0x28, 1, true);
-    uint8_t status = i2c.read();
+    status = i2c.read();
 
-  } while((status & 0x30) != 0x30) 
+  } while((status & 0x30) != 0x30);
 }
 
 // Gyro-Kalibrierung checken. 

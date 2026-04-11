@@ -8,7 +8,7 @@ void _log(String name, String component, String message, bool error = false)
   if (debug)
   {
     // Timestamp + Name + Message als kompakten String
-    String log_entry = String(millis()) + " [" + name + "] " + " [" + component + "] " + ":  " + message;
+    String log_entry = String(millis()) + " . " + name + " . " + component + " . " + message + " . " + String(error);
     
     if (debug_over_serial)
     {
@@ -24,6 +24,7 @@ void _log(String name, String component, String message, bool error = false)
 void _log_Dump()
 {
   Serial.println("--- Log Dump Start ---");
+  Serial.println("got log dump request with log size: " + String(debug_log.size()));
   
   for(int i = 0; i < debug_log.size(); i++)
   {
@@ -63,9 +64,10 @@ void setup()
   WRITE_LCD_TEXT(1, 2, "check with READ_I2C_IS_BNO055_READY()");
   _log("SETUP", "IMU","BNO055_INIT calib is finsihed, check with IS_BNO055_READY()");
   if (READ_I2C_IS_BNO055_READY()) {
-    _log("SETUP", "BNO055 is ready!");
+    _log("SETUP", "IMU", "BNO055 is ready!");
     WRITE_LCD_TEXT(1, 2, "IMU Ready!");
-  } else {
+  } else 
+  {
     _log("SETUP", "IMU", "BNO055 is NOT ready! Check wiring and connections.", true);
     WRITE_LCD_TEXT(1, 2, "IMU NOT Ready!");
     delay(7000);
@@ -198,13 +200,13 @@ void loop()
       case 6:
         WRITE_LCD_TEXT(1, 2, "Move 0");
         _log("VOID LOOP", "MENU", "Starting move test, press B1 to exit");
-        while(READ_BUTTON_CLOSED(B1) !== 1)
+        while((READ_BUTTON_CLOSED(B1) == 0))
         {
         _imu_read();
         rotate_to(0, 3, 3, 10, 10, 0 );
         motors(drive_m1, drive_m2, drive_m3, drive_m4, true);
         }
-        exit;
+        
 
       break;;
 

@@ -171,7 +171,7 @@ void KEPLER_UPDATE()
     //POWER READ END
     if (ina231_bus_voltage > 500)
     {
-      _log("KEPLER_UPDATE", "POWER", + String(ina231_bus_voltage/1000) + "V, " + String(ina231_current) + " mA, " + String(ina231_power/10000) + " W,  errors: " + String(ina231_error_count));
+      _log("KEPLER_UPDATE", "POWER", + "Readings: " + String(ina231_bus_voltage/1000) + "V, " + String(ina231_current) + " mA, " + String(ina231_power/10000) + " W,  errors: " + String(ina231_error_count));
     } else {
       _log("KEPLER_UPDATE", "POWER", "Unable to get Power data... INA231 Errors: " + String(ina231_error_count), true);
     }
