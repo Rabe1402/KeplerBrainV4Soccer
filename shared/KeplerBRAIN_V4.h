@@ -811,11 +811,11 @@ void KEPLERBRAIN_INIT()
   // PC_12 Display D6
   // PA_1  Display D7
 
-  lcd.begin(16, 2);
-  lcd.setCursor(0,0);
-  lcd.print(" KeplerBRAIN V4 ");
-  lcd.setCursor(0,1);
-  lcd.print(":-) WELLCOME (-:");
+  //lcd.begin(16, 2);
+  //lcd.setCursor(0,0);
+  //lcd.print(" KeplerBRAIN V4 ");
+  //lcd.setCursor(0,1);
+  //lcd.print(":-) WELLCOME (-:");
 
 
   // *** TASTER ***
@@ -931,6 +931,11 @@ void KEPLERBRAIN_INIT()
   digitalWrite(PC1,LOW);
   digitalWrite(PC0,LOW);
 
+  lcd.begin(16, 2);
+  lcd.setCursor(0,0);
+  lcd.print(" KeplerBRAIN V4 ");
+  lcd.setCursor(0,1);
+  lcd.print(":-) WELLCOME (-:");
 
   // *** I2C ***
 

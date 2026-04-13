@@ -16,7 +16,7 @@ void _log(String name, String component, String message, bool error = false)
     {
       Serial.println(log_entry);
     }
-    else
+    if (debug_push_log)
     {
       debug_log.push_back(log_entry);
     }

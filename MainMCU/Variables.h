@@ -64,8 +64,9 @@ int selection = 0;
 //-----------------------------------------------------------------------------
 bool debug = true;
 bool debug_over_serial = true; //for log pushback a SD module is neede or else you have about 8sec of log. 
-bool debug_over_BT = false;
-HardwareSerial bt_serial(PA3, PA2); // RX, TX — UART2 //USE OTHER PINS 
+bool debug_over_BT = true;
+bool debug_push_log = false; //push log into vector for later dump, needs SD module for long logs
+HardwareSerial bt_serial(PA9, PA10); // RX, TX — UART1 //USE OTHER PINS 
 std::vector<String> debug_log = {"Log initialized!"};
 unsigned long search_start_time = 0;
 
@@ -76,3 +77,7 @@ unsigned long search_start_time = 0;
 int16_t yaw;
 int16_t pitch;
 int16_t roll;
+
+int16_t acc_x;
+int16_t acc_y;
+int16_t acc_z;
