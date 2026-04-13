@@ -3,6 +3,8 @@
 #include <math.h>
 #include "Variables.h" //alle variablen usw. sind in dieser datei, um diese ein wenig aufzuräumen 
 
+
+
 void _log(String name, String component, String message, bool error = false)
 {
   if (debug)
@@ -17,6 +19,11 @@ void _log(String name, String component, String message, bool error = false)
     else
     {
       debug_log.push_back(log_entry);
+    }
+    if (debug_over_BT)
+    {
+      // Hier könnte Code hinzugefügt werden, um die Log-Einträge über Bluetooth zu senden
+      bt_serial.println(log_entry);
     }
   }
 }
@@ -274,6 +281,7 @@ void loop()
 void _default_statemachiene()
 {
   int cam_angle = _cam_data_calculation();
+  _imu_acc_read(); //read acc data for training is delay intensiv for games remove
   _imu_read();
   orbit_ang = yaw;
   if (orbit_ang > 180) {
@@ -284,6 +292,14 @@ void _default_statemachiene()
   WRITE_LCD_TEXT(1, 1, String(current_state) );
 
   //WRITE_LCD_TEXT(1, 2, String(counter) ); //debug
+
+  _log("MAIN", "STATE_TRANSITION", 
+  "from:" + String(last_state) + " to:" + String(current_state) + 
+  " cam_ang:" + String(cam_angle) + 
+  " cam_dist:" + String(_cam_distance_calculation()) +
+  " orbit_ang:" + String(orbit_ang));
+
+
   switch (current_state)
   {
     case 0: // search
@@ -297,6 +313,9 @@ void _default_statemachiene()
         rotate(-9); //should be (-target_speed /2 ) but for testing only -10
       }
       _log("MAIN", "STATE MACHINE", "[STATE: " + String(current_state) + "] ball last seen angle: " + String(ball_last_seen_ang));
+      _log("MAIN", "SEARCH_ACTIVE",
+        "duration_ms:" + String(millis() - search_start_time) +
+        " last_seen_ang:" + String(ball_last_seen_ang));
     }
     break;; //exit here
     
@@ -350,8 +369,11 @@ void _default_statemachiene()
         }
 
       WRITE_LCD_TEXT(1, 2, String(orbit_ang) + "   ");
-      _log("MAIN", "STATE MACHINE", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle) + " goal-angle: " + String(yaw_orbit_target));
-    
+      _log("MAIN", "STATE MACHINE", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " goal-angle: " + String(yaw_orbit_target));
+      _log("MAIN", "ORBIT_CYCLE",
+        "orbit_ang:" + String(orbit_ang) +
+        " cam_ang:" + String(cam_angle) +
+        " dist:" + String(_cam_distance_calculation()));
     }
     break;; //exit here
     
@@ -374,6 +396,12 @@ void _default_statemachiene()
         current_state = last_state; // Rückkehr zum vorherigen Zustand
         line_escape_start_time = 0; // Reset Timer
         sens_allowed = true; // Sensoren wieder erlauben
+
+        _log("MAIN", "LINE_ESCAPE_DONE",
+          "sensor_id:" + String(line_first_sensor_id) +
+          " duration_ms:" + String(millis() - line_escape_start_time) +
+          " returned_to_state:" + String(last_state));
+
       }      
 
       _log("MAIN", "STATE MACHINE", "[STATE: " + String(current_state) + "] line sensor: " + String(line_first_sensor_id) + " line smallest: " + String(ground_smallest) + " escape timer: " + String(millis() - line_escape_start_time));

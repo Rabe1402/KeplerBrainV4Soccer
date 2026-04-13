@@ -123,3 +123,12 @@ void _imu_read()
   
   _log("SENSOR DATA", "IMU", " Y" + String(yaw)+" P"+String(pitch)+" R"+String(roll));
 }
+
+void _imu_acc_read()
+{
+  int16_t acc_x = READ_I2C_BNO055_ACC_X();
+  int16_t acc_y = READ_I2C_BNO055_ACC_Y();
+  int16_t acc_z = READ_I2C_BNO055_ACC_Z();
+  
+  _log("SENSOR DATA", "IMU", " AccX" + String(acc_x)+" AccY"+String(acc_y)+" AccZ"+String(acc_z));
+}

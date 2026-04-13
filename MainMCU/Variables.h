@@ -63,8 +63,12 @@ int selection = 0;
 // DEBUG
 //-----------------------------------------------------------------------------
 bool debug = true;
-bool debug_over_serial = true;
+bool debug_over_serial = true; //for log pushback a SD module is neede or else you have about 8sec of log. 
+bool debug_over_BT = false;
+HardwareSerial bt_serial(PA3, PA2); // RX, TX — UART2 //USE OTHER PINS 
 std::vector<String> debug_log = {"Log initialized!"};
+unsigned long search_start_time = 0;
+
 
 //-----------------------------------------------------------------------------
 // IMU SENSOR

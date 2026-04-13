@@ -659,6 +659,40 @@ int16_t READ_I2C_BNO055_PITCH()
 }
 
 
+uint16_t READ_I2C_BN0055_ACC_X() 
+{
+  int16_t value = 0;
+  i2c.beginTransmission(0x28);
+  i2c.write(0x08);  
+  i2c.endTransmission(false);
+  i2c.requestFrom(0x28, 2, true);
+  value = (int16_t)(i2c.read()|i2c.read()<<8 )/100;  
+  return value;  
+}
+
+int16_t READ_I2C_BN0055_ACC_Y() 
+{
+  int16_t value = 0;
+  i2c.beginTransmission(0x28);
+  i2c.write(0x0A);  
+  i2c.endTransmission(false);
+  i2c.requestFrom(0x28, 2, true);
+  value = (int16_t)(i2c.read()|i2c.read()<<8 )/100;  
+  return value;  
+}
+
+int16_t READ_I2C_BN0055_ACC_Z() 
+{
+  int16_t value = 0;
+  i2c.beginTransmission(0x28);
+  i2c.write(0x0C);  
+  i2c.endTransmission(false);
+  i2c.requestFrom(0x28, 2, true);
+  value = (int16_t)(i2c.read()|i2c.read()<<8 )/100;  
+  return value;  
+}
+
+
 // *** SPI ***
 
 // PA_6 SPI MISO
