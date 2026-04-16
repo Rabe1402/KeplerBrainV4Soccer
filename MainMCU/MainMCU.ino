@@ -16,10 +16,12 @@ void _log(String name, String component, String message, bool error = false)
     {
       Serial.println(log_entry);
     }
+
     if (debug_push_log)
     {
       debug_log.push_back(log_entry);
     }
+
     if (debug_over_BT)
     {
       // Hier könnte Code hinzugefügt werden, um die Log-Einträge über Bluetooth zu senden
@@ -54,6 +56,7 @@ void _log_Dump()
 
 void setup()
 {
+  bt_serial.begin(9600);
   Serial.begin(115200); // Hier lassen um debug im setup zuzulassen 
 
   // Initialisierung der Hardwarekomponenten des Controllers
@@ -64,21 +67,12 @@ void setup()
   WRITE_LCD_TEXT(1, 1, "Imu calib in 1s!!");
   WRITE_LCD_TEXT(1, 2, "please put robot on flat surface");
   _log("SETUP", "IMU", "Starting Imu calibration in 1s, please place robot on flat surface and wait a few seconds");
-  SLEEP(1000);
+  delay(1000);
   WRITE_I2C_BNO055_INIT();
-  delay(3000);
   WRITE_LCD_TEXT(1, 1, "Imu calib done!"),
   WRITE_LCD_TEXT(1, 2, "check with READ_I2C_IS_BNO055_READY()");
-  _log("SETUP", "IMU","BNO055_INIT calib is finsihed, check with IS_BNO055_READY()");
-  if (READ_I2C_IS_BNO055_READY()) {
-    _log("SETUP", "IMU", "BNO055 is ready!");
-    WRITE_LCD_TEXT(1, 2, "IMU Ready!");
-  } else 
-  {
-    _log("SETUP", "IMU", "BNO055 is NOT ready! Check wiring and connections.", true);
-    WRITE_LCD_TEXT(1, 2, "IMU NOT Ready!");
-    delay(7000);
-  }
+  _log("SETUP", "IMU", "BNO055 is ready!");
+  WRITE_LCD_TEXT(1, 2, "IMU Ready!");
   SLEEP(100);
   WRITE_I2C_INA231_INIT();
   _log("SETUP", "POWER","INA231_INIT successful");
@@ -94,6 +88,7 @@ void loop()
 {
   KEPLER_UPDATE(); //um hintergrund aktionen automatisch auszuführen 
   _log("VOID LOOP", "KeplerBRAIN", "run is " + String(run));
+  _log("VOID LOOP", "KeplerBRAIN", "bt-onection status: " + String(is_bt_connected));
   if (!run)
   {
     if (READ_BUTTON_CLOSED(B1) == 1 && selection_cursor > 0){selection_cursor--;WRITE_LCD_TEXT(1, 2, "o");}

@@ -1,5 +1,6 @@
 int counter; //globaler counter 
 int counter_now_power = 0; // now power counter variable um power metering alle 100 runs zu ermöglichen 
+int counter_BT_check = 0; //BT check counter variable um BT connection check alle 500 runs zu ermöglichen
 
 //pwoer sense variablen
 static volatile float ina231_shunt_voltage = 000000.0f;  // mV
@@ -18,6 +19,12 @@ void KEPLER_UPDATE()
     _log("KEPLER_UPDATE", "COUNTER", "Counter reset to avoid overflow");
   }
 
+  if (counter >= counter_BT_check + 500) //BT connection check alle 500 runs
+  {
+    is_bt_connected = READ_IOS_PRESSED(IOS1); //check if BT is connected at start, needs to be updated when BT connection changes.
+    _log("KEPLER_UPDATE", "BT", "Bluetooth connection status: " + String(is_bt_connected));
+    counter_BT_check = counter; //reset BT check counter
+  }
   //brake button to enter menu mode
   if (READ_BUTTON_CLOSED(B2) == 1)
   {

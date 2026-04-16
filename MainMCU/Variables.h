@@ -66,7 +66,8 @@ bool debug = true;
 bool debug_over_serial = true; //for log pushback a SD module is neede or else you have about 8sec of log. 
 bool debug_over_BT = true;
 bool debug_push_log = false; //push log into vector for later dump, needs SD module for long logs
-HardwareSerial bt_serial(PA9, PA10); // RX, TX — UART1 //USE OTHER PINS 
+bool is_bt_connected = 0; //check if BT is connected at start, needs to be updated when BT connection changes.
+HardwareSerial bt_serial(PB3, PA9); // RX, TX — UART1 //USE OTHER PINS 
 std::vector<String> debug_log = {"Log initialized!"};
 unsigned long search_start_time = 0;
 

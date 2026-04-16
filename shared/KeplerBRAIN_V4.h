@@ -335,6 +335,33 @@ void WRITE_MOTOR_PWM(uint32_t frequency)
 // PB_7  Digital In Out Servo IOS2
 // PB_8  Digital In Out Servo IOS3
 // PB_9  Digital In Out Servo IOS4
+uint8_t READ_IOS_HIGH(uint8_t port)
+{
+  if (port==IOS1)
+  {
+    pinMode(PB6, INPUT_PULLDOWN);
+    if (digitalRead(PB6)==1) return 1;
+    else return 0;
+  }
+  if (port==IOS2)
+  {
+    pinMode(PB7, INPUT_PULLDOWN);
+    if (digitalRead(PB7)==1) return 1;
+    else return 0;
+  }
+  if (port==IOS3)
+  {
+    pinMode(PB8, INPUT_PULLDOWN);
+    if (digitalRead(PB8)==1) return 1;
+    else return 0;
+  }
+  if (port==IOS4)
+  {
+    pinMode(PB9, INPUT_PULLDOWN);
+    if (digitalRead(PB9)==1) return 1;
+    else return 0;
+  }
+}
 
 uint8_t READ_IOS_CLOSED(uint8_t port)
 {
@@ -659,7 +686,7 @@ int16_t READ_I2C_BNO055_PITCH()
 }
 
 
-uint16_t READ_I2C_BN0055_ACC_X() 
+uint16_t READ_I2C_BNO055_ACC_X() 
 {
   int16_t value = 0;
   i2c.beginTransmission(0x28);
@@ -670,7 +697,7 @@ uint16_t READ_I2C_BN0055_ACC_X()
   return value;  
 }
 
-int16_t READ_I2C_BN0055_ACC_Y() 
+int16_t READ_I2C_BNO055_ACC_Y() 
 {
   int16_t value = 0;
   i2c.beginTransmission(0x28);
@@ -681,7 +708,7 @@ int16_t READ_I2C_BN0055_ACC_Y()
   return value;  
 }
 
-int16_t READ_I2C_BN0055_ACC_Z() 
+int16_t READ_I2C_BNO055_ACC_Z() 
 {
   int16_t value = 0;
   i2c.beginTransmission(0x28);
@@ -939,7 +966,7 @@ void KEPLERBRAIN_INIT()
 
   // *** I2C ***
 
-  i2c.begin(); 
+  wr
 
 
   // *** SPI ***
@@ -1026,3 +1053,4 @@ void KEPLERBRAIN_INIT()
   UART.baud(19200);
     */
 }
+
