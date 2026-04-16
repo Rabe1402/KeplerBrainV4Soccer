@@ -1,3 +1,16 @@
+//This code is for the SRF10 ultrasonic sensor.
+//It allows you to 1. read the version, 2. change the I2C address, 3. start measurements, and 4. read distance values in a loop. 
+//The user interacts with the sensor through the Serial Monitor by entering specific commands.
+
+
+//CMDs:
+//SRF10+Ver?  --> reads the version of the SRF10 sensor
+//SRF10+ADD   --> prompts the user to enter a new I2C address for the sensor
+//SRF10+START --> starts a ranging measurement
+//SRF10+DIST? --> starts a loop that continuously reads distance values until the user presses 'q' to quit
+
+
+
 #include <Wire.h>
 
 #define SRF10_COMMAND_REG 0x00
