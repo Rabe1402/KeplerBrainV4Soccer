@@ -13,7 +13,8 @@ int error = 0;          // Fehler für rotate_to Funktionen
 //-----------------------------------------------------------------------------
 // MOVEMENT
 //-----------------------------------------------------------------------------
-int target_speed = 40;  // ANPASSEN: Grundgeschwindigkeit
+int target_speed = 88;  // ANPASSEN: Grundgeschwindigkeit
+int shoot_speed = 70;
 
 // Motor outputs
 int drive_m1;

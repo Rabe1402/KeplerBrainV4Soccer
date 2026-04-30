@@ -60,7 +60,7 @@ void ADC1_Init(void)
   // ADC1 konfigurieren
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
-  hadc1.Init.Resolution = ADC_RESOLUTION_12B;  // 12-Bit Auflösung (0-4095)
+  hadc1.Init.Resolution = ADC_RESOLUTION_10B;  // 12-Bit Auflösung (0-4095)
   hadc1.Init.ScanConvMode = ENABLE;
   hadc1.Init.ContinuousConvMode = ENABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;

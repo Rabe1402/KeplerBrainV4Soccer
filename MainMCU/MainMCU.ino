@@ -64,14 +64,7 @@ void setup()
   _log("SETUP", "KeplerBRAIN", "Hardware initialization complete, starting sensor initialization...");
   SLEEP(100); //um jegliche blockierungen zu vermeiden 
   WRITE_LCD_CLEAR();
-  WRITE_LCD_TEXT(1, 1, "Imu calib in 1s!!");
-  WRITE_LCD_TEXT(1, 2, "please put robot on flat surface");
-  _log("SETUP", "IMU", "Starting Imu calibration in 1s, please place robot on flat surface and wait a few seconds");
-  delay(1000);
-  WRITE_I2C_BNO055_INIT();
-  WRITE_LCD_TEXT(1, 1, "Imu calib done!"),
-  WRITE_LCD_TEXT(1, 2, "check with READ_I2C_IS_BNO055_READY()");
-  _log("SETUP", "IMU", "BNO055 is ready!");
+  delay(100);
   WRITE_LCD_TEXT(1, 2, "IMU Ready!");
   SLEEP(100);
   WRITE_I2C_INA231_INIT();
@@ -278,10 +271,9 @@ void _default_statemachiene()
   int cam_angle = _cam_data_calculation();
   _imu_acc_read(); //read acc data for training is delay intensiv for games remove
   _imu_read();
-  orbit_ang = yaw;
-  if (orbit_ang > 180) {
-    orbit_ang = orbit_ang - 360; // 350° wird zu -10°, 270° wird zu -90° usw.
-  }
+
+
+
   _SPIs();
   _log("MAIN", "STATE MACHINE", "running state: " + String(current_state));
   WRITE_LCD_TEXT(1, 1, String(current_state) );
@@ -303,9 +295,9 @@ void _default_statemachiene()
       ball_last_seen_ang = _cam_data_calculation();
       if(ball_last_seen_ang > 0) //MUSS ANGEPASST WERDEN IDK OB SO RICHTIG 
       {
-        rotate( 9); //should be ( target_speed /2 ) but for testing only 10
+        rotate( 30); //should be ( target_speed /2 ) but for testing only 10
       }else{
-        rotate(-9); //should be (-target_speed /2 ) but for testing only -10
+        rotate(-30); //should be (-target_speed /2 ) but for testing only -10
       }
       _log("MAIN", "STATE MACHINE", "[STATE: " + String(current_state) + "] ball last seen angle: " + String(ball_last_seen_ang));
       _log("MAIN", "SEARCH_ACTIVE",
@@ -322,19 +314,20 @@ void _default_statemachiene()
       // Target nur neu setzen wenn noch nicht to avoid over steer 
       // oder Ball fast zentriert ist (< 2°)
       // und fix alle 250ms
+
+      //seidenhof 51
+
       if (!ball_target_locked || abs(cam_angle) < 2 || last_ball_locked_time + 250 < millis())
       {
         
         last_ball_locked_time = millis();
         ball_target_locked = true;  
       }
-      //ball_target = yaw + cam_angle;
-      //rotate_quadratic(cam_angle, 2, 2, 11, 10, 0, 15); 
+
       rotate_quadratic(cam_angle, 2, 15, 17, 7);
+
       WRITE_LCD_TEXT(1, 2, String(cam_angle) + "   ");
       _log("MAIN", "STATE MACHINE", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
-      //rotate_to_quadratic(ball_target, 2, 23, 0.0000004, 0.00000004, 0);
-      //move_angle(cam_angle, 40);
     }
     break;; //exit here
     
@@ -342,26 +335,25 @@ void _default_statemachiene()
     
     case 2: // orbit around ball till yaw is 0 
     {
+
+      orbit_ang = yaw;
+      if (orbit_ang > 180) {
+        orbit_ang = orbit_ang - 360; // 350° wird zu -10°, 270° wird zu -90° usw.
+      }
       ball_target = yaw + cam_angle;
-      /*if (error > 5 || error < -5) //if not in target area
-      {
-        orbit_to_zero(ball_target, (target_speed/2), 30); //not working right idk why
-      }else
-      {        
-        move_angle(error, target_speed); //move to ball if in target area
-      }  */
-      //orbit_around(ball_target, (target_speed/2), 30); //not working right idk why
       
-        if(orbit_ang > 0)
-        {
-          orbit(25, -80, 2.5); 
-          
-        }
-        else
-        {
-          orbit(25, 80, -2.5);
-          //25, 80, -3 geht gut wenn er nah ist, 60 damit er rein spiraliert wenn er weit weg ist.
-        }
+      if(orbit_ang > 0)
+      {
+
+        orbit(67, -80, 20); //25 -80 2.5
+        
+      }
+      else
+      {
+
+        orbit(67, 80, -20);
+        
+      }
 
       WRITE_LCD_TEXT(1, 2, String(orbit_ang) + "   ");
       _log("MAIN", "STATE MACHINE", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " goal-angle: " + String(yaw_orbit_target));
@@ -369,6 +361,7 @@ void _default_statemachiene()
         "orbit_ang:" + String(orbit_ang) +
         " cam_ang:" + String(cam_angle) +
         " dist:" + String(_cam_distance_calculation()));
+
     }
     break;; //exit here
     
@@ -405,14 +398,14 @@ void _default_statemachiene()
 
     case 4: // move to ball
     {
-      move_angle(_cam_data_calculation(), 30);
+      move_angle(_cam_data_calculation(), target_speed);
       _log("MAIN", "STATE MACHINE", "[STATE: " + String(current_state) + "] ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
     }
     break;;
 
     case 5: // shoot
     {
-      move_angle(0, 45);
+      move_angle(0, shoot_speed);
       _log("MAIN", "STATE MACHINE", "[STATE: " + String(current_state) + "] SHOOTING! ball target: " + String(ball_target) + " cam angle: " + String(cam_angle));
     }
     break;;
