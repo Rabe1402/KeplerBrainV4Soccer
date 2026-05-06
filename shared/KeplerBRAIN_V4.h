@@ -818,6 +818,7 @@ void WRITE_SRF10_INIT()
 // address: SRF10_S1 .. SRF10_S4
 int READ_SRF10(byte address)
 {
+  int dist = -1;
   // Messung starten (0x51 = cm, 0x50 = inch, 0x52 = µs)
   i2c.beginTransmission(address);
   i2c.write(_SRF10_CMD_REG);
@@ -827,7 +828,7 @@ int READ_SRF10(byte address)
 
   while (i2c.available()) 
   {
-    int dist = (i2c.read() << 8) | i2c.read(); // evtl. alte Daten löschen
+    dist = i2c.read(); // evtl. alte Daten löschen
   }
 
   if dist!=0xFF
@@ -838,9 +839,9 @@ int READ_SRF10(byte address)
 
     i2c.requestFrom(address, 1);
 
-    if (i2c.available())
+    while (i2c.available())
     { 
-      int dist = (i2c.read() << 8) | i2c.read();
+      dist = i2c.read();
     
     }
     i2c.beginTransmission(address);
