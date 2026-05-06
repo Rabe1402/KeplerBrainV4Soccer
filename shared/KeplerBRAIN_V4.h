@@ -760,7 +760,7 @@ byte SRF10_RANGE = 23;
 #define _SRF10_CMD_REG   0x00
 #define _SRF10_GAIN_REG  0x01
 #define _SRF10_RANGE_REG 0x02
-#define _SRF10_RES_REG   0x02
+#define _SRF10_RES_REG   0x03
 #define _SRF10_POLL_MS   65    // SRF10 braucht max ~65ms pro Messung
 #define _SRF10_MAX_CM    255   // Ausreisser-Filter: Werte > 255 cm → -1
 
@@ -821,22 +821,34 @@ int READ_SRF10(byte address)
   // Messung starten (0x51 = cm, 0x50 = inch, 0x52 = µs)
   i2c.beginTransmission(address);
   i2c.write(_SRF10_CMD_REG);
-  i2c.write(0x51);
   i2c.endTransmission();
 
-  if (!_SRF10_WAIT_READY(address)) return -1;
+  i2c.requestFrom(112, 1);
 
-  i2c.beginTransmission(address);
-  i2c.write(_SRF10_RES_REG);
-  i2c.endTransmission();
-  i2c.requestFrom(address, (byte)2);
-
-  if (i2c.available() >= 2)
+  while (i2c.available()) 
   {
-    int dist = (i2c.read() << 8) | i2c.read();
-    return (dist > _SRF10_MAX_CM) ? -1 : dist;
+    int dist = (i2c.read() << 8) | i2c.read(); // evtl. alte Daten löschen
   }
-  return -1;
+
+  if dist!=0xFF
+  {
+    i2c.beginTransmission(address);
+    i2c.write(_SRF10_RES_REG);
+    i2c.endTransmission();
+
+    i2c.requestFrom(address, 1);
+
+    if (i2c.available())
+    { 
+      int dist = (i2c.read() << 8) | i2c.read();
+    
+    }
+    i2c.beginTransmission(address);
+    i2c.write(_SRF10_CMD_REG);
+    i2c.write(0x51); // Messung starten (0x51 = cm, 0x50 = inch, 0x52 = µs)
+    i2c.endTransmission();
+  }
+  return dist;
 }
 
 
