@@ -24,15 +24,15 @@ void setup()
   pinMode(PB8, INPUT);
   pinMode(PB7, INPUT);
   pinMode(PB6, INPUT);
-  pinMode(PB5, INPUT);
-  pinMode(PA10, INPUT);
-  pinMode(PA9, INPUT);
+  pinMode(PA8, INPUT);
+  pinMode(PC0, INPUT);
+  pinMode(PC2, INPUT);
   pinMode(PB15, INPUT);
   pinMode(PB14, INPUT);
   pinMode(PB12, INPUT);
   pinMode(PB13, INPUT);
-  pinMode(PB2, INPUT);
-  pinMode(PB0, INPUT);
+  pinMode(PB1, INPUT);
+  pinMode(PC5, INPUT);
   pinMode(PA1, INPUT);
   pinMode(PA0, INPUT);
   pinMode(PC13, INPUT);
@@ -47,18 +47,18 @@ void loop()
 {
  
   // explizite Auswertung
-  if (digitalRead(PB5)) arr_sensor[0] = 0; else arr_sensor[0] = 1; 
+  if (digitalRead(PA8)) arr_sensor[0] = 0; else arr_sensor[0] = 1; 
   if (digitalRead(PB7)) arr_sensor[1] = 0; else arr_sensor[1] = 1; 
   if (digitalRead(PB8)) arr_sensor[2] = 0; else arr_sensor[2] = 1; 
   if (digitalRead(PB6)) arr_sensor[3] = 0; else arr_sensor[3] = 1; 
   if (digitalRead(PB14)) arr_sensor[4] = 0; else arr_sensor[4] = 1; 
-  if (digitalRead(PA10)) arr_sensor[5] = 0; else arr_sensor[5] = 1; 
-  if (digitalRead(PA9)) arr_sensor[6] = 0; else arr_sensor[6] = 1; 
+  if (digitalRead(PC0)) arr_sensor[5] = 0; else arr_sensor[5] = 1; 
+  if (digitalRead(PC2)) arr_sensor[6] = 0; else arr_sensor[6] = 1; 
   if (digitalRead(PB15)) arr_sensor[7] = 0; else arr_sensor[7] = 1; 
  
   if (digitalRead(PB13)) arr_sensor[8] = 0; else arr_sensor[8] = 1; 
-  if (digitalRead(PB2)) arr_sensor[9] = 0; else arr_sensor[9] = 1; 
-  if (digitalRead(PB0)) arr_sensor[10] = 0; else arr_sensor[10] = 1; 
+  if (digitalRead(PB1)) arr_sensor[9] = 0; else arr_sensor[9] = 1; 
+  if (digitalRead(PC5)) arr_sensor[10] = 0; else arr_sensor[10] = 1; 
   if (digitalRead(PB12)) arr_sensor[11] = 0; else arr_sensor[11] = 1; 
   if (digitalRead(PA1)) arr_sensor[12] = 0; else arr_sensor[12] = 1; 
   if (digitalRead(PA0)) arr_sensor[13] = 0; else arr_sensor[13] = 1; 
