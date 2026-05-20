@@ -1,0 +1,159 @@
+import pyb, sensor, math
+import machine
+import utime
+
+spi = pyb.SPI(2, pyb.SPI.SLAVE, polarity=0, phase=0)
+led_red = pyb.LED(1)
+led_green = pyb.LED(2)
+spi_list = [250, 1, 2, 3, 4, 5, 6, 7]
+spi_data = bytearray(spi_list)
+largest_blob = 0
+img = 0
+
+def nss_callback(line):
+    global spi, spi_data
+    try:
+        spi.send(spi_data, timeout=1000)
+        led_green.on()
+        led_red.off()
+    except:
+        led_green.off()
+        led_red.on()
+        pass
+
+pyb.ExtInt(pyb.Pin("P3"), pyb.ExtInt.IRQ_FALLING, pyb.Pin.PULL_UP, nss_callback)
+
+
+# setup camera
+sensor.reset()
+sensor.set_pixformat(sensor.RGB565)
+sensor.set_framesize(sensor.QVGA)
+sensor.skip_frames(10)
+#blue
+blueThreshold = (31, 51, -8, 12, -45, -13)#(39, 65, -21, 6, -78, -18)
+#yellow
+yellowThreshold = (79, 100, -33, 9, 43, 74)#(72, 95, -18, 14, 27, 51)
+#orange
+orangeThreshold = (39, 100, 3, 54, 22, 68)#(43, 100, 4, 74, 34, 75)
+
+
+rois = [
+        (0, 0, 140, 240),
+        (0, 0, 320, 240)
+       ]
+
+#wdt = machine.WDT(timeout=2000)
+
+
+def findBlob(threshold, myRois):
+    largest_blob = 0
+    blobs = img.find_blobs([threshold], roi=myRois[0:4])
+    for b in blobs:
+        #img.draw_rectangle(b[0:4])
+        #print("x:%d y:%d w:%d h:%d" % (b[0],b[1],b[2],b[3]))
+        x = b[0] - 160 + b[2] / 2
+        y = b[1] - 120 + b[3] / 2
+
+        x = x*x
+        y = y*y
+
+        if x + y > 23000:
+            blobs.remove(b)
+            continue
+
+
+
+        largest_blob = max(blobs, key =lambda b: b.pixels())
+
+    if largest_blob:
+        img.draw_rectangle(largest_blob.rect())
+
+    return largest_blob
+
+def transformBlob(blob, n):
+
+    if blob == 0:
+        spi_list[n] = 0
+        spi_list[n + 1] = 0
+    else:
+        a = math.atan(-(blob[1] - 120.0001) / (blob[0] - 165.0001)) * 180 / 3.1416
+        if blob[1] > 110:
+            a += 180
+            if blob[0] > 152:
+                a += 180
+        elif blob[0] < 152:
+            a += 180
+
+        a = ((540 + a) % 360) / 2
+        r = math.sqrt(math.pow(165 - blob[0], 2) + math.pow(120 - blob[1], 2))
+
+        #angle
+        spi_list[n] = int(a)
+        #distance
+        spi_list[n + 1] = int(r)
+
+# find blobs
+
+startTime = 0
+roisBlueList = []
+x = False
+x2 = 0
+
+while(True):
+
+    wdt.feed()
+    img = sensor.snapshot()
+    roisOrange = findBlob(orangeThreshold, rois[1])
+    roisBlue = findBlob(blueThreshold, rois[0])
+    roisYellow = findBlob(yellowThreshold, rois[0])
+
+    roisBlueList.append(roisBlue)
+
+    transformBlob(roisOrange, 5)
+    startTime += 1
+    if startTime > 9:
+
+        """x2 += 1
+
+        if x2 > 4:
+            x2 = 0
+
+            if x:
+                led_green.on()
+                led_red.off()
+            else:
+                led_green.off()
+                led_red.on()
+
+            x = not x"""
+
+
+        startTime = 0
+
+        resultBlue = [0, 0]
+        times = 0
+
+        #print(roisBlueList)
+        for i in roisBlueList:
+            if i == 0:
+                continue
+
+            times += 1
+            #print(i[0])
+            resultBlue[0] += i[0] + i[2] / 2
+            resultBlue[1] += i[1] + i[3] / 2
+
+        resultBlue[0] /= 10
+        resultBlue[1] /= 10
+
+        if times < 5:
+            resultBlue = 0
+
+        transformBlob(resultBlue, 1)
+        transformBlob(roisYellow, 3)
+        #print(spi_list[1])
+
+
+        roisBlueList = []
+
+    spi_data = bytearray(spi_list)
