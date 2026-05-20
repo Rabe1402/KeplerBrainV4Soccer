@@ -457,19 +457,49 @@ TwoWire i2c(PC9, PA8);
 
 void WRITE_I2C_BNO055_INIT()
 {
-  
-  do
-  {
+  // ------ Warten bis Chip bereit
+  do {
     delay(10);
     i2c.beginTransmission(0x28);
     i2c.write(0x00);
     i2c.endTransmission(false);
     i2c.requestFrom(0x28, 1, true);
-  } while(i2c.read() != 0xA0);
+  } while(i2c.read() != 0xA0); //read first register till it shows 0xA0
+  
+  delay(50); //wait to let sensor finish starup 
+  
+  // ------ IMU Mode (nur Accel + Gyro, KEIN Magnetometer!)
   i2c.beginTransmission(0x28);
   i2c.write(0x3D);
-  i2c.write(0x0C);
-  i2c.endTransmission();
+  i2c.write(0x08);  // IMU Mode statt 0x0C (only ACC+GYRO) instead of (MAG+ACC+GYRO)
+  i2c.endTransmission(); 
+  delay(20); //wait till it switch out of config mode 
+
+  // ------- do not proceed if IMU is not calibrated. May add funktion to show when it is stuck here...
+  uint8_t status;
+  do {
+    delay(10);
+    i2c.beginTransmission(0x28);
+    i2c.write(0x35);
+    i2c.endTransmission(false);
+    i2c.requestFrom(0x28, 1, true);
+    status = i2c.read();
+
+  } while((status & 0x30) != 0x30);
+}
+
+// Gyro-Kalibrierung checken. 
+// should not be neccesary anymore if the code blocke above works as expected ... 
+bool READ_I2C_IS_BNO055_READY()
+{
+  i2c.beginTransmission(0x28);
+  i2c.write(0x35);
+  i2c.endTransmission(false);
+  i2c.requestFrom(0x28, 1, true);
+  uint8_t status = i2c.read();
+  
+  // Nur Gyro prüfen (Bit 5-4 müssen = 3 sein)
+  return ((status & 0x30) == 0x30);
 }
 
 uint16_t READ_I2C_BNO055_YAW()
@@ -504,6 +534,41 @@ int16_t READ_I2C_BNO055_PITCH()
   value = 65535-(int16_t)(i2c.read()|i2c.read()<<8 )/16;  
   return value;  
 }
+
+
+uint16_t READ_I2C_BNO055_ACC_X() 
+{
+  int16_t value = 0;
+  i2c.beginTransmission(0x28);
+  i2c.write(0x08);  
+  i2c.endTransmission(false);
+  i2c.requestFrom(0x28, 2, true);
+  value = (int16_t)(i2c.read()|i2c.read()<<8 )/100;  
+  return value;  
+}
+
+int16_t READ_I2C_BNO055_ACC_Y() 
+{
+  int16_t value = 0;
+  i2c.beginTransmission(0x28);
+  i2c.write(0x0A);  
+  i2c.endTransmission(false);
+  i2c.requestFrom(0x28, 2, true);
+  value = (int16_t)(i2c.read()|i2c.read()<<8 )/100;  
+  return value;  
+}
+
+int16_t READ_I2C_BNO055_ACC_Z() 
+{
+  int16_t value = 0;
+  i2c.beginTransmission(0x28);
+  i2c.write(0x0C);  
+  i2c.endTransmission(false);
+  i2c.requestFrom(0x28, 2, true);
+  value = (int16_t)(i2c.read()|i2c.read()<<8 )/100;  
+  return value;  
+}
+
 
 
 // *** SPI ***

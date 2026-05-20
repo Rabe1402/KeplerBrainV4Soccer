@@ -1,6 +1,12 @@
-import pyb, sensor, math
-#import machine
-#import utime
+import sensor
+import image
+import pyb
+import time
+import math
+import machine
+import utime
+
+DEBUG_DRAW = True
 
 spi = pyb.SPI(2, pyb.SPI.SLAVE, polarity=0, phase=0)
 led_red = pyb.LED(1)
@@ -42,12 +48,12 @@ rois = [
         (0, 0, 320, 240)
        ]
 
-#wdt = machine.WDT(timeout=2000)
-
+wdt = machine.WDT(timeout=5000)
 
 def findBlob(threshold, myRois):
     largest_blob = 0
-    blobs = img.find_blobs([threshold], roi=myRois[0:4])
+    if DEBUG_DRAW:
+        blobs = img.find_blobs([threshold], roi=myRois[0:4])
     for b in blobs:
         #img.draw_rectangle(b[0:4])
         #print("x:%d y:%d w:%d h:%d" % (b[0],b[1],b[2],b[3]))
@@ -66,7 +72,8 @@ def findBlob(threshold, myRois):
         largest_blob = max(blobs, key =lambda b: b.pixels())
 
     if largest_blob:
-        img.draw_rectangle(largest_blob.rect())
+        if DEBUG_DRAW:
+            img.draw_rectangle(largest_blob.rect())
 
     return largest_blob
 
@@ -101,7 +108,8 @@ x2 = 0
 
 while(True):
 
-    #wdt.feed()
+    wdt.feed()
+    clock.tick()
     img = sensor.snapshot()
     roisOrange = findBlob(orangeThreshold, rois[1])
     roisBlue = findBlob(blueThreshold, rois[0])
@@ -157,3 +165,4 @@ while(True):
         roisBlueList = []
 
     spi_data = bytearray(spi_list)
+    print(clock.fps())
