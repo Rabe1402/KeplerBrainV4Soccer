@@ -20,13 +20,14 @@ void WRITE_KICKER_INIT(uint8_t port) //init kicker pin unf timer, für exatkte k
     {
         pinMode(PB6, OUTPUT);   //PB6 als Ausgang für den Kicker konfigurieren
         digitalWrite(PB6, LOW); //sicher stellen, dass der kicker aus is
-
+        aktiv_kicker_port = 1; //merke kicker um im interrupt den richtigen auszuschalten und WRITE_KCIKER 
     }
 
     if (port==IOS2)
     {
         pinMode(PB7, OUTPUT);   //PB7 als Ausgang für den Kicker konfigurieren
         digitalWrite(PB7, LOW); //sicher stellen, dass der kicker aus is
+        aktiv_kicker_port = 2; //merke kicker um im interrupt den richtigen auszuschalten und WRITE_KCIKER
 
     }   
 
@@ -34,51 +35,52 @@ void WRITE_KICKER_INIT(uint8_t port) //init kicker pin unf timer, für exatkte k
     {
         pinMode(PB8, OUTPUT);   //PB8 als Ausgang für den Kicker konfigurieren
         digitalWrite(PB8, LOW); //sicher stellen, dass der kicker aus is
+        aktiv_kicker_port = 3; //merke kicker um im interrupt den richtigen auszuschalten und WRITE_KCIKER
     }
 
     if (port==IOS4)
     {
         pinMode(PB9, OUTPUT);   //PB9 als Ausgang für den Kicker konfigurieren
         digitalWrite(PB9, LOW); //sicher stellen, dass der kicker aus is
+        aktiv_kicker_port = 4; //merke kicker um im interrupt den richtigen auszuschalten und WRITE_KCIKER
     }
 
 }
 
-void WRITE_KICKER(uint8_t port, uint16_t duration_ms) //kickt für die angegebene dauer in ms, ohne den main code zu blockieren
+void WRITE_KICKER(uint16_t duration_ms) //kickt für die angegebene dauer in ms, ohne den main code zu blockieren
 {
     TIM5->ARR = duration_ms * 1000 -1; //timer zählt bis dahin mit 1Mhz also 1ms = 1000 counts, 10ms = 10000 counts usw. -1 weil der timer von 0 zählt
     TIM5->EGR = TIM_EGR_UG; //Update Generation um die neuen Werte sofort zu laden
-    TIM5->CR1 |= TIM_CR1_CEN; //Timer aktivieren (CEN = Counter Enable)
-
     
-    if (port==IOS1)
+    if (aktiv_kicker_port == 1) //nur kicker starten wenn kein anderer kicker aktiv ist, damit es nicht zu problemen mit dem timer kommt, da dieser ja nur einen interrupt hat
     {
         digitalWrite(PB6, HIGH); //Kicker los
         TIM5->CNT = 0; //Timer zurücksetzen
-        aktiv_kicker_port = 1; //merke kicker um im interrupt den richtigen auszuschalten
+        
     }
     
-    if (port==IOS2)
+    if (aktive_kicker_port == 2)
     {
         digitalWrite(PB7, HIGH); //Kicker los
         TIM5->CNT = 0; //Timer zurücksetzen
-        aktiv_kicker_port = 2; //merke kicker um im interrupt den richtigen auszuschalten
+        
     }
 
-    if (port==IOS3)
+    if (aktiv_kicker_port == 3)
     {
         digitalWrite(PB8, HIGH); //Kicker los
         TIM5->CNT = 0; //Timer zurücksetzen
-        aktiv_kicker_port = 3; //merke kicker um im interrupt den richtigen auszuschalten
+        
     }
 
-    if (port==IOS4)
+    if (aktiv_kicker_port == 4)
     {
         digitalWrite(PB9, HIGH); //Kicker los
         TIM5->CNT = 0; //Timer zurücksetzen
-        aktiv_kicker_port = 4; //merke kicker um im interrupt den richtigen auszuschalten
+    
     }
-
+    
+    TIM5->CR1 |= TIM_CR1_CEN; //Timer aktivieren (CEN = Counter Enable)
 }
 
 extern "C" void TIM5_IRQHandler() //wenn TIM5 überläuft, also nach duration_ms, kommt dieser interrupt
