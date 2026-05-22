@@ -1099,10 +1099,7 @@ void KEPLERBRAIN_INIT()
 
   i2c.begin();
 
-  // *** SRF10 Ultraschall ***
-
-  WRITE_SRF10_INIT();
-
+  
   // *** SPI ***
 
   // PA_6 SPI MISO
