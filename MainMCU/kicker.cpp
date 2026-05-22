@@ -79,7 +79,7 @@ void WRITE_KICKER(uint16_t duration_ms) //kickt für die angegebene dauer in ms,
         TIM5->CNT = 0; //Timer zurücksetzen
     
     }
-    
+
     TIM5->CR1 |= TIM_CR1_CEN; //Timer aktivieren (CEN = Counter Enable)
 }
 
@@ -92,22 +92,22 @@ extern "C" void TIM5_IRQHandler() //wenn TIM5 überläuft, also nach duration_ms
         if (aktiv_kicker_port == 1)
         {
             digitalWrite(PB6, LOW); //Kicker aus
-            aktiv_kicker_port = 0; //reset (lwk egal)
+            
         }
         if (aktiv_kicker_port == 2)
         {
             digitalWrite(PB7, LOW); //Kicker aus
-            aktiv_kicker_port = 0; //reset (lwk egal)
+            
         }
         if (aktiv_kicker_port == 3)
         {
             digitalWrite(PB8, LOW); //Kicker aus
-            aktiv_kicker_port = 0; //reset (lwk egal)
+            
         }
         if (aktiv_kicker_port == 4)
         {
             digitalWrite(PB9, LOW); //Kicker aus
-            aktiv_kicker_port = 0; //reset (lwk egal)
+            
         }
         TIM5->CR1 &= ~TIM_CR1_CEN;  // Timer stoppen
     }
