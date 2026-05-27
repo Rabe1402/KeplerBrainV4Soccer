@@ -365,14 +365,14 @@ uint8_t READ_IOS_HIGH(uint8_t port)
   }
   if (port==IOS2)
   {
-    pinMode(PB7, INPUT_PULLDOWN);
-    if (digitalRead(PB7)==1) return 1;
+    pinMode(PB8, INPUT_PULLDOWN);
+    if (digitalRead(PB8)==1) return 1;
     else return 0;
   }
   if (port==IOS3)
   {
-    pinMode(PB8, INPUT_PULLDOWN);
-    if (digitalRead(PB8)==1) return 1;
+    pinMode(PB6, INPUT_PULLDOWN);
+    if (digitalRead(PB6)==1) return 1;
     else return 0;
   }
   if (port==IOS4)
@@ -393,14 +393,14 @@ uint8_t READ_IOS_CLOSED(uint8_t port)
   }
   if (port==IOS2)
   {
-    pinMode(PB7, INPUT_PULLUP);
-    if (digitalRead(PB7)==0) return 1;
+    pinMode(PB8, INPUT_PULLUP);
+    if (digitalRead(PB8)==0) return 1;
     else return 0;
   }
   if (port==IOS3)
   {
-    pinMode(PB8, INPUT_PULLUP);
-    if (digitalRead(PB8)==0) return 1;
+    pinMode(PB6, INPUT_PULLUP);
+    if (digitalRead(PB6)==0) return 1;
     else return 0;
   }
   if (port==IOS4)
@@ -441,7 +441,7 @@ uint8_t READ_IOS_PRESSED(uint8_t port)
   }
   if (port==IOS2)
   {      
-        if (!digitalRead(PB7))
+        if (!digitalRead(PB8))
         {
           if (ios2_closed==false)
           {
@@ -457,7 +457,7 @@ uint8_t READ_IOS_PRESSED(uint8_t port)
    }
    if (port==IOS3)
    {
-        if (!digitalRead(PB8))
+        if (!digitalRead(PB6))
         {
           if (ios3_closed==false)
           {
@@ -497,10 +497,10 @@ uint8_t READ_IOS_PRESSED(uint8_t port)
 // =====================
 #ifdef USE_KICKER
 
-// PB_6  Digital In Out  IOS1
-// PB_7  Digital In Out  IOS2
-// PB_8  Digital In Out  IOS3
-// PB_9  Digital In Out  IOS4
+// PB_6  Digital In Out  IOS1 = PBsiben
+// PB_7  Digital In Out  IOS2 = PBacht
+// PB_8  Digital In Out  IOS3 = PBsechs
+// PB_9  Digital In Out  IOS4 = PBneuhn
 int aktiv_kicker_port; //merke kicker um im interrupt den richtigen auszuschalten
 
 void WRITE_KICKER_INIT(uint8_t port) //init kicker pin unf timer, für exatkte kick dauer ohne den main code zu stoppen
@@ -514,11 +514,12 @@ void WRITE_KICKER_INIT(uint8_t port) //init kicker pin unf timer, für exatkte k
     TIM4->EGR = TIM_EGR_UG; //Update Generation um die neuen Werte zu laden
     TIM4->DIER |= TIM_DIER_UIE;  // interupt wird ausgelöst wenn timer überlauft, also nach 1ms
     HAL_NVIC_SetPriority(TIM4_IRQn, 3, 0); //set priority 3 es soll vor allem kein SPI oder so zerstören. nach dem es sich da um wenige mikrosek handelt kann der kicker auch bissi länger an sein.
+    HAL_NVIC_EnableIRQ(TIM4_IRQn);  // timer aktivieren 
 
     switch (port)
     {
         case IOS1:
-            pinMode(PB6, OUTPUT);   //PB6 als Ausgang für den Kicker konfigurieren
+            pinMode(PB7, OUTPUT);   //PB6 als Ausgang für den Kicker konfigurieren
             digitalWrite(PB6, LOW); //sicher stellen, dass der kicker aus is
             aktiv_kicker_port = 1; //merke kicker um im interrupt den richtigen auszuschalten und WRITE_KCIKER 
             #ifdef log 
@@ -527,20 +528,20 @@ void WRITE_KICKER_INIT(uint8_t port) //init kicker pin unf timer, für exatkte k
             break;
 
         case IOS2:
-            pinMode(PB7, OUTPUT);   //PB6 als Ausgang für den Kicker konfigurieren
-            digitalWrite(PB7, LOW); //sicher stellen, dass der kicker aus is
+            pinMode(PB8, OUTPUT);   //PB6 als Ausgang für den Kicker konfigurieren
+            digitalWrite(PB8, LOW); //sicher stellen, dass der kicker aus is
             aktiv_kicker_port = 2; //merke kicker um im interrupt den richtigen auszuschalten und WRITE_KCIKER
             #ifdef log 
-            _log("KeplerBrain", "KickerINIT", "Kicker initialized on port IOS2 (PB7)");
+            _log("KeplerBrain", "KickerINIT", "Kicker initialized on port IOS2 (PB8)");
             #endif
             break;
 
         case IOS3:
-            pinMode(PB8, OUTPUT);   //PB6 als Ausgang für den Kicker konfigurieren
-            digitalWrite(PB8, LOW); //sicher stellen, dass der kicker aus is
+            pinMode(PB6, OUTPUT);   //PB6 als Ausgang für den Kicker konfigurieren
+            digitalWrite(PB6, LOW); //sicher stellen, dass der kicker aus is
             aktiv_kicker_port = 3; //merke kicker um im interrupt den richtigen auszuschalten und WRITE_KCIKER
             #ifdef log 
-            _log("KeplerBrain", "KickerINIT", "Kicker initialized on port IOS3 (PB8)");
+            _log("KeplerBrain", "KickerINIT", "Kicker initialized on port IOS3 (PB6)");
             #endif
             break;
 
@@ -569,21 +570,20 @@ void WRITE_KICKER(uint8_t port, uint16_t duration_ms) //kickt für die angegeben
 
     switch (port)  // direkt port verwenden
     {
-    case IOS1: digitalWrite(PB6, HIGH); break;
-    case IOS2: digitalWrite(PB7, HIGH); break;
-    case IOS3: digitalWrite(PB8, HIGH); break;
+    case IOS1: digitalWrite(PB7, HIGH); break;
+    case IOS2: digitalWrite(PB8, HIGH); break;
+    case IOS3: digitalWrite(PB6, HIGH); break;
     case IOS4: digitalWrite(PB9, HIGH); break;
     }
 
     
-    TIM4->CR1 |= TIM_CR1_CEN; //Timer aktivieren (CEN = Counter Enable)
+    TIM4->CR1 |= TIM_CR1_CEN; //counter aktivieren (CEN = Counter Enable)
+
 }
 
 extern "C" void TIM4_IRQHandler() //wenn TIM4 überläuft, also nach duration_ms, kommt dieser interrupt
 {
-    #ifdef log 
-    _log("KeplerBrain", "KickerInterrupt", "TIM4 interrupt triggered, checking for active kicker...");
-    #endif
+    _log("KeplerBrain", "KickerInterrupt", "aktiv_kicker_port: " + String(aktiv_kicker_port));
     if (TIM4->SR & TIM_SR_UIF) //überprüfen, ob der Update Interrupt Flag gesetzt ist
     {
         TIM4->SR &= ~TIM_SR_UIF; //Interrupt Flag zurücksetzen
@@ -591,36 +591,28 @@ extern "C" void TIM4_IRQHandler() //wenn TIM4 überläuft, also nach duration_ms
         switch (aktiv_kicker_port) 
         {
         case 1:
-            digitalWrite(PB6, LOW); //Kicker aus
-            #ifdef log 
-            _log("KeplerBrain", "KickerInterrupt", "Kicker on port IOS1 (PB6) deactivated");
-            #endif
+            digitalWrite(PB7, LOW); //Kicker aus
+            
             break;
 
         case 2:
-            digitalWrite(PB7, LOW); //Kicker aus
-            #ifdef log 
-            _log("KeplerBrain", "KickerInterrupt", "Kicker on port IOS2 (PB7) deactivated");
-            #endif
+            digitalWrite(PB8, LOW); //Kicker aus
+            
             break;
 
         case 3:
-            digitalWrite(PB8, LOW); //Kicker aus
-            #ifdef log 
-            _log("KeplerBrain", "KickerInterrupt", "Kicker on port IOS3 (PB8) deactivated");
-            #endif
+            digitalWrite(PB6, LOW); //Kicker aus
+            
             break;
 
         case 4:
             digitalWrite(PB9, LOW); //Kicker aus
-            #ifdef log 
-            _log("KeplerBrain", "KickerInterrupt", "Kicker on port IOS4 (PB9) deactivated");
-            #endif
+            
             break;
 
         }
 
-        aktiv_kicker_port = 0; //reset (lwk egal)
+        
         TIM4->CR1 &= ~TIM_CR1_CEN;  // Timer stoppen
 
     }
@@ -643,12 +635,12 @@ void WRITE_SERVO_INIT(uint8_t port)
   // TIM4 Takt aktivieren
   __HAL_RCC_TIM4_CLK_ENABLE();
 
-  // GPIO-Konfiguration für PB6 (TIM4 CH1), PB7 (TIM4 CH2), PB8 (TIM4 CH3), PB9 (TIM4 CH4)
+  // GPIO-Konfiguration für PB6 (TIM4 CH1), PB8 (TIM4 CH2), PB6 (TIM4 CH3), PB9 (TIM4 CH4)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   if (port==IOS1)
   {
-    // PB7 (TIM4 CH2)
+    // PB8 (TIM4 CH2)
     GPIO_InitStruct.Pin = GPIO_PIN_7;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -659,7 +651,7 @@ void WRITE_SERVO_INIT(uint8_t port)
 
   if (port==IOS2)
   {
-    // PB8 (TIM4 CH3)
+    // PB6 (TIM4 CH3)
     GPIO_InitStruct.Pin = GPIO_PIN_8;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -696,7 +688,7 @@ void WRITE_SERVO_INIT(uint8_t port)
   
   if (port==IOS1)
   {
-    // TIM4: Kanal 2 (PB7)
+    // TIM4: Kanal 2 (PB8)
     TIM4->CCMR1 &= ~(TIM_CCMR1_OC2M);
     TIM4->CCMR1 |= (0x6 << TIM_CCMR1_OC2M_Pos); // PWM Mode 1 für CH2
     TIM4->CCER |= TIM_CCER_CC2E;  // Output Compare aktivieren
@@ -704,7 +696,7 @@ void WRITE_SERVO_INIT(uint8_t port)
 
   if (port==IOS2)
   {
-    // TIM4: Kanal 3 (PB8)
+    // TIM4: Kanal 3 (PB6)
     TIM4->CCMR2 &= ~(TIM_CCMR2_OC3M);
     TIM4->CCMR2 |= (0x6 << TIM_CCMR2_OC3M_Pos); // PWM Mode 1 für CH3
     TIM4->CCER |= TIM_CCER_CC3E;  // Output Compare aktivieren

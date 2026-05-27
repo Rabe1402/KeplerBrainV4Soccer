@@ -195,23 +195,17 @@ void loop()
         delay(200);
         if (READ_BUTTON_CLOSED(B1) == 1){exit;}
         WRITE_LCD_CLEAR();
-        WRITE_KICKER_INIT(IOS2);
+        WRITE_KICKER_INIT(IOS1);
         WRITE_LCD_TEXT(1, 2, "Kciekr INIT Fertig");
-        delay(100);
+        delay(500);
         WRITE_LCD_CLEAR();
-        WRITE_KICKER(IOS2, 500); // kick for 1ms
+        WRITE_KICKER(IOS1, 10); // kick for 1ms
         WRITE_LCD_TEXT(1, 2, "Kciekr Test1 ");
-        delay(2000);
+        delay(500);
         WRITE_LCD_CLEAR();
-        WRITE_KICKER(IOS2, 100); // kick for 1s
+        WRITE_KICKER(IOS1, 10); // kick for 1ms
         WRITE_LCD_TEXT(1, 2, "Kciekr Test2 ");
-        delay(100); 
-        WRITE_LCD_CLEAR();
-        
-        delay(1000);
-        digitalWrite(PB7, HIGH);  // direkt, kein Kicker-Code
-        delay(1000);
-        digitalWrite(PB7, LOW); 
+        delay(100);  
         run = false;
 
       break;;      
