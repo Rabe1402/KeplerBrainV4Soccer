@@ -1,4 +1,10 @@
-#include "stm32f4xx.h"
+
+
+
+#define IOS1 0x51
+#define IOS2 0x52
+#define IOS3 0x53
+#define IOS4 0x54
 
 // PB_6  Digital In Out  IOS1
 // PB_7  Digital In Out  IOS2
@@ -9,12 +15,12 @@ int aktiv_kicker_port; //merke kicker um im interrupt den richtigen auszuschalte
 void WRITE_KICKER_INIT(uint8_t port) //init kicker pin unf timer, für exatkte kick dauer ohne den main code zu stoppen
 {
 
-    __HAL_RCC_TIM5_CLK_ENABLE(); //aktivate timer5 ? 5 um auf APB1 zu sein (84MHz statt 168Mhz)
-    TIM5->PSC = 83; //Prescaler auf 83 (84MHz / (83 + 1) = 1MHz) )
-    TIM5->ARR = 999; //timer zählt bis 999+1 also 1ms (1MHz / 1000 = 1ms) 
-    TIM5->EGR = TIM_EGR_UG; //Update Generation um die neuen Werte zu laden
-    TIM5->DIER |= TIM_DIER_UIE;  // interupt wird ausgelöst wenn timer überlauft, also nach 1ms
-    HAL_NVIC_SetPriority(TIM5_IRQn, 3, 0); //set priority 3 es soll vor allem kein SPI oder so zerstören. nach dem es sich da um wenige mikrosek handelt kann der kicker auch bissi länger an sein.
+    __HAL_RCC_TIM1_CLK_ENABLE(); //aktivate timer1 ? 5 um auf APB1 zu sein (84MHz statt 168Mhz)
+    TIM1->PSC = 83; //Prescaler auf 83 (84MHz / (83 + 1) = 1MHz) )
+    TIM1->ARR = 999; //timer zählt bis 999+1 also 1ms (1MHz / 1000 = 1ms) 
+    TIM1->EGR = TIM_EGR_UG; //Update Generation um die neuen Werte zu laden
+    TIM1->DIER |= TIM_DIER_UIE;  // interupt wird ausgelöst wenn timer überlauft, also nach 1ms
+    HAL_NVIC_SetPriority(TIM1_IRQn, 3, 0); //set priority 3 es soll vor allem kein SPI oder so zerstören. nach dem es sich da um wenige mikrosek handelt kann der kicker auch bissi länger an sein.
 
     switch (port)
     {
@@ -46,11 +52,11 @@ void WRITE_KICKER_INIT(uint8_t port) //init kicker pin unf timer, für exatkte k
 
 }
 
-void WRITE_KICKER(uint16_t duration_ms) //kickt für die angegebene dauer in ms, ohne den main code zu blockieren
+void WRITE_KICKER(uint8_t port, uint16_t duration_ms) //kickt für die angegebene dauer in ms, ohne den main code zu blockieren
 {
-    TIM5->ARR = duration_ms * 1000 -1; //timer zählt bis dahin mit 1Mhz also 1ms = 1000 counts, 10ms = 10000 counts usw. -1 weil der timer von 0 zählt
-    TIM5->EGR = TIM_EGR_UG; //Update Generation um die neuen Werte sofort zu laden    
-    TIM5->CNT = 0; //Timer zurücksetzen
+    TIM1->ARR = duration_ms * 1000 -1; //timer zählt bis dahin mit 1Mhz also 1ms = 1000 counts, 10ms = 10000 counts usw. -1 weil der timer von 0 zählt
+    TIM1->EGR = TIM_EGR_UG; //Update Generation um die neuen Werte sofort zu laden    
+    TIM1->CNT = 0; //Timer zurücksetzen
 
     switch (aktiv_kicker_port) 
     {

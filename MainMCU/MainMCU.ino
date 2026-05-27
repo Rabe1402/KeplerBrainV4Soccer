@@ -5,6 +5,8 @@
 
 
 
+#define log;
+
 void _log(String name, String component, String message, bool error = false)
 {
   if (debug)
@@ -41,13 +43,15 @@ void _log_Dump()
   }
 }
 
+
+
+#define USE_KICKER;
 #include "../shared/KeplerBRAIN_V4.h"
 
 
 #include "KEPLER_UPDATE.h" // wird in echte header migrirt wenn randl gut findet 
 #include "powersense.h" //powersensor read 
 #include "data-calculation.h" //alle datenberechnungen wie winkel zu ball usw.
-
 
 
 #include "Move.h"
@@ -61,7 +65,9 @@ void setup()
 
   // Initialisierung der Hardwarekomponenten des Controllers
   KEPLERBRAIN_INIT();
+  #ifdef _log 
   _log("SETUP", "KeplerBRAIN", "Hardware initialization complete, starting sensor initialization...");
+  #endif 
   SLEEP(100); //um jegliche blockierungen zu vermeiden 
   WRITE_LCD_CLEAR();
   delay(100);
@@ -184,9 +190,28 @@ void loop()
 
 
       case 5:
-        WRITE_LCD_TEXT(1, 2, "NOTHING HERE ");
-        _log("VOID LOOP", "MENU", "Nothing here, going back to menu in .2s");
+        WRITE_LCD_TEXT(1, 2, "KickerTest ");
+        _log("VOID LOOP", "KickerTest", "Kicker test in 2 seconds, press B1 to exit");
         delay(200);
+        if (READ_BUTTON_CLOSED(B1) == 1){exit;}
+        WRITE_LCD_CLEAR();
+        WRITE_KICKER_INIT(IOS2);
+        WRITE_LCD_TEXT(1, 2, "Kciekr INIT Fertig");
+        delay(100);
+        WRITE_LCD_CLEAR();
+        WRITE_KICKER(IOS2, 500); // kick for 1ms
+        WRITE_LCD_TEXT(1, 2, "Kciekr Test1 ");
+        delay(2000);
+        WRITE_LCD_CLEAR();
+        WRITE_KICKER(IOS2, 100); // kick for 1s
+        WRITE_LCD_TEXT(1, 2, "Kciekr Test2 ");
+        delay(100); 
+        WRITE_LCD_CLEAR();
+        
+        delay(1000);
+        digitalWrite(PB7, HIGH);  // direkt, kein Kicker-Code
+        delay(1000);
+        digitalWrite(PB7, LOW); 
         run = false;
 
       break;;      

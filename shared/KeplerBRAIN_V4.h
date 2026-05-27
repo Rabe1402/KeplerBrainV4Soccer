@@ -491,6 +491,150 @@ uint8_t READ_IOS_PRESSED(uint8_t port)
     return value;
 }    
 
+
+// =====================
+// KICKER
+// =====================
+#ifdef USE_KICKER
+
+// PB_6  Digital In Out  IOS1
+// PB_7  Digital In Out  IOS2
+// PB_8  Digital In Out  IOS3
+// PB_9  Digital In Out  IOS4
+int aktiv_kicker_port; //merke kicker um im interrupt den richtigen auszuschalten
+
+void WRITE_KICKER_INIT(uint8_t port) //init kicker pin unf timer, für exatkte kick dauer ohne den main code zu stoppen
+{
+    #ifdef log 
+    _log("KeplerBrain", "KickerINIT", "Initializing kicker on port " + String(port));
+    #endif
+    __HAL_RCC_TIM4_CLK_ENABLE(); //aktivate timer4 um auf APB1 zu sein (84MHz statt 168Mhz)
+    TIM4->PSC = 83; //Prescaler auf 83 (84MHz / (83 + 1) = 1MHz) )
+    TIM4->ARR = 999; //timer zählt bis 999+1 also 1ms (1MHz / 1000 = 1ms) 
+    TIM4->EGR = TIM_EGR_UG; //Update Generation um die neuen Werte zu laden
+    TIM4->DIER |= TIM_DIER_UIE;  // interupt wird ausgelöst wenn timer überlauft, also nach 1ms
+    HAL_NVIC_SetPriority(TIM4_IRQn, 3, 0); //set priority 3 es soll vor allem kein SPI oder so zerstören. nach dem es sich da um wenige mikrosek handelt kann der kicker auch bissi länger an sein.
+
+    switch (port)
+    {
+        case IOS1:
+            pinMode(PB6, OUTPUT);   //PB6 als Ausgang für den Kicker konfigurieren
+            digitalWrite(PB6, LOW); //sicher stellen, dass der kicker aus is
+            aktiv_kicker_port = 1; //merke kicker um im interrupt den richtigen auszuschalten und WRITE_KCIKER 
+            #ifdef log 
+            _log("KeplerBrain", "KickerINIT", "Kicker initialized on port IOS1 (PB6)");
+            #endif
+            break;
+
+        case IOS2:
+            pinMode(PB7, OUTPUT);   //PB6 als Ausgang für den Kicker konfigurieren
+            digitalWrite(PB7, LOW); //sicher stellen, dass der kicker aus is
+            aktiv_kicker_port = 2; //merke kicker um im interrupt den richtigen auszuschalten und WRITE_KCIKER
+            #ifdef log 
+            _log("KeplerBrain", "KickerINIT", "Kicker initialized on port IOS2 (PB7)");
+            #endif
+            break;
+
+        case IOS3:
+            pinMode(PB8, OUTPUT);   //PB6 als Ausgang für den Kicker konfigurieren
+            digitalWrite(PB8, LOW); //sicher stellen, dass der kicker aus is
+            aktiv_kicker_port = 3; //merke kicker um im interrupt den richtigen auszuschalten und WRITE_KCIKER
+            #ifdef log 
+            _log("KeplerBrain", "KickerINIT", "Kicker initialized on port IOS3 (PB8)");
+            #endif
+            break;
+
+        case IOS4:
+            pinMode(PB9, OUTPUT);   //PB6 als Ausgang für den Kicker konfigurieren
+            digitalWrite(PB9, LOW); //sicher stellen, dass der kicker aus is
+            aktiv_kicker_port = 4; //merke kicker um im interrupt den richtigen auszuschalten und WRITE_KCIKER
+            #ifdef log 
+            _log("KeplerBrain", "KickerINIT", "Kicker initialized on port IOS4 (PB9)");
+            #endif
+            break;
+
+    }
+
+}
+
+void WRITE_KICKER(uint8_t port, uint16_t duration_ms) //kickt für die angegebene dauer in ms, ohne den main code zu blockieren
+{
+    #ifdef log 
+    _log("KeplerBrain", "Kicker", "Activating kicker on port " + String(port) + " for " + String(duration_ms) + " ms");
+    #endif
+
+    TIM4->ARR = duration_ms * 1000 -1; //timer zählt bis dahin mit 1Mhz also 1ms = 1000 counts, 10ms = 10000 counts usw. -1 weil der timer von 0 zählt
+    TIM4->EGR = TIM_EGR_UG; //Update Generation um die neuen Werte sofort zu laden    
+    TIM4->CNT = 0; //Timer zurücksetzen
+
+    switch (port)  // direkt port verwenden
+    {
+    case IOS1: digitalWrite(PB6, HIGH); break;
+    case IOS2: digitalWrite(PB7, HIGH); break;
+    case IOS3: digitalWrite(PB8, HIGH); break;
+    case IOS4: digitalWrite(PB9, HIGH); break;
+    }
+
+    
+    TIM4->CR1 |= TIM_CR1_CEN; //Timer aktivieren (CEN = Counter Enable)
+}
+
+extern "C" void TIM4_IRQHandler() //wenn TIM4 überläuft, also nach duration_ms, kommt dieser interrupt
+{
+    #ifdef log 
+    _log("KeplerBrain", "KickerInterrupt", "TIM4 interrupt triggered, checking for active kicker...");
+    #endif
+    if (TIM4->SR & TIM_SR_UIF) //überprüfen, ob der Update Interrupt Flag gesetzt ist
+    {
+        TIM4->SR &= ~TIM_SR_UIF; //Interrupt Flag zurücksetzen
+
+        switch (aktiv_kicker_port) 
+        {
+        case 1:
+            digitalWrite(PB6, LOW); //Kicker aus
+            #ifdef log 
+            _log("KeplerBrain", "KickerInterrupt", "Kicker on port IOS1 (PB6) deactivated");
+            #endif
+            break;
+
+        case 2:
+            digitalWrite(PB7, LOW); //Kicker aus
+            #ifdef log 
+            _log("KeplerBrain", "KickerInterrupt", "Kicker on port IOS2 (PB7) deactivated");
+            #endif
+            break;
+
+        case 3:
+            digitalWrite(PB8, LOW); //Kicker aus
+            #ifdef log 
+            _log("KeplerBrain", "KickerInterrupt", "Kicker on port IOS3 (PB8) deactivated");
+            #endif
+            break;
+
+        case 4:
+            digitalWrite(PB9, LOW); //Kicker aus
+            #ifdef log 
+            _log("KeplerBrain", "KickerInterrupt", "Kicker on port IOS4 (PB9) deactivated");
+            #endif
+            break;
+
+        }
+
+        aktiv_kicker_port = 0; //reset (lwk egal)
+        TIM4->CR1 &= ~TIM_CR1_CEN;  // Timer stoppen
+
+    }
+}
+
+
+#endif // USE_KICKER
+
+
+// =====================
+// SERVO
+// =====================
+#ifdef USE_SERVO
+
 void WRITE_SERVO_INIT(uint8_t port)
 {
   // GPIOB Takt aktivieren
@@ -614,6 +758,9 @@ void WRITE_SERVO_PWM(uint8_t port, uint32_t pulselength)
     TIM4->CCR4 = pulselength;
   }
 }
+
+#endif // USE_SERVO
+
 
 // *** I2C ***
 
@@ -831,7 +978,7 @@ int READ_SRF10(byte address)
     dist = i2c.read(); // evtl. alte Daten löschen
   }
 
-  if dist!=0xFF
+  if (dist!=0xFF)
   {
     i2c.beginTransmission(address);
     i2c.write(_SRF10_RES_REG);
