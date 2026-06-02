@@ -497,10 +497,10 @@ uint8_t READ_IOS_PRESSED(uint8_t port)
 // =====================
 #ifdef USE_KICKER
 
-// PB_6  Digital In Out  IOS1 = PBsiben
-// PB_7  Digital In Out  IOS2 = PBacht
-// PB_8  Digital In Out  IOS3 = PBsechs
-// PB_9  Digital In Out  IOS4 = PBneuhn
+// PB_7  Digital In Out  IOS1 
+// PB_8  Digital In Out  IOS2 
+// PB_6  Digital In Out  IOS3 
+// PB_9  Digital In Out  IOS4 
 int aktiv_kicker_port; //merke kicker um im interrupt den richtigen auszuschalten
 
 void WRITE_KICKER_INIT(uint8_t port) //init kicker pin unf timer, für exatkte kick dauer ohne den main code zu stoppen
@@ -520,7 +520,7 @@ void WRITE_KICKER_INIT(uint8_t port) //init kicker pin unf timer, für exatkte k
     {
         case IOS1:
             pinMode(PB7, OUTPUT);   //PB6 als Ausgang für den Kicker konfigurieren
-            digitalWrite(PB6, LOW); //sicher stellen, dass der kicker aus is
+            digitalWrite(PB7, LOW); //sicher stellen, dass der kicker aus is
             aktiv_kicker_port = 1; //merke kicker um im interrupt den richtigen auszuschalten und WRITE_KCIKER 
             #ifdef log 
             _log("KeplerBrain", "KickerINIT", "Kicker initialized on port IOS1 (PB6)");
