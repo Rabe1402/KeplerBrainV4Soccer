@@ -15,5 +15,21 @@ extern int ballY;
 extern bool isYellowGoal;
 extern int goalX;
 extern int goalY;
-extern bool seesBall;
+extern bool seesGoal;
 void CheckCamera();
+
+
+
+//Line script declarations
+#define noiseSample 5
+#define averagingSample 3
+#define lineThreshold 18
+#define lineThresholdForward 22
+extern bool useForwardSensor;
+#define smartForwardSensor true
+
+
+
+#define maxFrontDistance 13
+#define maxGoalMismatches 3
+

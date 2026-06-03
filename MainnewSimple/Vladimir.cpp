@@ -14,18 +14,15 @@ SPIClass spi2(PA7,PA6,PA5);
 
 
 //Line script
-#define noiseSample 5
-#define averagingSample 3
-#define lineThreshold 20
-#define lineThresholdForward 30
-#define useForwardSensor true
-
 bool isLine[8];
 int secondLineValues[8];
 int lineValues[8];
 int lineValuesTemporary[8][noiseSample];
 int lineValuesAv[8][averagingSample];
 int averageLineValue = 0;
+
+
+bool useForwardSensor;
 
 int compare(const void* a, const void* b)
 {
@@ -135,6 +132,7 @@ int ballY;
 bool isYellowGoal;
 int goalX;
 int goalY;
+bool seesGoal;
 
 int tempGoalBlueX;
 int tempGoalBlueY;
@@ -180,4 +178,5 @@ void CheckCamera()
     goalX = tempGoalBlueX;
     goalY = tempGoalBlueY;
   }
+  seesGoal = goalX != 0;
 }
