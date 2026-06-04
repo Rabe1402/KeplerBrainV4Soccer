@@ -351,16 +351,16 @@ void WRITE_MOTOR_PWM(uint32_t frequency)
 
 // *** IOS ***
    
-// PB_6  Digital In Out Servo IOS1
-// PB_7  Digital In Out Servo IOS2
-// PB_8  Digital In Out Servo IOS3
+// PB_7  Digital In Out Servo IOS1
+// PB_8  Digital In Out Servo IOS2
+// PB_6  Digital In Out Servo IOS3
 // PB_9  Digital In Out Servo IOS4
 uint8_t READ_IOS_HIGH(uint8_t port)
 {
   if (port==IOS1)
   {
-    pinMode(PB6, INPUT_PULLDOWN);
-    if (digitalRead(PB6)==1) return 1;
+    pinMode(PB7, INPUT_PULLDOWN);
+    if (digitalRead(PB7)==1) return 1;
     else return 0;
   }
   if (port==IOS2)
@@ -387,8 +387,8 @@ uint8_t READ_IOS_CLOSED(uint8_t port)
 {
   if (port==IOS1)
   {
-    pinMode(PB6, INPUT_PULLUP);
-    if (digitalRead(PB6)==0) return 1;
+    pinMode(PB7, INPUT_PULLUP);
+    if (digitalRead(PB7)==0) return 1;
     else return 0;
   }
   if (port==IOS2)
@@ -425,7 +425,7 @@ uint8_t READ_IOS_PRESSED(uint8_t port)
   int value4 = 0;
   if (port==IOS1)
   {
-        if (!digitalRead(PB6))
+        if (!digitalRead(PB7))
         {
           if (ios1_closed==false)
           {
@@ -497,10 +497,10 @@ uint8_t READ_IOS_PRESSED(uint8_t port)
 // =====================
 #ifdef USE_KICKER
 
-// PB_6  Digital In Out  IOS1 = PBsiben
-// PB_7  Digital In Out  IOS2 = PBacht
-// PB_8  Digital In Out  IOS3 = PBsechs
-// PB_9  Digital In Out  IOS4 = PBneuhn
+// PB_7  Digital In Out  IOS1 
+// PB_8  Digital In Out  IOS2 
+// PB_6  Digital In Out  IOS3 
+// PB_9  Digital In Out  IOS4
 int aktiv_kicker_port; //merke kicker um im interrupt den richtigen auszuschalten
 HardwareTimer *kickerTimer = nullptr;
 
@@ -604,12 +604,12 @@ void WRITE_SERVO_INIT(uint8_t port)
   // TIM4 Takt aktivieren
   __HAL_RCC_TIM4_CLK_ENABLE();
 
-  // GPIO-Konfiguration für PB6 (TIM4 CH1), PB8 (TIM4 CH2), PB6 (TIM4 CH3), PB9 (TIM4 CH4)
+  // GPIO-Konfiguration für PB7 (TIM4 CH1), PB8 (TIM4 CH2), PB6 (TIM4 CH3), PB9 (TIM4 CH4)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   if (port==IOS1)
   {
-    // PB8 (TIM4 CH2)
+    // PB7 (TIM4 CH1)
     GPIO_InitStruct.Pin = GPIO_PIN_7;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -620,7 +620,7 @@ void WRITE_SERVO_INIT(uint8_t port)
 
   if (port==IOS2)
   {
-    // PB6 (TIM4 CH3)
+    // PB8 (TIM4 CH2)
     GPIO_InitStruct.Pin = GPIO_PIN_8;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -631,7 +631,7 @@ void WRITE_SERVO_INIT(uint8_t port)
 
   if (port==IOS3)
   {
-    // PB6 (TIM4 CH1)
+    // PB6 (TIM4 CH3)
     GPIO_InitStruct.Pin = GPIO_PIN_6;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
