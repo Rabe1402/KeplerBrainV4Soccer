@@ -359,3 +359,11 @@ int ReadYaw()
 {
   return (READ_I2C_BNO055_YAW() - targetYaw + 540) % 360 - 180;
 }
+
+bool ReadCom(int port)
+{
+  if (READ_IOS_HIGH(port))
+    return true;
+  else
+    return false;
+}

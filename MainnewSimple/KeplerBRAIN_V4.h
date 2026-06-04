@@ -330,30 +330,58 @@ void WRITE_MOTOR_PWM(uint32_t frequency)
 
 // *** IOS ***
    
-// PB_6  Digital In Out Servo IOS1
-// PB_7  Digital In Out Servo IOS2
-// PB_8  Digital In Out Servo IOS3
+// PB_7  Digital In Out Servo IOS1
+// PB_8  Digital In Out Servo IOS2
+// PB_6  Digital In Out Servo IOS3
 // PB_9  Digital In Out Servo IOS4
+
+uint8_t READ_IOS_HIGH(uint8_t port)
+{
+  if (port==IOS1)
+  {
+    pinMode(PB6, INPUT_PULLDOWN);
+    if (digitalRead(PB6)==1) return 1;
+    else return 0;
+  }
+  if (port==IOS2)
+  {
+    pinMode(PB7, INPUT_PULLDOWN);
+    if (digitalRead(PB7)==1) return 1;
+    else return 0;
+  }
+  if (port==IOS3)
+  {
+    pinMode(PB8, INPUT_PULLDOWN);
+    if (digitalRead(PB8)==1) return 1;
+    else return 0;
+  }
+  if (port==IOS4)
+  {
+    pinMode(PB9, INPUT_PULLDOWN);
+    if (digitalRead(PB9)==1) return 1;
+    else return 0;
+  }
+}
 
 uint8_t READ_IOS_CLOSED(uint8_t port)
 {
 
   if (port==IOS1)
   {
-    pinMode(PB6, INPUT_PULLUP);
-    if (digitalRead(PB6)==0) return 1;
-    else return 0;
-  }
-  if (port==IOS2)
-  {
     pinMode(PB7, INPUT_PULLUP);
     if (digitalRead(PB7)==0) return 1;
     else return 0;
   }
-  if (port==IOS3)
+  if (port==IOS2)
   {
     pinMode(PB8, INPUT_PULLUP);
     if (digitalRead(PB8)==0) return 1;
+    else return 0;
+  }
+  if (port==IOS3)
+  {
+    pinMode(PB6, INPUT_PULLUP);
+    if (digitalRead(PB6)==0) return 1;
     else return 0;
   }
   if (port==IOS4)
@@ -378,7 +406,7 @@ uint8_t READ_IOS_PRESSED(uint8_t port)
   int value4 = 0;
   if (port==IOS1)
   {
-        if (!digitalRead(PB6))
+        if (!digitalRead(PB7))
         {
           if (ios1_closed==false)
           {
@@ -394,7 +422,7 @@ uint8_t READ_IOS_PRESSED(uint8_t port)
   }
   if (port==IOS2)
   {      
-        if (!digitalRead(PB7))
+        if (!digitalRead(PB8))
         {
           if (ios2_closed==false)
           {
@@ -410,7 +438,7 @@ uint8_t READ_IOS_PRESSED(uint8_t port)
    }
    if (port==IOS3)
    {
-        if (!digitalRead(PB8))
+        if (!digitalRead(PB6))
         {
           if (ios3_closed==false)
           {
