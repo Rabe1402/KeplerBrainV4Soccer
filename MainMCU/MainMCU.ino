@@ -103,7 +103,7 @@ void loop()
       while(READ_BUTTON_CLOSED(B2) == 1){}
       WRITE_LCD_TEXT(4, 2, "()");
 
-      delay(500);
+      //delay(500);
 
       selection = selection_cursor;
 
@@ -112,6 +112,16 @@ void loop()
       run = true;
       WRITE_LCD_CLEAR(); // to clean up dislplay. And hopefully find wehre it hangs 
     }
+
+    //NOTFALL COM MODULE CODE, needs proper improven when time is there
+    if (READ_IOS_HIGH(IOS2))
+    {
+      _log("VOID LOOP", "MENU", "FALL COM MODULE CODE STARTED");
+      slection_cursor = 0;
+      run = true;
+    }
+
+
   }else
   {
     _log("VOID LOOP", "KeplerBRAIN", "run is true");
@@ -132,7 +142,13 @@ void loop()
           WRITE_LCD_CLEAR();
           KEPLER_UPDATE();
           _default_statemachiene();
-         
+          //NOTFALL COM MODULE CODE, needs proper improven when time is there
+         if (!READ_IOS_HIGH(IOS2))
+          {
+            _log("VOID LOOP", "MENU", "FALL COM MODULE CODE STARTED");
+            run = false;
+            break;
+          }
         }
 
       break;;
