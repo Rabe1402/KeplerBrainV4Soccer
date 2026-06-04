@@ -339,20 +339,20 @@ uint8_t READ_IOS_HIGH(uint8_t port)
 {
   if (port==IOS1)
   {
-    pinMode(PB6, INPUT_PULLDOWN);
-    if (digitalRead(PB6)==1) return 1;
-    else return 0;
-  }
-  if (port==IOS2)
-  {
     pinMode(PB7, INPUT_PULLDOWN);
     if (digitalRead(PB7)==1) return 1;
     else return 0;
   }
-  if (port==IOS3)
+  if (port==IOS2)
   {
     pinMode(PB8, INPUT_PULLDOWN);
     if (digitalRead(PB8)==1) return 1;
+    else return 0;
+  }
+  if (port==IOS3)
+  {
+    pinMode(PB6, INPUT_PULLDOWN);
+    if (digitalRead(PB6)==1) return 1;
     else return 0;
   }
   if (port==IOS4)
