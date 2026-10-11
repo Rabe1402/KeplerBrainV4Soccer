@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "KeplerBrainV4-Main"
+		},
+		{
+			"path": "KeplerBrainV4-BodenSens"
+		}
+	],
+	"settings": {
+		"mbed.serialBaudRate": 115200
+	}
+}
